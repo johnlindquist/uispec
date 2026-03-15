@@ -1,0 +1,303 @@
+{
+  "$schema": "https://uispec.dev/0.1/schema.json",
+  "$description": "Contact form with real-time validation. Demonstrates per-field error states, cross-field validation (password confirmation), async validation (email uniqueness check), character counters, conditional field visibility, and submission lifecycle. Edge cases: debounced async validation, field-level vs form-level errors, pristine/dirty/touched tracking.",
+
+  "$tokens": {
+    "color": {
+      "bg":      { "$type": "color", "$value": "#000000" },
+      "surface": { "$type": "color", "$value": "#0a0a0a" },
+      "card":    { "$type": "color", "$value": "#111111" },
+      "stroke":  { "$type": "color", "$value": "rgba(255, 255, 255, 0.1)" },
+      "text": {
+        "primary":   { "$type": "color", "$value": "#ededed" },
+        "secondary": { "$type": "color", "$value": "#888888" },
+        "muted":     { "$type": "color", "$value": "#666666" }
+      },
+      "accent":      { "$type": "color", "$value": "#0070f3" },
+      "accentHover": { "$type": "color", "$value": "#0060df" },
+      "error":       { "$type": "color", "$value": "#ee5555" },
+      "errorBg":     { "$type": "color", "$value": "rgba(238, 85, 85, 0.08)" },
+      "success":     { "$type": "color", "$value": "#52c41a" },
+      "successBg":   { "$type": "color", "$value": "rgba(82, 196, 26, 0.08)" },
+      "warning":     { "$type": "color", "$value": "#f5a623" }
+    },
+    "spacing": {
+      "xs":  { "$type": "dimension", "$value": { "value": 4,  "unit": "px" } },
+      "sm":  { "$type": "dimension", "$value": { "value": 8,  "unit": "px" } },
+      "md":  { "$type": "dimension", "$value": { "value": 12, "unit": "px" } },
+      "lg":  { "$type": "dimension", "$value": { "value": 16, "unit": "px" } },
+      "xl":  { "$type": "dimension", "$value": { "value": 24, "unit": "px" } },
+      "xxl": { "$type": "dimension", "$value": { "value": 32, "unit": "px" } }
+    },
+    "radius": {
+      "sm": { "$type": "dimension", "$value": { "value": 6,  "unit": "px" } },
+      "md": { "$type": "dimension", "$value": { "value": 8,  "unit": "px" } },
+      "lg": { "$type": "dimension", "$value": { "value": 12, "unit": "px" } }
+    },
+    "font": {
+      "family": { "$type": "fontFamily", "$value": ["Geist", "system-ui", "sans-serif"] },
+      "size": {
+        "xs":   { "$type": "dimension", "$value": { "value": 11, "unit": "px" } },
+        "sm":   { "$type": "dimension", "$value": { "value": 13, "unit": "px" } },
+        "base": { "$type": "dimension", "$value": { "value": 14, "unit": "px" } },
+        "lg":   { "$type": "dimension", "$value": { "value": 16, "unit": "px" } },
+        "xl":   { "$type": "dimension", "$value": { "value": 20, "unit": "px" } }
+      },
+      "weight": {
+        "regular": { "$type": "number", "$value": 400 },
+        "medium":  { "$type": "number", "$value": 500 }
+      }
+    }
+  },
+
+  "$elements": {
+    "field": {
+      "$description": "Form field with label, input, helper text, error message, and character counter. Tracks pristine/dirty/touched states via context.",
+      "type": "group",
+      "params": ["name", "label", "placeholder", "inputType", "required", "maxLength", "helperText"],
+      "layout": "stack-v",
+      "gap": "{spacing.xs}",
+      "children": [
+        {
+          "type": "group", "layout": "stack-h", "justify": "space-between", "align": "center",
+          "children": [
+            { "type": "text", "bind": "label", "style": { "fontSize": "{font.size.sm}", "fontWeight": "{font.weight.medium}", "color": "{color.text.primary}" } },
+            {
+              "$description": "Character counter — only shown when maxLength is set",
+              "type": "text", "name": "char-counter",
+              "conditional": "params.maxLength != null",
+              "dynamic": [
+                { "property": "content", "expr": ["var", "charCountDisplay"] },
+                { "property": "color", "expr": ["if", ["var", "overLimit"], "{color.error}", "{color.text.muted}"] }
+              ],
+              "style": { "fontSize": "{font.size.xs}", "fontVariantNumeric": "tabular-nums" }
+            }
+          ]
+        },
+        {
+          "type": "input", "bind": "name",
+          "inputType": { "$bind": "inputType" },
+          "placeholder": { "$bind": "placeholder" },
+          "style": {
+            "height": { "value": 40, "unit": "px" },
+            "padding": { "horizontal": "{spacing.md}" },
+            "fontSize": "{font.size.base}",
+            "color": "{color.text.primary}",
+            "background": "{color.surface}",
+            "borderWidth": { "value": 1, "unit": "px" },
+            "borderColor": "{color.stroke}",
+            "cornerRadius": "{radius.sm}"
+          },
+          "interactions": {
+            "focus": { "borderColor": "{color.accent}" }
+          },
+          "stateStyles": {
+            "error":   { "borderColor": "{color.error}", "background": "{color.errorBg}" },
+            "success": { "borderColor": "{color.success}", "background": "{color.successBg}" }
+          }
+        },
+        {
+          "$description": "Helper text — shown when field has no error",
+          "type": "text", "bind": "helperText",
+          "conditional": "fieldState == 'pristine' || fieldState == 'valid'",
+          "style": { "fontSize": "{font.size.xs}", "color": "{color.text.muted}" }
+        },
+        {
+          "$description": "Error text — shown when field has error",
+          "type": "text", "name": "field-error",
+          "conditional": "fieldState == 'error'",
+          "dynamic": [{ "property": "content", "expr": ["var", "errorMessage"] }],
+          "style": { "fontSize": "{font.size.xs}", "color": "{color.error}" }
+        },
+        {
+          "$description": "Async validation spinner — shown while checking server",
+          "type": "icon", "icon": "Loader2", "name": "async-spinner",
+          "conditional": "fieldState == 'validating'",
+          "size": { "value": 12, "unit": "px" },
+          "color": "{color.text.muted}",
+          "animation": "spinner"
+        }
+      ]
+    },
+    "password-strength": {
+      "$description": "Password strength indicator — 4 bars that fill based on strength score 0-4",
+      "type": "group",
+      "layout": "stack-h",
+      "gap": "{spacing.xs}",
+      "children": {
+        "type": "shape", "shape": "rectangle", "repeat": 4,
+        "size": { "width": "fill", "height": { "value": 3, "unit": "px" } },
+        "cornerRadius": { "value": 1.5, "unit": "px" },
+        "dynamic": [
+          { "property": "background", "expr":
+            ["if", ["<=", ["var", "index"], ["var", "strength"]],
+              ["if", ["<=", ["var", "strength"], 1], "{color.error}",
+              ["if", ["<=", ["var", "strength"], 2], "{color.warning}",
+              "{color.success}"]],
+              "{color.stroke}"]
+          }
+        ]
+      }
+    }
+  },
+
+  "$animations": {
+    "spinner": {
+      "duration": { "value": 800, "unit": "ms" },
+      "easing": "linear",
+      "repeat": "infinite",
+      "keyframes": { "0": { "rotate": 0 }, "100": { "rotate": 360 } }
+    },
+    "error-appear": {
+      "duration": { "value": 200, "unit": "ms" },
+      "easing": "ease-out",
+      "keyframes": {
+        "0":   { "opacity": 0, "translateY": { "value": -4, "unit": "px" } },
+        "100": { "opacity": 1, "translateY": { "value": 0,  "unit": "px" } }
+      }
+    }
+  },
+
+  "$machine": {
+    "id": "contactForm",
+    "initial": "editing",
+
+    "$visual": {
+      "$description": "Centered card form on dark background",
+      "container": {
+        "layout": "layer",
+        "align": "center",
+        "justify": "center",
+        "size": { "width": "fill", "height": "fill" },
+        "background": "{color.bg}"
+      }
+    },
+
+    "states": {
+      "editing": {
+        "initial": "pristine",
+        "$visual": {
+          "$description": "Form card with name, email, subject, message fields, and submit button. Email field has async uniqueness validation. Message field has character counter (max 500).",
+          "slots": {
+            "content": [
+              {
+                "type": "group", "name": "form-card",
+                "layout": "stack-v", "align": "stretch",
+                "gap": "{spacing.lg}",
+                "size": { "width": { "value": 480, "unit": "px" } },
+                "padding": { "value": "{spacing.xl}" },
+                "background": "{color.card}",
+                "cornerRadius": "{radius.lg}",
+                "borderWidth": { "value": 1, "unit": "px" },
+                "borderColor": "{color.stroke}",
+                "children": [
+                  { "type": "text", "content": "form.title", "style": { "fontSize": "{font.size.xl}", "fontWeight": "{font.weight.medium}", "color": "{color.text.primary}" } },
+                  { "type": "text", "content": "form.subtitle", "style": { "fontSize": "{font.size.sm}", "color": "{color.text.secondary}" } },
+                  { "$ref": "field", "name": "fullName", "label": "form.name", "placeholder": "form.namePlaceholder", "inputType": "text", "required": true },
+                  { "$ref": "field", "name": "email", "label": "form.email", "placeholder": "form.emailPlaceholder", "inputType": "email", "required": true, "helperText": "form.emailHelper" },
+                  { "$ref": "field", "name": "subject", "label": "form.subject", "placeholder": "form.subjectPlaceholder", "inputType": "text" },
+                  {
+                    "type": "group", "layout": "stack-v", "gap": "{spacing.xs}",
+                    "children": [
+                      { "$ref": "field", "name": "message", "label": "form.message", "placeholder": "form.messagePlaceholder", "inputType": "textarea", "required": true, "maxLength": 500 }
+                    ]
+                  },
+                  {
+                    "type": "button", "name": "submit", "command": "submitForm",
+                    "size": { "width": "fill", "height": { "value": 40, "unit": "px" } },
+                    "cornerRadius": "{radius.sm}",
+                    "style": { "background": "{color.accent}", "fontSize": "{font.size.base}", "fontWeight": "{font.weight.medium}", "color": "{color.text.primary}" },
+                    "interactions": {
+                      "hover": { "background": "{color.accentHover}" },
+                      "disabled": { "opacity": 0.5 }
+                    },
+                    "dynamic": [
+                      { "property": "disabled", "expr": ["!", ["var", "formValid"]] }
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        "on": { "SUBMIT": "submitting" },
+        "states": {
+          "pristine": {
+            "$visual": { "$description": "No fields touched yet — all fields in default state, no errors shown" },
+            "on": { "FOCUS_FIELD": "dirty", "TYPE": "dirty" }
+          },
+          "dirty": {
+            "$visual": { "$description": "At least one field modified. Validation runs on blur (touched). Real-time validation for char counter." },
+            "on": {
+              "BLUR_FIELD": "validating",
+              "SUBMIT": "validating"
+            }
+          },
+          "validating": {
+            "$visual": { "$description": "Field-level validation running. Async fields (email) show spinner. Sync fields resolve immediately." },
+            "on": {
+              "ALL_VALID": "valid",
+              "HAS_ERRORS": "invalid",
+              "TYPE": "dirty"
+            }
+          },
+          "valid": {
+            "$visual": { "$description": "All touched fields valid — submit button enabled. Untouched optional fields are not validated." },
+            "on": { "TYPE": "dirty", "SUBMIT": "submitting" }
+          },
+          "invalid": {
+            "$visual": { "$description": "One or more fields have errors — error messages shown below invalid fields with error-appear animation. Submit button disabled." },
+            "on": { "TYPE": "dirty", "FOCUS_FIELD": "dirty" }
+          }
+        }
+      },
+
+      "submitting": {
+        "$visual": {
+          "$description": "All fields disabled, submit button shows spinner. Form cannot be edited during submission."
+        },
+        "on": {
+          "SUCCESS": "success",
+          "SERVER_ERROR": "serverError",
+          "NETWORK_ERROR": "networkError"
+        }
+      },
+
+      "success": {
+        "$visual": {
+          "$description": "Form replaced by success message — green checkmark icon, 'Message sent!' heading, 'We will get back to you soon.' body, and 'Send another' link.",
+          "slots": {
+            "content": [
+              {
+                "type": "group", "name": "success-card",
+                "layout": "stack-v", "align": "center",
+                "gap": "{spacing.lg}",
+                "size": { "width": { "value": 480, "unit": "px" } },
+                "padding": { "value": "{spacing.xxl}" },
+                "background": "{color.card}",
+                "cornerRadius": "{radius.lg}",
+                "children": [
+                  { "type": "icon", "icon": "CheckCircle", "size": { "value": 48, "unit": "px" }, "color": "{color.success}" },
+                  { "type": "text", "content": "form.success.title", "style": { "fontSize": "{font.size.lg}", "fontWeight": "{font.weight.medium}", "color": "{color.text.primary}", "textAlign": "center" } },
+                  { "type": "text", "content": "form.success.body", "style": { "fontSize": "{font.size.base}", "color": "{color.text.secondary}", "textAlign": "center" } },
+                  { "type": "text", "content": "form.success.sendAnother", "style": { "fontSize": "{font.size.sm}", "color": "{color.accent}" }, "command": "resetForm" }
+                ]
+              }
+            ]
+          }
+        },
+        "on": { "RESET": "editing" }
+      },
+
+      "serverError": {
+        "$visual": { "$description": "Form re-enabled with banner at top: 'Server error. Please try again.' Retry button." },
+        "on": { "RETRY": "submitting", "EDIT": "editing.dirty" }
+      },
+
+      "networkError": {
+        "$visual": { "$description": "Form re-enabled with banner: 'No internet connection.' Shows offline icon and retry button." },
+        "on": { "RETRY": "submitting", "ONLINE": "submitting", "EDIT": "editing.dirty" }
+      }
+    }
+  }
+}

@@ -1,0 +1,407 @@
+{
+  "$schema": "https://uispec.dev/0.1/schema.json",
+  "$description": "Authentication flow — multi-page with conditional routing. Demonstrates guards (via context), form inputs, error states, loading substates, and page-level layout transitions. Edge cases: OAuth redirect, email verification pending, rate limiting.",
+
+  "$tokens": {
+    "color": {
+      "bg":          { "$type": "color", "$value": "#000000" },
+      "surface":     { "$type": "color", "$value": "#111111" },
+      "surfaceAlt":  { "$type": "color", "$value": "#1a1a1a" },
+      "stroke":      { "$type": "color", "$value": "rgba(255, 255, 255, 0.12)" },
+      "text": {
+        "primary":   { "$type": "color", "$value": "#ffffff" },
+        "secondary": { "$type": "color", "$value": "rgba(255, 255, 255, 0.6)" },
+        "muted":     { "$type": "color", "$value": "rgba(255, 255, 255, 0.4)" }
+      },
+      "accent":      { "$type": "color", "$value": "#0070f3" },
+      "accentHover": { "$type": "color", "$value": "#0060df" },
+      "error":       { "$type": "color", "$value": "#ee5555" },
+      "errorBg":     { "$type": "color", "$value": "rgba(238, 85, 85, 0.1)" },
+      "success":     { "$type": "color", "$value": "#52c41a" },
+      "github":      { "$type": "color", "$value": "#ffffff" },
+      "google":      { "$type": "color", "$value": "#4285f4" }
+    },
+    "spacing": {
+      "xs":  { "$type": "dimension", "$value": { "value": 4,  "unit": "px" } },
+      "sm":  { "$type": "dimension", "$value": { "value": 8,  "unit": "px" } },
+      "md":  { "$type": "dimension", "$value": { "value": 16, "unit": "px" } },
+      "lg":  { "$type": "dimension", "$value": { "value": 24, "unit": "px" } },
+      "xl":  { "$type": "dimension", "$value": { "value": 32, "unit": "px" } },
+      "xxl": { "$type": "dimension", "$value": { "value": 48, "unit": "px" } }
+    },
+    "radius": {
+      "sm":  { "$type": "dimension", "$value": { "value": 6,  "unit": "px" } },
+      "md":  { "$type": "dimension", "$value": { "value": 8,  "unit": "px" } },
+      "lg":  { "$type": "dimension", "$value": { "value": 12, "unit": "px" } },
+      "full": { "$type": "dimension", "$value": { "value": 9999, "unit": "px" } }
+    },
+    "font": {
+      "family": { "$type": "fontFamily", "$value": ["Inter", "ui-sans-serif", "system-ui", "sans-serif"] },
+      "size": {
+        "sm":   { "$type": "dimension", "$value": { "value": 13, "unit": "px" } },
+        "base": { "$type": "dimension", "$value": { "value": 14, "unit": "px" } },
+        "lg":   { "$type": "dimension", "$value": { "value": 18, "unit": "px" } },
+        "xl":   { "$type": "dimension", "$value": { "value": 24, "unit": "px" } }
+      },
+      "weight": {
+        "regular": { "$type": "number", "$value": 400 },
+        "medium":  { "$type": "number", "$value": 500 },
+        "bold":    { "$type": "number", "$value": 700 }
+      }
+    },
+    "timing": {
+      "fast":   { "$type": "duration", "$value": { "value": 150, "unit": "ms" } },
+      "normal": { "$type": "duration", "$value": { "value": 250, "unit": "ms" } }
+    }
+  },
+
+  "$animations": {
+    "page-enter": {
+      "$description": "Page slides up and fades in",
+      "duration": "{timing.normal}",
+      "easing": "ease-out",
+      "keyframes": {
+        "0":   { "opacity": 0, "translateY": { "value": 8, "unit": "px" } },
+        "100": { "opacity": 1, "translateY": { "value": 0, "unit": "px" } }
+      }
+    },
+    "shake": {
+      "$description": "Error shake on form",
+      "duration": { "value": 400, "unit": "ms" },
+      "easing": "ease-out",
+      "keyframes": {
+        "0":   { "translateX": { "value": 0,   "unit": "px" } },
+        "20":  { "translateX": { "value": -8,  "unit": "px" } },
+        "40":  { "translateX": { "value": 8,   "unit": "px" } },
+        "60":  { "translateX": { "value": -4,  "unit": "px" } },
+        "80":  { "translateX": { "value": 4,   "unit": "px" } },
+        "100": { "translateX": { "value": 0,   "unit": "px" } }
+      }
+    },
+    "spinner": {
+      "$description": "Rotating spinner for loading states",
+      "duration": { "value": 800, "unit": "ms" },
+      "easing": "linear",
+      "repeat": "infinite",
+      "keyframes": {
+        "0":   { "rotate": 0 },
+        "100": { "rotate": 360 }
+      }
+    }
+  },
+
+  "$elements": {
+    "text-input": {
+      "$description": "Styled text input with label, placeholder, and error state",
+      "type": "input",
+      "params": ["name", "label", "placeholder", "inputType"],
+      "layout": "stack-v",
+      "gap": "{spacing.xs}",
+      "children": [
+        {
+          "type": "text", "bind": "label",
+          "style": { "fontSize": "{font.size.sm}", "fontWeight": "{font.weight.medium}", "color": "{color.text.secondary}" }
+        },
+        {
+          "type": "input", "bind": "name",
+          "inputType": { "$bind": "inputType" },
+          "placeholder": { "$bind": "placeholder" },
+          "style": {
+            "height": { "value": 40, "unit": "px" },
+            "padding": { "horizontal": "{spacing.md}" },
+            "fontSize": "{font.size.base}",
+            "color": "{color.text.primary}",
+            "background": "{color.surfaceAlt}",
+            "borderWidth": { "value": 1, "unit": "px" },
+            "borderColor": "{color.stroke}",
+            "cornerRadius": "{radius.sm}"
+          },
+          "interactions": {
+            "focus": { "borderColor": "{color.accent}", "outlineWidth": { "value": 2, "unit": "px" }, "outlineColor": "rgba(0, 112, 243, 0.3)" }
+          },
+          "errorStyle": {
+            "borderColor": "{color.error}",
+            "background": "{color.errorBg}"
+          }
+        }
+      ]
+    },
+    "primary-button": {
+      "$description": "Full-width primary action button",
+      "type": "button",
+      "params": ["label", "command"],
+      "size": { "width": "fill", "height": { "value": 40, "unit": "px" } },
+      "cornerRadius": "{radius.sm}",
+      "style": {
+        "background": "{color.accent}",
+        "fontSize": "{font.size.base}",
+        "fontWeight": "{font.weight.medium}",
+        "color": "{color.text.primary}"
+      },
+      "interactions": {
+        "hover": { "background": "{color.accentHover}" },
+        "disabled": { "opacity": 0.5 }
+      }
+    },
+    "oauth-button": {
+      "$description": "OAuth provider button with icon",
+      "type": "button",
+      "params": ["provider", "icon", "label", "bgColor"],
+      "size": { "width": "fill", "height": { "value": 40, "unit": "px" } },
+      "cornerRadius": "{radius.sm}",
+      "layout": "stack-h",
+      "align": "center",
+      "justify": "center",
+      "gap": "{spacing.sm}",
+      "style": {
+        "background": "transparent",
+        "borderWidth": { "value": 1, "unit": "px" },
+        "borderColor": "{color.stroke}",
+        "fontSize": "{font.size.base}",
+        "fontWeight": "{font.weight.medium}",
+        "color": "{color.text.primary}"
+      },
+      "interactions": {
+        "hover": { "background": "{color.surfaceAlt}" }
+      }
+    },
+    "error-message": {
+      "$description": "Inline error message below a field or form",
+      "type": "text",
+      "params": ["message"],
+      "style": {
+        "fontSize": "{font.size.sm}",
+        "color": "{color.error}"
+      }
+    }
+  },
+
+  "$machine": {
+    "id": "authFlow",
+    "initial": "signIn",
+
+    "$visual": {
+      "$description": "Full-page centered card on dark background",
+      "container": {
+        "layout": "layer",
+        "align": "center",
+        "justify": "center",
+        "size": { "width": "fill", "height": "fill" },
+        "background": "{color.bg}"
+      }
+    },
+
+    "states": {
+      "signIn": {
+        "on": {
+          "SUBMIT_EMAIL": "signIn.loading",
+          "OAUTH_GITHUB": "oauthRedirect",
+          "OAUTH_GOOGLE": "oauthRedirect",
+          "GO_TO_SIGNUP": "signUp"
+        },
+        "initial": "idle",
+        "$visual": {
+          "$description": "Sign-in page. Centered card with email input, password input, submit button, OAuth buttons, and sign-up link.",
+          "animation": "page-enter",
+          "slots": {
+            "content": [
+              {
+                "type": "group", "name": "auth-card",
+                "layout": "stack-v", "align": "stretch",
+                "gap": "{spacing.lg}",
+                "size": { "width": { "value": 360, "unit": "px" } },
+                "padding": { "value": "{spacing.xl}" },
+                "background": "{color.surface}",
+                "cornerRadius": "{radius.lg}",
+                "borderWidth": { "value": 1, "unit": "px" },
+                "borderColor": "{color.stroke}",
+                "children": [
+                  { "type": "text", "content": "auth.signIn.title", "style": { "fontSize": "{font.size.xl}", "fontWeight": "{font.weight.bold}", "color": "{color.text.primary}" } },
+                  { "$ref": "text-input", "name": "email", "label": "auth.email", "placeholder": "auth.emailPlaceholder", "inputType": "email" },
+                  { "$ref": "text-input", "name": "password", "label": "auth.password", "placeholder": "auth.passwordPlaceholder", "inputType": "password" },
+                  { "$ref": "primary-button", "label": "auth.signIn.submit", "command": "submitSignIn" },
+                  { "type": "group", "name": "divider", "layout": "stack-h", "align": "center", "gap": "{spacing.md}", "children": [
+                    { "type": "shape", "shape": "rectangle", "size": { "width": "fill", "height": { "value": 1, "unit": "px" } }, "fill": "{color.stroke}" },
+                    { "type": "text", "content": "auth.or", "style": { "fontSize": "{font.size.sm}", "color": "{color.text.muted}" } },
+                    { "type": "shape", "shape": "rectangle", "size": { "width": "fill", "height": { "value": 1, "unit": "px" } }, "fill": "{color.stroke}" }
+                  ]},
+                  { "$ref": "oauth-button", "provider": "github", "icon": "Github", "label": "auth.continueWithGithub" },
+                  { "$ref": "oauth-button", "provider": "google", "icon": "Google", "label": "auth.continueWithGoogle" },
+                  { "type": "text", "content": "auth.noAccount", "style": { "fontSize": "{font.size.sm}", "color": "{color.text.muted}", "textAlign": "center" },
+                    "children": [{ "type": "text", "content": "auth.signUpLink", "style": { "color": "{color.accent}" }, "command": "goToSignUp" }]
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        "states": {
+          "idle": {
+            "$visual": { "$description": "Form ready for input" },
+            "on": { "SUBMIT": "loading" }
+          },
+          "loading": {
+            "$visual": {
+              "$description": "Submit button shows spinner, inputs disabled",
+              "slots": {
+                "content": [{ "$description": "Same card but submit button shows spinner animation and all inputs are disabled" }]
+              }
+            },
+            "on": {
+              "SUCCESS": "success",
+              "INVALID_CREDENTIALS": "error",
+              "RATE_LIMITED": "rateLimited",
+              "NEEDS_VERIFICATION": "needsVerification"
+            }
+          },
+          "error": {
+            "$visual": {
+              "$description": "Card shakes, error message appears below password field: 'Invalid email or password'",
+              "animation": "shake"
+            },
+            "on": { "SUBMIT": "loading", "EDIT": "idle" }
+          },
+          "rateLimited": {
+            "$visual": {
+              "$description": "Error message: 'Too many attempts. Try again in {retryAfterSeconds}s.' Submit button disabled with countdown."
+            },
+            "on": { "COOLDOWN_EXPIRED": "idle" }
+          },
+          "needsVerification": {
+            "$visual": { "$description": "Transitions to emailVerification state" },
+            "on": { "": "emailVerification" }
+          },
+          "success": {
+            "$visual": { "$description": "Brief green checkmark, then redirect" },
+            "on": { "": "authenticated" }
+          }
+        }
+      },
+
+      "signUp": {
+        "on": { "GO_TO_SIGNIN": "signIn" },
+        "initial": "idle",
+        "$visual": {
+          "$description": "Sign-up page. Same card layout as sign-in but with name field and confirm password. Has link back to sign-in.",
+          "animation": "page-enter",
+          "slots": {
+            "content": [
+              {
+                "type": "group", "name": "auth-card",
+                "layout": "stack-v", "align": "stretch",
+                "gap": "{spacing.lg}",
+                "size": { "width": { "value": 360, "unit": "px" } },
+                "padding": { "value": "{spacing.xl}" },
+                "background": "{color.surface}",
+                "cornerRadius": "{radius.lg}",
+                "children": [
+                  { "type": "text", "content": "auth.signUp.title", "style": { "fontSize": "{font.size.xl}", "fontWeight": "{font.weight.bold}", "color": "{color.text.primary}" } },
+                  { "$ref": "text-input", "name": "name", "label": "auth.name", "placeholder": "auth.namePlaceholder", "inputType": "text" },
+                  { "$ref": "text-input", "name": "email", "label": "auth.email", "placeholder": "auth.emailPlaceholder", "inputType": "email" },
+                  { "$ref": "text-input", "name": "password", "label": "auth.password", "placeholder": "auth.passwordPlaceholder", "inputType": "password" },
+                  { "$ref": "text-input", "name": "confirmPassword", "label": "auth.confirmPassword", "placeholder": "auth.confirmPasswordPlaceholder", "inputType": "password" },
+                  { "$ref": "primary-button", "label": "auth.signUp.submit", "command": "submitSignUp" }
+                ]
+              }
+            ]
+          }
+        },
+        "states": {
+          "idle": {
+            "$visual": { "$description": "Form ready for input" },
+            "on": { "SUBMIT": "loading", "VALIDATE_FIELD": "validating" }
+          },
+          "validating": {
+            "$visual": { "$description": "Real-time field validation — password strength indicator, email format check. Per-field error messages appear below invalid fields." },
+            "on": { "VALID": "idle", "SUBMIT": "loading" }
+          },
+          "loading": {
+            "$visual": { "$description": "Spinner on submit, all fields disabled" },
+            "on": { "SUCCESS": "success", "EMAIL_TAKEN": "error", "WEAK_PASSWORD": "error" }
+          },
+          "error": {
+            "$visual": { "$description": "Shake + field-level errors. email: 'Already registered', password: 'Must be 8+ characters'", "animation": "shake" },
+            "on": { "EDIT": "idle", "SUBMIT": "loading" }
+          },
+          "success": {
+            "$visual": { "$description": "Redirect to email verification" },
+            "on": { "": "emailVerification" }
+          }
+        }
+      },
+
+      "emailVerification": {
+        "on": { "VERIFIED": "authenticated", "RESEND": "emailVerification.resending", "BACK": "signIn" },
+        "initial": "waiting",
+        "$visual": {
+          "$description": "Email verification pending. Shows envelope icon, 'Check your email' heading, description with the email address, and a resend button.",
+          "animation": "page-enter",
+          "slots": {
+            "content": [
+              {
+                "type": "group", "name": "verification-card",
+                "layout": "stack-v", "align": "center",
+                "gap": "{spacing.lg}",
+                "size": { "width": { "value": 360, "unit": "px" } },
+                "padding": { "value": "{spacing.xl}" },
+                "background": "{color.surface}",
+                "cornerRadius": "{radius.lg}",
+                "children": [
+                  { "type": "icon", "icon": "Mail", "size": { "value": 48, "unit": "px" }, "color": "{color.accent}" },
+                  { "type": "text", "content": "auth.verification.title", "style": { "fontSize": "{font.size.lg}", "fontWeight": "{font.weight.bold}", "color": "{color.text.primary}", "textAlign": "center" } },
+                  { "type": "text", "content": "auth.verification.description", "style": { "fontSize": "{font.size.base}", "color": "{color.text.secondary}", "textAlign": "center" } },
+                  { "$ref": "primary-button", "label": "auth.verification.resend", "command": "resendVerification" },
+                  { "type": "text", "content": "auth.verification.backToSignIn", "style": { "fontSize": "{font.size.sm}", "color": "{color.accent}", "textAlign": "center" }, "command": "backToSignIn" }
+                ]
+              }
+            ]
+          }
+        },
+        "states": {
+          "waiting": {
+            "$visual": { "$description": "Waiting for user to click email link" },
+            "on": { "RESEND": "resending" }
+          },
+          "resending": {
+            "$visual": { "$description": "Resend button shows spinner" },
+            "on": { "RESENT": "resent", "RESEND_FAILED": "resendError" }
+          },
+          "resent": {
+            "$visual": { "$description": "Green checkmark replaces resend button, 'Email sent!' confirmation text" },
+            "autoDismiss": { "value": 3000, "unit": "ms" }
+          },
+          "resendError": {
+            "$visual": { "$description": "Red error text: 'Failed to resend. Try again.'" },
+            "on": { "RESEND": "resending" }
+          }
+        }
+      },
+
+      "oauthRedirect": {
+        "$visual": {
+          "$description": "Full-page loading state with provider logo and 'Redirecting to {provider}...' text. Spinner animation.",
+          "slots": {
+            "content": [
+              {
+                "type": "group", "layout": "stack-v", "align": "center", "gap": "{spacing.lg}",
+                "children": [
+                  { "type": "icon", "icon": "Loader2", "size": { "value": 32, "unit": "px" }, "color": "{color.text.secondary}", "animation": "spinner" },
+                  { "type": "text", "content": "auth.oauth.redirecting", "style": { "fontSize": "{font.size.base}", "color": "{color.text.secondary}" } }
+                ]
+              }
+            ]
+          }
+        },
+        "on": {
+          "OAUTH_SUCCESS": "authenticated",
+          "OAUTH_ERROR": "signIn.error",
+          "OAUTH_CANCEL": "signIn"
+        }
+      },
+
+      "authenticated": {
+        "$visual": { "$description": "Terminal state — app redirects to main content" }
+      }
+    }
+  }
+}

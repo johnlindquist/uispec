@@ -1,0 +1,334 @@
+{
+  "$schema": "https://uispec.dev/0.1/schema.json",
+  "$description": "Media player with transport controls. Demonstrates parallel states (playback + volume + fullscreen are independent), continuous values (seek position, volume level), keyboard shortcuts across states, and responsive layout. Edge cases: buffering stalls, seek while paused, volume mute toggle, picture-in-picture, error recovery.",
+
+  "$tokens": {
+    "color": {
+      "bg":       { "$type": "color", "$value": "#000000" },
+      "surface":  { "$type": "color", "$value": "rgba(0, 0, 0, 0.85)" },
+      "white":    { "$type": "color", "$value": "#ffffff" },
+      "text": {
+        "primary":   { "$type": "color", "$value": "#ffffff" },
+        "secondary": { "$type": "color", "$value": "rgba(255, 255, 255, 0.7)" },
+        "muted":     { "$type": "color", "$value": "rgba(255, 255, 255, 0.4)" }
+      },
+      "accent":    { "$type": "color", "$value": "#ff4d4f", "$description": "Playback accent (YouTube-style red)" },
+      "accentDim": { "$type": "color", "$value": "rgba(255, 77, 79, 0.3)" },
+      "track":     { "$type": "color", "$value": "rgba(255, 255, 255, 0.2)" },
+      "buffered":  { "$type": "color", "$value": "rgba(255, 255, 255, 0.4)" },
+      "error":     { "$type": "color", "$value": "#ee5555" }
+    },
+    "spacing": {
+      "xs":  { "$type": "dimension", "$value": { "value": 4,  "unit": "px" } },
+      "sm":  { "$type": "dimension", "$value": { "value": 8,  "unit": "px" } },
+      "md":  { "$type": "dimension", "$value": { "value": 12, "unit": "px" } },
+      "lg":  { "$type": "dimension", "$value": { "value": 16, "unit": "px" } }
+    },
+    "radius": {
+      "sm":   { "$type": "dimension", "$value": { "value": 4,  "unit": "px" } },
+      "full": { "$type": "dimension", "$value": { "value": 9999, "unit": "px" } }
+    },
+    "font": {
+      "family": { "$type": "fontFamily", "$value": ["Geist Mono", "ui-monospace", "monospace"] },
+      "size": {
+        "xs":   { "$type": "dimension", "$value": { "value": 11, "unit": "px" } },
+        "sm":   { "$type": "dimension", "$value": { "value": 12, "unit": "px" } }
+      },
+      "weight": {
+        "regular": { "$type": "number", "$value": 400 },
+        "medium":  { "$type": "number", "$value": 500 }
+      }
+    }
+  },
+
+  "$animations": {
+    "controls-show": {
+      "$description": "Controls bar fades in from bottom",
+      "duration": { "value": 200, "unit": "ms" },
+      "easing": "ease-out",
+      "keyframes": {
+        "0":   { "opacity": 0, "translateY": { "value": 8, "unit": "px" } },
+        "100": { "opacity": 1, "translateY": { "value": 0, "unit": "px" } }
+      }
+    },
+    "controls-hide": {
+      "$description": "Controls bar fades out downward",
+      "duration": { "value": 300, "unit": "ms" },
+      "easing": "ease-in",
+      "keyframes": {
+        "0":   { "opacity": 1, "translateY": { "value": 0, "unit": "px" } },
+        "100": { "opacity": 0, "translateY": { "value": 8, "unit": "px" } }
+      }
+    },
+    "spinner": {
+      "duration": { "value": 1000, "unit": "ms" },
+      "easing": "linear",
+      "repeat": "infinite",
+      "keyframes": { "0": { "rotate": 0 }, "100": { "rotate": 360 } }
+    },
+    "pip-shrink": {
+      "$description": "Video shrinks into corner for picture-in-picture",
+      "duration": { "value": 300, "unit": "ms" },
+      "easing": "cubic-bezier(0.34, 1.56, 0.64, 1)",
+      "keyframes": {
+        "0":   { "scale": 1 },
+        "100": { "scale": 0.3 }
+      }
+    }
+  },
+
+  "$elements": {
+    "transport-button": {
+      "$description": "Control bar icon button",
+      "type": "button",
+      "params": ["name", "icon", "shortcutKey"],
+      "size": { "width": { "value": 36, "unit": "px" }, "height": { "value": 36, "unit": "px" } },
+      "cornerRadius": "{radius.sm}",
+      "style": {
+        "color": "{color.text.primary}",
+        "background": "transparent",
+        "iconSize": { "value": 20, "unit": "px" }
+      },
+      "interactions": {
+        "hover": { "background": "rgba(255,255,255,0.1)" },
+        "press": { "scale": 0.92 }
+      }
+    },
+    "seek-bar": {
+      "$description": "Horizontal seek/progress bar with buffered range, played range, and draggable thumb",
+      "type": "group",
+      "name": "seek-bar",
+      "layout": "layer",
+      "size": { "width": "fill", "height": { "value": 4, "unit": "px" } },
+      "cornerRadius": "{radius.full}",
+      "interactions": {
+        "hover": { "height": { "value": 6, "unit": "px" } }
+      },
+      "children": [
+        { "type": "shape", "name": "track", "shape": "rectangle", "size": { "width": "fill", "height": "fill" }, "fill": "{color.track}", "cornerRadius": "{radius.full}" },
+        { "type": "shape", "name": "buffered", "shape": "rectangle", "size": { "height": "fill" }, "fill": "{color.buffered}", "cornerRadius": "{radius.full}",
+          "dynamic": [{ "property": "width", "expr": ["*", ["var", "bufferedFraction"], 100], "unit": "%" }] },
+        { "type": "shape", "name": "played", "shape": "rectangle", "size": { "height": "fill" }, "fill": "{color.accent}", "cornerRadius": "{radius.full}",
+          "dynamic": [{ "property": "width", "expr": ["*", ["var", "playedFraction"], 100], "unit": "%" }] },
+        { "type": "shape", "name": "thumb", "shape": "circle", "size": { "value": 12, "unit": "px" }, "fill": "{color.accent}",
+          "conditional": "hovering || dragging",
+          "dynamic": [{ "property": "left", "expr": ["*", ["var", "playedFraction"], 100], "unit": "%" }] }
+      ]
+    },
+    "volume-slider": {
+      "$description": "Vertical or horizontal volume slider with mute toggle",
+      "type": "group",
+      "layout": "stack-h",
+      "align": "center",
+      "gap": "{spacing.xs}",
+      "children": [
+        {
+          "type": "button", "name": "mute-toggle",
+          "size": { "width": { "value": 36, "unit": "px" }, "height": { "value": 36, "unit": "px" } },
+          "style": { "color": "{color.text.primary}", "background": "transparent" },
+          "dynamic": [
+            { "property": "icon", "expr": ["if", ["var", "muted"], "VolumeX",
+                                           ["if", ["<", ["var", "volume"], 0.5], "Volume1", "Volume2"]] }
+          ],
+          "command": "toggleMute"
+        },
+        {
+          "type": "group", "name": "volume-track",
+          "layout": "layer",
+          "size": { "width": { "value": 60, "unit": "px" }, "height": { "value": 4, "unit": "px" } },
+          "cornerRadius": "{radius.full}",
+          "children": [
+            { "type": "shape", "name": "track-bg", "shape": "rectangle", "size": { "width": "fill", "height": "fill" }, "fill": "{color.track}", "cornerRadius": "{radius.full}" },
+            { "type": "shape", "name": "volume-fill", "shape": "rectangle", "size": { "height": "fill" }, "fill": "{color.text.primary}", "cornerRadius": "{radius.full}",
+              "dynamic": [{ "property": "width", "expr": ["*", ["if", ["var", "muted"], 0, ["var", "volume"]], 100], "unit": "%" }] }
+          ]
+        }
+      ]
+    }
+  },
+
+  "$machine": {
+    "id": "mediaPlayer",
+    "initial": "loading",
+    "$description": "Uses parallel states: playback, volume, and display mode are independent axes that can change without affecting each other.",
+
+    "$visual": {
+      "$description": "Full-viewport video player with overlay controls at the bottom",
+      "container": {
+        "layout": "layer",
+        "size": { "width": "fill", "height": "fill" },
+        "background": "{color.bg}"
+      }
+    },
+
+    "states": {
+      "loading": {
+        "$visual": {
+          "$description": "Centered spinner over black background while media loads",
+          "slots": {
+            "center": [
+              { "type": "icon", "icon": "Loader2", "size": { "value": 48, "unit": "px" }, "color": "{color.text.secondary}", "animation": "spinner" }
+            ]
+          }
+        },
+        "on": {
+          "LOADED": "ready",
+          "LOAD_ERROR": "error"
+        }
+      },
+
+      "ready": {
+        "initial": "paused",
+        "$visual": {
+          "$description": "Video visible. Controls bar at bottom with: seek bar (full width), play/pause, skip buttons, time display, volume, fullscreen toggle.",
+          "slots": {
+            "video": [
+              { "type": "group", "name": "video-viewport", "layout": "layer", "size": { "width": "fill", "height": "fill" } }
+            ],
+            "controls": [
+              {
+                "type": "group", "name": "controls-bar",
+                "layout": "stack-v",
+                "gap": "{spacing.sm}",
+                "size": { "width": "fill" },
+                "padding": { "horizontal": "{spacing.lg}", "vertical": "{spacing.sm}" },
+                "background": "linear-gradient(transparent, rgba(0,0,0,0.8))",
+                "children": [
+                  { "$ref": "seek-bar" },
+                  {
+                    "type": "group", "name": "transport",
+                    "layout": "stack-h", "align": "center", "justify": "space-between",
+                    "children": [
+                      {
+                        "type": "group", "name": "left-controls", "layout": "stack-h", "align": "center", "gap": "{spacing.xs}",
+                        "children": [
+                          { "$ref": "transport-button", "name": "play-pause", "icon": "Play", "shortcutKey": "Space" },
+                          { "$ref": "transport-button", "name": "skip-back", "icon": "SkipBack", "shortcutKey": "ArrowLeft" },
+                          { "$ref": "transport-button", "name": "skip-forward", "icon": "SkipForward", "shortcutKey": "ArrowRight" },
+                          { "$ref": "volume-slider" },
+                          {
+                            "type": "text", "name": "time-display",
+                            "dynamic": [{ "property": "content", "expr": ["var", "timeDisplay"] }],
+                            "style": { "fontSize": "{font.size.xs}", "fontWeight": "{font.weight.regular}", "color": "{color.text.secondary}", "fontVariantNumeric": "tabular-nums" }
+                          }
+                        ]
+                      },
+                      {
+                        "type": "group", "name": "right-controls", "layout": "stack-h", "align": "center", "gap": "{spacing.xs}",
+                        "children": [
+                          { "$ref": "transport-button", "name": "pip", "icon": "PictureInPicture2", "shortcutKey": "p" },
+                          { "$ref": "transport-button", "name": "fullscreen", "icon": "Maximize", "shortcutKey": "f" }
+                        ]
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        "on": {
+          "CONTROLS_IDLE": "ready.controlsHidden",
+          "MOUSE_MOVE": "ready.controlsVisible",
+          "ERROR": "error"
+        },
+
+        "states": {
+          "paused": {
+            "$visual": {
+              "$description": "Video paused — play button shows Play icon, large centered play overlay visible",
+              "slots": {
+                "center": [
+                  {
+                    "type": "button", "name": "big-play",
+                    "size": { "width": { "value": 64, "unit": "px" }, "height": { "value": 64, "unit": "px" } },
+                    "cornerRadius": "{radius.full}",
+                    "style": { "background": "rgba(0,0,0,0.6)", "color": "{color.white}", "iconSize": { "value": 28, "unit": "px" } },
+                    "icon": "Play",
+                    "command": "play"
+                  }
+                ]
+              }
+            },
+            "on": { "PLAY": "playing", "SEEK": "paused" },
+            "keyboard": { "Space": "PLAY", "k": "PLAY" }
+          },
+          "playing": {
+            "$visual": {
+              "$description": "Video playing — play button shows Pause icon, no center overlay",
+              "slots": { "center": [] }
+            },
+            "on": { "PAUSE": "paused", "ENDED": "ended", "BUFFERING": "buffering", "SEEK": "playing" },
+            "keyboard": { "Space": "PAUSE", "k": "PAUSE" }
+          },
+          "buffering": {
+            "$visual": {
+              "$description": "Playback stalled — center spinner, play button shows Pause icon (still 'playing' intent)",
+              "slots": {
+                "center": [
+                  { "type": "icon", "icon": "Loader2", "size": { "value": 48, "unit": "px" }, "color": "{color.text.primary}", "animation": "spinner" }
+                ]
+              }
+            },
+            "on": { "BUFFER_FULL": "playing", "PAUSE": "paused" }
+          },
+          "ended": {
+            "$visual": {
+              "$description": "Video ended — center replay button, seek bar at 100%",
+              "slots": {
+                "center": [
+                  {
+                    "type": "button", "name": "replay",
+                    "size": { "width": { "value": 64, "unit": "px" }, "height": { "value": 64, "unit": "px" } },
+                    "cornerRadius": "{radius.full}",
+                    "style": { "background": "rgba(0,0,0,0.6)", "color": "{color.white}", "iconSize": { "value": 28, "unit": "px" } },
+                    "icon": "RotateCcw",
+                    "command": "replay"
+                  }
+                ]
+              }
+            },
+            "on": { "REPLAY": "playing", "SEEK": "paused" }
+          },
+          "controlsVisible": {
+            "$visual": { "$description": "Controls bar visible with controls-show animation", "animation": "controls-show" },
+            "on": { "IDLE_TIMEOUT": "controlsHidden" }
+          },
+          "controlsHidden": {
+            "$visual": { "$description": "Controls bar hidden — cursor hidden, controls-hide animation", "animation": "controls-hide" },
+            "on": { "MOUSE_MOVE": "controlsVisible", "TAP": "controlsVisible" }
+          }
+        }
+      },
+
+      "error": {
+        "$visual": {
+          "$description": "Centered error message with retry button: 'This video could not be played.' AlertTriangle icon.",
+          "slots": {
+            "center": [
+              {
+                "type": "group", "layout": "stack-v", "align": "center", "gap": "{spacing.md}",
+                "children": [
+                  { "type": "icon", "icon": "AlertTriangle", "size": { "value": 48, "unit": "px" }, "color": "{color.error}" },
+                  { "type": "text", "content": "player.error.title", "style": { "fontSize": "{font.size.sm}", "fontWeight": "{font.weight.medium}", "color": "{color.text.primary}" } },
+                  { "type": "text", "content": "player.error.description", "style": { "fontSize": "{font.size.xs}", "color": "{color.text.secondary}" } },
+                  {
+                    "type": "button", "name": "retry",
+                    "layout": "stack-h", "align": "center", "gap": "{spacing.xs}",
+                    "icon": "RotateCcw",
+                    "size": { "height": { "value": 32, "unit": "px" } },
+                    "padding": { "horizontal": "{spacing.lg}" },
+                    "cornerRadius": "{radius.sm}",
+                    "style": { "background": "rgba(255,255,255,0.1)", "fontSize": "{font.size.sm}", "color": "{color.text.primary}" },
+                    "command": "retry"
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        "on": { "RETRY": "loading" }
+      }
+    }
+  }
+}

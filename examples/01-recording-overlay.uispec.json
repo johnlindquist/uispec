@@ -1,0 +1,344 @@
+{
+  "$schema": "https://uispec.dev/0.1/schema.json",
+  "$description": "Recording overlay — a floating pill-shaped HUD shown during voice dictation. Demonstrates compound states, dynamic expressions (waveform), auto-dismiss substates, keyboard bindings, and focus management.",
+
+  "$tokens": {
+    "color": {
+      "white":    { "$type": "color", "$value": "#ffffff" },
+      "active":   { "$type": "color", "$value": "#52c41a", "$description": "Success / voice-active green" },
+      "inactive": { "$type": "color", "$value": "#ff4d4f", "$description": "Error / stop red" },
+      "surface": {
+        "glass": { "$type": "color", "$value": "rgba(18, 18, 22, 0.72)" },
+        "solid": { "$type": "color", "$value": "rgba(18, 18, 22, 0.82)" }
+      },
+      "stroke":    { "$type": "color", "$value": "rgba(255, 255, 255, 0.18)" },
+      "focusRing": { "$type": "color", "$value": "rgba(255, 255, 255, 0.62)" },
+      "text": {
+        "primary": { "$type": "color", "$value": "#ffffff" },
+        "muted":   { "$type": "color", "$value": "rgba(255, 255, 255, 0.5)" },
+        "dimmed":  { "$type": "color", "$value": "rgba(255, 255, 255, 0.6)" }
+      },
+      "fill": {
+        "subtle":      { "$type": "color", "$value": "rgba(255, 255, 255, 0.05)" },
+        "hover":       { "$type": "color", "$value": "rgba(255, 255, 255, 0.08)" },
+        "hoverStrong": { "$type": "color", "$value": "rgba(255, 255, 255, 0.15)" },
+        "active":      { "$type": "color", "$value": "rgba(255, 255, 255, 0.2)" }
+      },
+      "border": {
+        "light":  { "$type": "color", "$value": "rgba(255, 255, 255, 0.1)" },
+        "medium": { "$type": "color", "$value": "rgba(255, 255, 255, 0.12)" },
+        "hover":  { "$type": "color", "$value": "rgba(255, 255, 255, 0.25)" }
+      },
+      "error": {
+        "badgeBg": { "$type": "color", "$value": "rgba(239, 68, 68, 0.3)" },
+        "fg":      { "$type": "color", "$value": "#f87171" }
+      }
+    },
+    "spacing": {
+      "sm":  { "$type": "dimension", "$value": { "value": 4,  "unit": "px" } },
+      "md":  { "$type": "dimension", "$value": { "value": 6,  "unit": "px" } },
+      "lg":  { "$type": "dimension", "$value": { "value": 10, "unit": "px" } },
+      "xl":  { "$type": "dimension", "$value": { "value": 14, "unit": "px" } },
+      "xxl": { "$type": "dimension", "$value": { "value": 16, "unit": "px" } }
+    },
+    "radius": {
+      "xs":   { "$type": "dimension", "$value": { "value": 1.5, "unit": "px" } },
+      "sm":   { "$type": "dimension", "$value": { "value": 3,   "unit": "px" } },
+      "md":   { "$type": "dimension", "$value": { "value": 4,   "unit": "px" } },
+      "pill": { "$type": "dimension", "$value": { "value": 18,  "unit": "px" } }
+    },
+    "font": {
+      "family": { "$type": "fontFamily", "$value": ["Geist", "ui-sans-serif", "system-ui", "sans-serif"] },
+      "size": {
+        "sm":   { "$type": "dimension", "$value": { "value": 9,  "unit": "px" } },
+        "base": { "$type": "dimension", "$value": { "value": 11, "unit": "px" } },
+        "lg":   { "$type": "dimension", "$value": { "value": 12, "unit": "px" } }
+      },
+      "weight": {
+        "regular":  { "$type": "number", "$value": 400 },
+        "medium":   { "$type": "number", "$value": 500 },
+        "semibold": { "$type": "number", "$value": 600 }
+      }
+    },
+    "timing": {
+      "smooth": { "$type": "duration", "$value": { "value": 200, "unit": "ms" } }
+    }
+  },
+
+  "$animations": {
+    "dot-pulse": {
+      "$description": "Pulsing scale for transcribing indicator dots",
+      "duration": { "value": 1400, "unit": "ms" },
+      "easing": "ease-in-out",
+      "repeat": "infinite",
+      "keyframes": {
+        "0":   { "opacity": 0.3, "scale": 1 },
+        "40":  { "opacity": 1,   "scale": 1.2 },
+        "80":  { "opacity": 0.3, "scale": 1 },
+        "100": { "opacity": 0.3, "scale": 1 }
+      }
+    },
+    "paused-fade": {
+      "$description": "Simple opacity fade for pause indicator entry",
+      "duration": "{timing.smooth}",
+      "easing": "ease-out",
+      "keyframes": { "0": { "opacity": 0 }, "100": { "opacity": 1 } }
+    }
+  },
+
+  "$elements": {
+    "logo": {
+      "$description": "Vercel Voice triangle logo, always white",
+      "type": "icon",
+      "icon": "VercelVoiceLogo",
+      "size": { "value": 16, "unit": "px" },
+      "color": "{color.white}"
+    },
+    "timer": {
+      "$description": "Elapsed recording time in MM:SS, monospace numerals",
+      "type": "text",
+      "role": "timer",
+      "style": {
+        "fontSize": "{font.size.base}",
+        "fontWeight": "{font.weight.medium}",
+        "color": "{color.text.muted}",
+        "fontVariantNumeric": "tabular-nums",
+        "whiteSpace": "nowrap"
+      }
+    },
+    "action-button": {
+      "$description": "24×24 icon button with hover/press/focus states",
+      "type": "button",
+      "params": ["id", "icon", "tooltip"],
+      "size": { "width": { "value": 24, "unit": "px" }, "height": { "value": 24, "unit": "px" } },
+      "cornerRadius": "{radius.md}",
+      "style": {
+        "background": "{color.fill.subtle}",
+        "borderWidth": { "value": 1, "unit": "px" },
+        "borderColor": "{color.border.light}",
+        "iconSize": { "value": 16, "unit": "px" },
+        "iconStrokeWidth": 2.5,
+        "color": "{color.text.dimmed}"
+      },
+      "interactions": {
+        "hover":  { "color": "{color.white}", "background": "{color.fill.hoverStrong}", "borderColor": "{color.border.hover}" },
+        "press":  { "scale": 0.95, "background": "{color.fill.active}" },
+        "focus":  { "outlineWidth": { "value": 2, "unit": "px" }, "outlineColor": "{color.text.muted}", "outlineOffset": { "value": 1, "unit": "px" } }
+      }
+    },
+    "error-badge": {
+      "$description": "Small red status badge with icon and label",
+      "type": "badge",
+      "params": ["icon", "label"],
+      "layout": "stack-h",
+      "align": "center",
+      "gap": "{spacing.sm}",
+      "cornerRadius": "{radius.sm}",
+      "style": {
+        "background": "{color.error.badgeBg}",
+        "fontSize": "{font.size.sm}",
+        "fontWeight": "{font.weight.semibold}",
+        "color": "{color.error.fg}",
+        "letterSpacing": "0.05em"
+      }
+    }
+  },
+
+  "$machine": {
+    "id": "recordingOverlay",
+    "initial": "hidden",
+
+    "$visual": {
+      "$description": "Root container — 36px pill, 3-column grid, glass backdrop with blur",
+      "container": {
+        "layout": "grid",
+        "columns": ["auto", "1fr", "auto"],
+        "align": "center",
+        "size": { "width": "fill", "height": { "value": 36, "unit": "px" } },
+        "padding": { "vertical": { "value": 0, "unit": "px" }, "horizontal": "{spacing.xl}" },
+        "gap": "{spacing.lg}",
+        "cornerRadius": "{radius.pill}",
+        "background": "{color.surface.glass}",
+        "borderWidth": { "value": 1, "unit": "px" },
+        "borderColor": "{color.stroke}",
+        "backdropBlur": { "value": 6, "unit": "px" },
+        "backdropSaturate": 1.4
+      }
+    },
+
+    "states": {
+      "hidden": {
+        "on": { "SHOW": "recording" },
+        "$visual": { "$description": "Not rendered — zero presence in the view hierarchy" }
+      },
+
+      "recording": {
+        "initial": "active",
+        "on": {
+          "STOP": "transcribing",
+          "CANCEL": "hidden",
+          "HIDE": "hidden",
+          "LONG_RECORDING": "confirming"
+        },
+        "$visual": {
+          "$description": "Actively capturing audio. Left: logo + elapsed timer. Middle: 9-bar waveform colored by voice activity. Right: screenshot, variations, chat, cancel buttons.",
+          "slots": {
+            "left": [
+              { "$ref": "logo" },
+              { "$ref": "timer" }
+            ],
+            "middle": [
+              {
+                "type": "group", "name": "waveform",
+                "layout": "stack-h", "align": "end", "justify": "center",
+                "gap": "{spacing.sm}",
+                "size": { "height": { "value": 20, "unit": "px" } },
+                "clip": true,
+                "children": {
+                  "type": "bar", "repeat": 9,
+                  "size": { "width": { "value": 3, "unit": "px" }, "minHeight": { "value": 3, "unit": "px" }, "maxHeight": { "value": 18, "unit": "px" } },
+                  "cornerRadius": "{radius.xs}",
+                  "dynamic": [
+                    { "property": "height",     "expr": ["+", 4, ["*", 16, ["pow", ["var", "level"], 0.7]]] },
+                    { "property": "opacity",    "expr": ["max", 0.3, ["*", ["var", "level"], 1.5]] },
+                    { "property": "background", "expr": ["if", ["var", "hasSound"], "{color.active}", "{color.inactive}"] }
+                  ]
+                }
+              }
+            ],
+            "right": [
+              { "$ref": "action-button", "id": "crop",       "icon": "Crop",          "tooltip": "overlay.captureRegionShortcut" },
+              { "$ref": "action-button", "id": "monitor",    "icon": "Monitor",       "tooltip": "overlay.captureFullscreenShortcut" },
+              { "$ref": "action-button", "id": "window",     "icon": "AppWindow",     "tooltip": "overlay.captureWindowShortcut" },
+              { "$ref": "action-button", "id": "variations", "icon": "LayoutGrid",    "tooltip": "overlay.variationsTooltip" },
+              { "$ref": "action-button", "id": "chat",       "icon": "MessageSquare", "tooltip": "overlay.followUpChatTooltip" },
+              { "$ref": "action-button", "id": "cancel",     "icon": "EscapeKey",     "tooltip": "overlay.cancelShortcut" }
+            ]
+          }
+        },
+        "states": {
+          "active": {
+            "$visual": { "$description": "Live recording — waveform bars animate with mic levels, timer counts up" },
+            "on": { "PAUSE": "paused" }
+          },
+          "paused": {
+            "$visual": {
+              "$description": "Recording paused — timer frozen, waveform replaced by Pause icon + 'Paused' label",
+              "slots": {
+                "middle": [
+                  {
+                    "type": "group", "name": "pause-indicator",
+                    "layout": "stack-h", "align": "center", "justify": "center",
+                    "gap": "{spacing.sm}",
+                    "size": { "height": { "value": 20, "unit": "px" } },
+                    "animation": "paused-fade",
+                    "children": [
+                      { "type": "icon", "icon": "Pause", "size": { "value": 10, "unit": "px" }, "strokeWidth": 2.5, "color": "{color.text.dimmed}" },
+                      { "type": "text", "content": "overlay.paused", "style": { "fontSize": "{font.size.base}", "fontWeight": "{font.weight.medium}", "letterSpacing": "0.04em", "color": "{color.text.muted}" } }
+                    ]
+                  }
+                ]
+              }
+            },
+            "on": { "RESUME": "active" }
+          }
+        }
+      },
+
+      "transcribing": {
+        "initial": "processing",
+        "on": { "DONE": "hidden" },
+        "$visual": {
+          "$description": "Processing audio. Left: logo (no timer). Middle: 3 pulsing green dots. Right: empty.",
+          "slots": {
+            "left":   [{ "$ref": "logo" }],
+            "middle": [
+              {
+                "type": "group", "name": "dots",
+                "layout": "stack-h", "gap": "{spacing.sm}", "align": "center",
+                "children": {
+                  "type": "shape", "shape": "circle", "repeat": 3,
+                  "size": { "value": 4, "unit": "px" },
+                  "fill": "{color.active}",
+                  "animation": "dot-pulse",
+                  "animationStagger": { "value": 200, "unit": "ms" }
+                }
+              }
+            ],
+            "right": []
+          }
+        },
+        "states": {
+          "processing": {
+            "$visual": { "$description": "Dots pulsing while transcription model runs" },
+            "on": { "NO_SPEECH": "noSpeech", "ERROR": "error" }
+          },
+          "noSpeech": {
+            "$visual": {
+              "$description": "No speech detected — red MicOff badge, auto-dismiss 3s",
+              "slots": {
+                "left":   [{ "$ref": "logo" }],
+                "middle": [{ "$ref": "error-badge", "icon": "MicOff", "label": "overlay.noSpeechDetected" }],
+                "right":  []
+              },
+              "autoDismiss": { "value": 3000, "unit": "ms" }
+            }
+          },
+          "error": {
+            "$visual": {
+              "$description": "Transcription failed — red XCircle badge, auto-dismiss 3s",
+              "slots": {
+                "left":   [{ "$ref": "logo" }],
+                "middle": [{ "$ref": "error-badge", "icon": "XCircle", "label": "overlay.transcriptionFailed" }],
+                "right":  []
+              },
+              "autoDismiss": { "value": 3000, "unit": "ms" }
+            }
+          }
+        }
+      },
+
+      "confirming": {
+        "on": { "CONFIRM_ABORT": "hidden", "DISMISS": "recording" },
+        "$visual": {
+          "$description": "Long recording threshold. Two buttons: Enter=abort (red), Escape=resume (green). First button auto-focused.",
+          "slots": {
+            "left": [{ "$ref": "logo" }],
+            "middle": [
+              {
+                "type": "group", "name": "confirm-actions", "role": "group",
+                "layout": "stack-h", "align": "center", "justify": "center",
+                "gap": "{spacing.xxl}",
+                "children": [
+                  {
+                    "type": "button", "name": "abort", "command": "confirmStop",
+                    "layout": "stack-h", "align": "center", "gap": "{spacing.md}",
+                    "cornerRadius": "{radius.md}",
+                    "interactions": { "hover": { "background": "{color.fill.hover}" }, "focus": { "outlineWidth": { "value": 2, "unit": "px" }, "outlineColor": "{color.focusRing}" } },
+                    "children": [
+                      { "type": "text", "content": "overlay.abortKey", "style": { "fontSize": "{font.size.lg}", "fontWeight": "{font.weight.regular}", "color": "{color.text.muted}", "background": "{color.fill.hover}", "borderWidth": { "value": 1, "unit": "px" }, "borderColor": "{color.border.medium}", "cornerRadius": "{radius.md}" } },
+                      { "type": "text", "content": "overlay.abort", "style": { "fontSize": "{font.size.lg}", "fontWeight": "{font.weight.medium}", "color": "{color.inactive}" } }
+                    ]
+                  },
+                  {
+                    "type": "button", "name": "resume", "command": "dismissConfirmation",
+                    "layout": "stack-h", "align": "center", "gap": "{spacing.md}",
+                    "cornerRadius": "{radius.md}",
+                    "interactions": { "hover": { "background": "{color.fill.hover}" }, "focus": { "outlineWidth": { "value": 2, "unit": "px" }, "outlineColor": "{color.focusRing}" } },
+                    "children": [
+                      { "type": "text", "content": "overlay.resumeKey", "style": { "fontSize": "{font.size.lg}", "fontWeight": "{font.weight.regular}", "color": "{color.text.muted}", "background": "{color.fill.hover}", "borderWidth": { "value": 1, "unit": "px" }, "borderColor": "{color.border.medium}", "cornerRadius": "{radius.md}" } },
+                      { "type": "text", "content": "overlay.resume", "style": { "fontSize": "{font.size.lg}", "fontWeight": "{font.weight.medium}", "color": "{color.active}" } }
+                    ]
+                  }
+                ]
+              }
+            ],
+            "right": []
+          },
+          "onEnter": { "focus": "abort" },
+          "keyboard": { "Escape": "DISMISS" }
+        }
+      }
+    }
+  }
+}

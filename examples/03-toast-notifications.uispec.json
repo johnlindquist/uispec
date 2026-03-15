@@ -1,0 +1,228 @@
+{
+  "$schema": "https://uispec.dev/0.1/schema.json",
+  "$description": "Toast notification system — ephemeral messages with auto-dismiss, stacking, swipe-to-dismiss, and action buttons. Edge cases: multiple concurrent toasts, different severity levels, progress bar for timed actions, undo pattern.",
+
+  "$tokens": {
+    "color": {
+      "surface":  { "$type": "color", "$value": "#1a1a1a" },
+      "stroke":   { "$type": "color", "$value": "rgba(255, 255, 255, 0.1)" },
+      "text": {
+        "primary":   { "$type": "color", "$value": "#ffffff" },
+        "secondary": { "$type": "color", "$value": "rgba(255, 255, 255, 0.6)" }
+      },
+      "info":    { "$type": "color", "$value": "#0070f3" },
+      "success": { "$type": "color", "$value": "#52c41a" },
+      "warning": { "$type": "color", "$value": "#f5a623" },
+      "error":   { "$type": "color", "$value": "#ee5555" },
+      "infoBg":    { "$type": "color", "$value": "rgba(0, 112, 243, 0.1)" },
+      "successBg": { "$type": "color", "$value": "rgba(82, 196, 26, 0.1)" },
+      "warningBg": { "$type": "color", "$value": "rgba(245, 166, 35, 0.1)" },
+      "errorBg":   { "$type": "color", "$value": "rgba(238, 85, 85, 0.1)" }
+    },
+    "spacing": {
+      "xs":  { "$type": "dimension", "$value": { "value": 4,  "unit": "px" } },
+      "sm":  { "$type": "dimension", "$value": { "value": 8,  "unit": "px" } },
+      "md":  { "$type": "dimension", "$value": { "value": 12, "unit": "px" } },
+      "lg":  { "$type": "dimension", "$value": { "value": 16, "unit": "px" } }
+    },
+    "radius": {
+      "md": { "$type": "dimension", "$value": { "value": 8, "unit": "px" } }
+    },
+    "font": {
+      "family": { "$type": "fontFamily", "$value": ["Inter", "system-ui", "sans-serif"] },
+      "size": {
+        "sm":   { "$type": "dimension", "$value": { "value": 12, "unit": "px" } },
+        "base": { "$type": "dimension", "$value": { "value": 14, "unit": "px" } }
+      },
+      "weight": {
+        "regular": { "$type": "number", "$value": 400 },
+        "medium":  { "$type": "number", "$value": 500 }
+      }
+    },
+    "timing": {
+      "fast":   { "$type": "duration", "$value": { "value": 150, "unit": "ms" } },
+      "normal": { "$type": "duration", "$value": { "value": 300, "unit": "ms" } }
+    }
+  },
+
+  "$animations": {
+    "slide-in": {
+      "$description": "Toast slides in from bottom-right",
+      "duration": "{timing.normal}",
+      "easing": "cubic-bezier(0.34, 1.56, 0.64, 1)",
+      "keyframes": {
+        "0":   { "translateX": { "value": 100, "unit": "%" }, "opacity": 0 },
+        "100": { "translateX": { "value": 0,   "unit": "%" }, "opacity": 1 }
+      }
+    },
+    "slide-out": {
+      "$description": "Toast slides out to the right",
+      "duration": "{timing.fast}",
+      "easing": "ease-in",
+      "keyframes": {
+        "0":   { "translateX": { "value": 0,   "unit": "%" }, "opacity": 1 },
+        "100": { "translateX": { "value": 100, "unit": "%" }, "opacity": 0 }
+      }
+    },
+    "progress-shrink": {
+      "$description": "Progress bar shrinks from full width to zero over the auto-dismiss duration",
+      "easing": "linear",
+      "keyframes": {
+        "0":   { "scaleX": 1 },
+        "100": { "scaleX": 0 }
+      }
+    }
+  },
+
+  "$elements": {
+    "severity-icon": {
+      "$description": "Colored icon matching toast severity",
+      "type": "icon",
+      "params": ["severity"],
+      "size": { "value": 16, "unit": "px" },
+      "strokeWidth": 2,
+      "dynamic": [
+        { "property": "icon",  "expr": ["if", ["==", ["var", "severity"], "success"], "CheckCircle",
+                                        ["if", ["==", ["var", "severity"], "error"], "XCircle",
+                                        ["if", ["==", ["var", "severity"], "warning"], "AlertTriangle", "Info"]]] },
+        { "property": "color", "expr": ["if", ["==", ["var", "severity"], "success"], "{color.success}",
+                                        ["if", ["==", ["var", "severity"], "error"], "{color.error}",
+                                        ["if", ["==", ["var", "severity"], "warning"], "{color.warning}", "{color.info}"]]] }
+      ]
+    }
+  },
+
+  "$machine": {
+    "id": "toast",
+    "initial": "idle",
+    "$description": "Lifecycle of a single toast notification instance. The toast container (stacking, positioning) is handled by the parent — this machine governs one toast.",
+
+    "$visual": {
+      "$description": "Single toast card — fixed width, dark surface, subtle border, shadow",
+      "container": {
+        "layout": "stack-v",
+        "size": { "width": { "value": 356, "unit": "px" } },
+        "cornerRadius": "{radius.md}",
+        "background": "{color.surface}",
+        "borderWidth": { "value": 1, "unit": "px" },
+        "borderColor": "{color.stroke}",
+        "shadow": [
+          { "x": 0, "y": 4, "blur": 12, "spread": 0, "color": "rgba(0,0,0,0.4)" }
+        ],
+        "overflow": "hidden"
+      }
+    },
+
+    "states": {
+      "idle": {
+        "$visual": { "$description": "No toast — not rendered" },
+        "on": { "SHOW": "entering" }
+      },
+
+      "entering": {
+        "$visual": {
+          "$description": "Toast slides in from the right with spring easing",
+          "animation": "slide-in"
+        },
+        "on": { "ANIMATION_END": "visible" }
+      },
+
+      "visible": {
+        "initial": "countdown",
+        "$visual": {
+          "$description": "Toast fully visible. Icon + title + message. Optional action button. Optional progress bar at bottom showing remaining time.",
+          "slots": {
+            "body": [
+              {
+                "type": "group", "name": "toast-content",
+                "layout": "stack-h", "align": "start",
+                "gap": "{spacing.md}",
+                "padding": { "value": "{spacing.lg}" },
+                "children": [
+                  { "$ref": "severity-icon" },
+                  {
+                    "type": "group", "name": "text-content",
+                    "layout": "stack-v", "gap": "{spacing.xs}",
+                    "size": { "width": "fill" },
+                    "children": [
+                      { "type": "text", "bind": "title", "style": { "fontSize": "{font.size.base}", "fontWeight": "{font.weight.medium}", "color": "{color.text.primary}" } },
+                      { "type": "text", "bind": "message", "style": { "fontSize": "{font.size.sm}", "color": "{color.text.secondary}" } }
+                    ]
+                  },
+                  {
+                    "type": "button", "name": "close",
+                    "icon": "X", "iconSize": { "value": 14, "unit": "px" },
+                    "size": { "width": { "value": 24, "unit": "px" }, "height": { "value": 24, "unit": "px" } },
+                    "style": { "color": "{color.text.secondary}", "background": "transparent" },
+                    "interactions": { "hover": { "color": "{color.text.primary}" } },
+                    "command": "dismiss"
+                  }
+                ]
+              }
+            ],
+            "action": [
+              {
+                "$description": "Optional action button (e.g., 'Undo'). Only rendered when context.action is set.",
+                "type": "button", "name": "action",
+                "bind": "actionLabel",
+                "size": { "width": "fill", "height": { "value": 36, "unit": "px" } },
+                "style": {
+                  "fontSize": "{font.size.sm}",
+                  "fontWeight": "{font.weight.medium}",
+                  "color": "{color.info}",
+                  "background": "{color.infoBg}",
+                  "borderTop": "1px solid {color.stroke}"
+                },
+                "command": "executeAction",
+                "conditional": "context.action != null"
+              }
+            ],
+            "progress": [
+              {
+                "$description": "Thin progress bar at the bottom that shrinks to zero over the auto-dismiss duration",
+                "type": "shape", "shape": "rectangle", "name": "progress-bar",
+                "size": { "width": "fill", "height": { "value": 2, "unit": "px" } },
+                "transformOrigin": "left",
+                "dynamic": [
+                  { "property": "background", "expr": ["if", ["==", ["var", "severity"], "success"], "{color.success}",
+                                                       ["if", ["==", ["var", "severity"], "error"], "{color.error}",
+                                                       ["if", ["==", ["var", "severity"], "warning"], "{color.warning}", "{color.info}"]]] }
+                ],
+                "animation": "progress-shrink",
+                "conditional": "context.autoDismiss != null"
+              }
+            ]
+          }
+        },
+        "on": {
+          "DISMISS": "exiting",
+          "ACTION": "exiting",
+          "SWIPE_RIGHT": "exiting"
+        },
+        "states": {
+          "countdown": {
+            "$visual": { "$description": "Progress bar animating, will auto-dismiss when timer expires" },
+            "on": {
+              "TIMER_EXPIRED": "exiting",
+              "HOVER_START": "paused"
+            }
+          },
+          "paused": {
+            "$visual": { "$description": "Mouse hovering — progress bar paused, countdown frozen. Toast stays visible indefinitely while hovered." },
+            "on": {
+              "HOVER_END": "countdown"
+            }
+          }
+        }
+      },
+
+      "exiting": {
+        "$visual": {
+          "$description": "Toast slides out to the right, then removed from DOM",
+          "animation": "slide-out"
+        },
+        "on": { "ANIMATION_END": "idle" }
+      }
+    }
+  }
+}
