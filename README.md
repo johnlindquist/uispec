@@ -21,7 +21,7 @@ UISpec collapses all of this into one artifact. One file. One source of truth. T
 
 ## Format Overview
 
-A `.uispec.json` file has four sections:
+A `.uispec.json` file has up to eight sections:
 
 ```
 ┌──────────────────────────────────────┐
@@ -34,6 +34,17 @@ A `.uispec.json` file has four sections:
 │  $elements    Reusable component     │
 │               specs (buttons,        │
 │               inputs, badges)        │
+├──────────────────────────────────────┤
+│  $context     Typed runtime state    │
+│               (form values, flags,   │
+│               error messages)        │
+├──────────────────────────────────────┤
+│  $events      Typed event catalog    │
+│               (user, network,        │
+│               timer, system)         │
+├──────────────────────────────────────┤
+│  $actions     Pure state mutations   │
+│  $effects     Side-effecting ops     │
 ├──────────────────────────────────────┤
 │  $machine     Statechart where       │
 │               every state has a      │
@@ -50,6 +61,8 @@ Every state in `$machine` carries a `$visual` object with:
 - `keyboard` — key bindings active in this state
 - `onEnter` — focus management and entry animations
 - `autoDismiss` — auto-transition after a duration
+
+States also carry runtime semantics: `entry`/`exit` actions, `always` (transient) transitions, `invoke` for long-running effects, and guarded transitions with inline actions. Elements can declare `binding`, `visibleWhen`, `enabledWhen`, `testId`, and `aria` to connect visual structure to runtime data.
 
 ## What Makes This Different
 
@@ -75,10 +88,10 @@ Other approaches separate behavior from appearance:
 
 JSON is parseable by every language. The format has no TypeScript, no CSS, no framework-specific concepts.
 
-A **compiled** version of any `.uispec.json` resolves all token references and element refs into concrete values. Consuming the compiled format requires ~50 lines of code in any language:
+A **compiled** version of any `.uispec.json` resolves all token references and element refs into concrete values and preserves the full runtime model — context schema, event schema, guarded transitions, entry/exit actions, and verification assertions. Consuming the compiled format requires a small amount of code in any language:
 
-- Transition lookup: `table[state][event]` (1-3 lines)
-- Expression evaluator: recursive match on 10 ops (15-20 lines)
+- Transition lookup with guards: `table[state][event]` + guard evaluation
+- Expression evaluator: recursive match on ~20 ops (25-35 lines)
 - Visual tree walker: recursive match on element types (30-50 lines)
 
 See [spec/COMPILER.md](spec/COMPILER.md) for reference implementations in Python, Rust, and Swift.
@@ -94,6 +107,7 @@ Each example targets different edge cases:
 | [03-toast-notifications](examples/03-toast-notifications.uispec.json) | Ephemeral lifecycle (enter → visible → exit), hover-to-pause countdown, swipe-to-dismiss, action buttons (undo), stacking |
 | [04-form-validation](examples/04-form-validation.uispec.json) | Per-field validation states (pristine/dirty/touched/error/valid), async validation with debounce, character counters, password strength, cross-field validation, network errors |
 | [05-media-player](examples/05-media-player.uispec.json) | Parallel states (playback + volume + display mode), continuous values (seek position, volume), buffering stalls, picture-in-picture, error recovery |
+| [06-data-resource-page](examples/06-data-resource-page.uispec.json) | Route-level loading, data fetch on entry, success/empty/error branches, retry, form edit, optimistic save, rollback on failure, toast on success, focus management, test IDs, aria metadata |
 
 ## For AI Agents
 
@@ -122,16 +136,33 @@ uispec/
     ├── 02-auth-flow.uispec.json
     ├── 03-toast-notifications.uispec.json
     ├── 04-form-validation.uispec.json
-    └── 05-media-player.uispec.json
+    ├── 05-media-player.uispec.json
+    └── 06-data-resource-page.uispec.json
 ```
+
+## Runtime Semantics (v0.2)
+
+UISpec v0.2 adds a normative execution model. The spec now defines:
+
+- **Typed context** (`$context`) — declare every runtime variable with a type and default.
+- **Typed events** (`$events`) — declare every event with source and payload schema.
+- **Actions and effects** (`$actions`, `$effects`) — pure state mutations vs. side-effecting operations.
+- **State lifecycle** — `entry`, `exit`, `always` (transient transitions), `invoke` (long-running effects).
+- **Element data binding** — `binding`, `visibleWhen`, `enabledWhen` connect UI elements to runtime state.
+- **Verification hooks** — `testId` and `aria` enable deterministic testing and accessibility auditing.
+- **Extended expression language** — comparison (`==`, `!=`, `<`, `<=`, `>`, `>=`), boolean (`!`, `&&`, `||`), and utility (`get`, `coalesce`) operators.
+
+The compiled format preserves context/event schemas, guarded transitions, entry/exit behavior, and optional assertions so a renderer or agent can implement the full application from a single artifact.
+
+> **Migration note.** The existing examples (01–05) use some legacy fields (`command`, `bind`, `conditional`, `errorStyle`, `stateStyles`) that predate the v0.2 runtime model. These are documented as aliases in the spec and will be migrated in a future cycle. New examples should use the v0.2 runtime properties exclusively.
 
 ## Status
 
-This is an early exploration. The format is not stable. We're looking for feedback on:
+This is an active specification. The visual layer is maturing, and the runtime semantics layer (v0.2) is newly normative. We're looking for feedback on:
 
-- Does the `$visual` structure capture enough to be unambiguous?
+- Does the runtime model (`$context`, `$events`, actions, effects) cover enough to implement a real app?
 - Are the layout primitives (`stack-h`, `stack-v`, `grid`, `layer`) sufficient?
-- Is the expression language (`lerp`, `pow`, `if`, etc.) too limited or too complex?
+- Is the expression language too limited or too complex?
 - What edge cases are missing from the examples?
 - Would you use this for cross-platform rendering, agent-driven development, design-to-code, or something else?
 

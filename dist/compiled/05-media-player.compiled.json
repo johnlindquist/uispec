@@ -1,0 +1,638 @@
+{
+  "$format": "uispec-compiled",
+  "$version": "0.2",
+  "initial": "loading",
+  "contextSchema": {},
+  "eventSchema": {},
+  "states": {
+    "loading": {
+      "path": "loading",
+      "visual": {
+        "$description": "Centered spinner over black background while media loads",
+        "container": {
+          "layout": "layer",
+          "size": {
+            "width": "fill",
+            "height": "fill"
+          },
+          "background": "{color.bg}"
+        },
+        "slots": {
+          "center": [
+            {
+              "type": "icon",
+              "icon": "Loader2",
+              "size": {
+                "value": 48,
+                "unit": "px"
+              },
+              "color": "{color.text.secondary}",
+              "animation": "spinner"
+            }
+          ]
+        }
+      },
+      "transitions": [
+        {
+          "event": "LOADED",
+          "target": "ready",
+          "guard": null,
+          "actions": []
+        },
+        {
+          "event": "LOAD_ERROR",
+          "target": "error",
+          "guard": null,
+          "actions": []
+        }
+      ],
+      "entry": [],
+      "exit": [],
+      "invoke": []
+    },
+    "ready.paused": {
+      "path": "ready.paused",
+      "visual": {
+        "$description": "Video paused — play button shows Play icon, large centered play overlay visible",
+        "container": {
+          "layout": "layer",
+          "size": {
+            "width": "fill",
+            "height": "fill"
+          },
+          "background": "{color.bg}"
+        },
+        "slots": {
+          "center": [
+            {
+              "type": "button",
+              "name": "big-play",
+              "size": {
+                "width": {
+                  "value": 64,
+                  "unit": "px"
+                },
+                "height": {
+                  "value": 64,
+                  "unit": "px"
+                }
+              },
+              "cornerRadius": "{radius.full}",
+              "style": {
+                "background": "rgba(0,0,0,0.6)",
+                "color": "{color.white}",
+                "iconSize": {
+                  "value": 28,
+                  "unit": "px"
+                }
+              },
+              "icon": "Play",
+              "command": "play"
+            }
+          ]
+        }
+      },
+      "transitions": [
+        {
+          "event": "PLAY",
+          "target": "playing",
+          "guard": null,
+          "actions": []
+        },
+        {
+          "event": "SEEK",
+          "target": "paused",
+          "guard": null,
+          "actions": []
+        }
+      ],
+      "entry": [],
+      "exit": [],
+      "invoke": []
+    },
+    "ready.playing": {
+      "path": "ready.playing",
+      "visual": {
+        "$description": "Video playing — play button shows Pause icon, no center overlay",
+        "container": {
+          "layout": "layer",
+          "size": {
+            "width": "fill",
+            "height": "fill"
+          },
+          "background": "{color.bg}"
+        },
+        "slots": {
+          "center": []
+        }
+      },
+      "transitions": [
+        {
+          "event": "PAUSE",
+          "target": "paused",
+          "guard": null,
+          "actions": []
+        },
+        {
+          "event": "ENDED",
+          "target": "ended",
+          "guard": null,
+          "actions": []
+        },
+        {
+          "event": "BUFFERING",
+          "target": "buffering",
+          "guard": null,
+          "actions": []
+        },
+        {
+          "event": "SEEK",
+          "target": "playing",
+          "guard": null,
+          "actions": []
+        }
+      ],
+      "entry": [],
+      "exit": [],
+      "invoke": []
+    },
+    "ready.buffering": {
+      "path": "ready.buffering",
+      "visual": {
+        "$description": "Playback stalled — center spinner, play button shows Pause icon (still 'playing' intent)",
+        "container": {
+          "layout": "layer",
+          "size": {
+            "width": "fill",
+            "height": "fill"
+          },
+          "background": "{color.bg}"
+        },
+        "slots": {
+          "center": [
+            {
+              "type": "icon",
+              "icon": "Loader2",
+              "size": {
+                "value": 48,
+                "unit": "px"
+              },
+              "color": "{color.text.primary}",
+              "animation": "spinner"
+            }
+          ]
+        }
+      },
+      "transitions": [
+        {
+          "event": "BUFFER_FULL",
+          "target": "playing",
+          "guard": null,
+          "actions": []
+        },
+        {
+          "event": "PAUSE",
+          "target": "paused",
+          "guard": null,
+          "actions": []
+        }
+      ],
+      "entry": [],
+      "exit": [],
+      "invoke": []
+    },
+    "ready.ended": {
+      "path": "ready.ended",
+      "visual": {
+        "$description": "Video ended — center replay button, seek bar at 100%",
+        "container": {
+          "layout": "layer",
+          "size": {
+            "width": "fill",
+            "height": "fill"
+          },
+          "background": "{color.bg}"
+        },
+        "slots": {
+          "center": [
+            {
+              "type": "button",
+              "name": "replay",
+              "size": {
+                "width": {
+                  "value": 64,
+                  "unit": "px"
+                },
+                "height": {
+                  "value": 64,
+                  "unit": "px"
+                }
+              },
+              "cornerRadius": "{radius.full}",
+              "style": {
+                "background": "rgba(0,0,0,0.6)",
+                "color": "{color.white}",
+                "iconSize": {
+                  "value": 28,
+                  "unit": "px"
+                }
+              },
+              "icon": "RotateCcw",
+              "command": "replay"
+            }
+          ]
+        }
+      },
+      "transitions": [
+        {
+          "event": "REPLAY",
+          "target": "playing",
+          "guard": null,
+          "actions": []
+        },
+        {
+          "event": "SEEK",
+          "target": "paused",
+          "guard": null,
+          "actions": []
+        }
+      ],
+      "entry": [],
+      "exit": [],
+      "invoke": []
+    },
+    "ready.controlsVisible": {
+      "path": "ready.controlsVisible",
+      "visual": {
+        "$description": "Controls bar visible with controls-show animation",
+        "container": {
+          "layout": "layer",
+          "size": {
+            "width": "fill",
+            "height": "fill"
+          },
+          "background": "{color.bg}"
+        },
+        "slots": {
+          "video": [
+            {
+              "type": "group",
+              "name": "video-viewport",
+              "layout": "layer",
+              "size": {
+                "width": "fill",
+                "height": "fill"
+              }
+            }
+          ],
+          "controls": [
+            {
+              "type": "group",
+              "name": "controls-bar",
+              "layout": "stack-v",
+              "gap": "{spacing.sm}",
+              "size": {
+                "width": "fill"
+              },
+              "padding": {
+                "horizontal": "{spacing.lg}",
+                "vertical": "{spacing.sm}"
+              },
+              "background": "linear-gradient(transparent, rgba(0,0,0,0.8))",
+              "children": [
+                {
+                  "$ref": "seek-bar"
+                },
+                {
+                  "type": "group",
+                  "name": "transport",
+                  "layout": "stack-h",
+                  "align": "center",
+                  "justify": "space-between",
+                  "children": [
+                    {
+                      "type": "group",
+                      "name": "left-controls",
+                      "layout": "stack-h",
+                      "align": "center",
+                      "gap": "{spacing.xs}",
+                      "children": [
+                        {
+                          "$ref": "transport-button",
+                          "name": "play-pause",
+                          "icon": "Play",
+                          "shortcutKey": "Space"
+                        },
+                        {
+                          "$ref": "transport-button",
+                          "name": "skip-back",
+                          "icon": "SkipBack",
+                          "shortcutKey": "ArrowLeft"
+                        },
+                        {
+                          "$ref": "transport-button",
+                          "name": "skip-forward",
+                          "icon": "SkipForward",
+                          "shortcutKey": "ArrowRight"
+                        },
+                        {
+                          "$ref": "volume-slider"
+                        },
+                        {
+                          "type": "text",
+                          "name": "time-display",
+                          "dynamic": [
+                            {
+                              "property": "content",
+                              "expr": [
+                                "var",
+                                "timeDisplay"
+                              ]
+                            }
+                          ],
+                          "style": {
+                            "fontSize": "{font.size.xs}",
+                            "fontWeight": "{font.weight.regular}",
+                            "color": "{color.text.secondary}",
+                            "fontVariantNumeric": "tabular-nums"
+                          }
+                        }
+                      ]
+                    },
+                    {
+                      "type": "group",
+                      "name": "right-controls",
+                      "layout": "stack-h",
+                      "align": "center",
+                      "gap": "{spacing.xs}",
+                      "children": [
+                        {
+                          "$ref": "transport-button",
+                          "name": "pip",
+                          "icon": "PictureInPicture2",
+                          "shortcutKey": "p"
+                        },
+                        {
+                          "$ref": "transport-button",
+                          "name": "fullscreen",
+                          "icon": "Maximize",
+                          "shortcutKey": "f"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        "animation": "controls-show"
+      },
+      "transitions": [
+        {
+          "event": "IDLE_TIMEOUT",
+          "target": "controlsHidden",
+          "guard": null,
+          "actions": []
+        }
+      ],
+      "entry": [],
+      "exit": [],
+      "invoke": []
+    },
+    "ready.controlsHidden": {
+      "path": "ready.controlsHidden",
+      "visual": {
+        "$description": "Controls bar hidden — cursor hidden, controls-hide animation",
+        "container": {
+          "layout": "layer",
+          "size": {
+            "width": "fill",
+            "height": "fill"
+          },
+          "background": "{color.bg}"
+        },
+        "slots": {
+          "video": [
+            {
+              "type": "group",
+              "name": "video-viewport",
+              "layout": "layer",
+              "size": {
+                "width": "fill",
+                "height": "fill"
+              }
+            }
+          ],
+          "controls": [
+            {
+              "type": "group",
+              "name": "controls-bar",
+              "layout": "stack-v",
+              "gap": "{spacing.sm}",
+              "size": {
+                "width": "fill"
+              },
+              "padding": {
+                "horizontal": "{spacing.lg}",
+                "vertical": "{spacing.sm}"
+              },
+              "background": "linear-gradient(transparent, rgba(0,0,0,0.8))",
+              "children": [
+                {
+                  "$ref": "seek-bar"
+                },
+                {
+                  "type": "group",
+                  "name": "transport",
+                  "layout": "stack-h",
+                  "align": "center",
+                  "justify": "space-between",
+                  "children": [
+                    {
+                      "type": "group",
+                      "name": "left-controls",
+                      "layout": "stack-h",
+                      "align": "center",
+                      "gap": "{spacing.xs}",
+                      "children": [
+                        {
+                          "$ref": "transport-button",
+                          "name": "play-pause",
+                          "icon": "Play",
+                          "shortcutKey": "Space"
+                        },
+                        {
+                          "$ref": "transport-button",
+                          "name": "skip-back",
+                          "icon": "SkipBack",
+                          "shortcutKey": "ArrowLeft"
+                        },
+                        {
+                          "$ref": "transport-button",
+                          "name": "skip-forward",
+                          "icon": "SkipForward",
+                          "shortcutKey": "ArrowRight"
+                        },
+                        {
+                          "$ref": "volume-slider"
+                        },
+                        {
+                          "type": "text",
+                          "name": "time-display",
+                          "dynamic": [
+                            {
+                              "property": "content",
+                              "expr": [
+                                "var",
+                                "timeDisplay"
+                              ]
+                            }
+                          ],
+                          "style": {
+                            "fontSize": "{font.size.xs}",
+                            "fontWeight": "{font.weight.regular}",
+                            "color": "{color.text.secondary}",
+                            "fontVariantNumeric": "tabular-nums"
+                          }
+                        }
+                      ]
+                    },
+                    {
+                      "type": "group",
+                      "name": "right-controls",
+                      "layout": "stack-h",
+                      "align": "center",
+                      "gap": "{spacing.xs}",
+                      "children": [
+                        {
+                          "$ref": "transport-button",
+                          "name": "pip",
+                          "icon": "PictureInPicture2",
+                          "shortcutKey": "p"
+                        },
+                        {
+                          "$ref": "transport-button",
+                          "name": "fullscreen",
+                          "icon": "Maximize",
+                          "shortcutKey": "f"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        "animation": "controls-hide"
+      },
+      "transitions": [
+        {
+          "event": "MOUSE_MOVE",
+          "target": "controlsVisible",
+          "guard": null,
+          "actions": []
+        },
+        {
+          "event": "TAP",
+          "target": "controlsVisible",
+          "guard": null,
+          "actions": []
+        }
+      ],
+      "entry": [],
+      "exit": [],
+      "invoke": []
+    },
+    "error": {
+      "path": "error",
+      "visual": {
+        "$description": "Centered error message with retry button: 'This video could not be played.' AlertTriangle icon.",
+        "container": {
+          "layout": "layer",
+          "size": {
+            "width": "fill",
+            "height": "fill"
+          },
+          "background": "{color.bg}"
+        },
+        "slots": {
+          "center": [
+            {
+              "type": "group",
+              "layout": "stack-v",
+              "align": "center",
+              "gap": "{spacing.md}",
+              "children": [
+                {
+                  "type": "icon",
+                  "icon": "AlertTriangle",
+                  "size": {
+                    "value": 48,
+                    "unit": "px"
+                  },
+                  "color": "{color.error}"
+                },
+                {
+                  "type": "text",
+                  "content": "player.error.title",
+                  "style": {
+                    "fontSize": "{font.size.sm}",
+                    "fontWeight": "{font.weight.medium}",
+                    "color": "{color.text.primary}"
+                  }
+                },
+                {
+                  "type": "text",
+                  "content": "player.error.description",
+                  "style": {
+                    "fontSize": "{font.size.xs}",
+                    "color": "{color.text.secondary}"
+                  }
+                },
+                {
+                  "type": "button",
+                  "name": "retry",
+                  "layout": "stack-h",
+                  "align": "center",
+                  "gap": "{spacing.xs}",
+                  "icon": "RotateCcw",
+                  "size": {
+                    "height": {
+                      "value": 32,
+                      "unit": "px"
+                    }
+                  },
+                  "padding": {
+                    "horizontal": "{spacing.lg}"
+                  },
+                  "cornerRadius": "{radius.sm}",
+                  "style": {
+                    "background": "rgba(255,255,255,0.1)",
+                    "fontSize": "{font.size.sm}",
+                    "color": "{color.text.primary}"
+                  },
+                  "command": "retry"
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "transitions": [
+        {
+          "event": "RETRY",
+          "target": "loading",
+          "guard": null,
+          "actions": []
+        }
+      ],
+      "entry": [],
+      "exit": [],
+      "invoke": []
+    }
+  },
+  "assertions": [],
+  "$source": "examples/05-media-player.uispec.json"
+}

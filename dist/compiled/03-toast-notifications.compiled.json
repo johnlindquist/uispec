@@ -1,0 +1,554 @@
+{
+  "$format": "uispec-compiled",
+  "$version": "0.2",
+  "initial": "idle",
+  "contextSchema": {},
+  "eventSchema": {},
+  "states": {
+    "idle": {
+      "path": "idle",
+      "visual": {
+        "$description": "No toast — not rendered",
+        "container": {
+          "layout": "stack-v",
+          "size": {
+            "width": {
+              "value": 356,
+              "unit": "px"
+            }
+          },
+          "cornerRadius": "{radius.md}",
+          "background": "{color.surface}",
+          "borderWidth": {
+            "value": 1,
+            "unit": "px"
+          },
+          "borderColor": "{color.stroke}",
+          "shadow": [
+            {
+              "x": 0,
+              "y": 4,
+              "blur": 12,
+              "spread": 0,
+              "color": "rgba(0,0,0,0.4)"
+            }
+          ],
+          "overflow": "hidden"
+        }
+      },
+      "transitions": [
+        {
+          "event": "SHOW",
+          "target": "entering",
+          "guard": null,
+          "actions": []
+        }
+      ],
+      "entry": [],
+      "exit": [],
+      "invoke": []
+    },
+    "entering": {
+      "path": "entering",
+      "visual": {
+        "$description": "Toast slides in from the right with spring easing",
+        "container": {
+          "layout": "stack-v",
+          "size": {
+            "width": {
+              "value": 356,
+              "unit": "px"
+            }
+          },
+          "cornerRadius": "{radius.md}",
+          "background": "{color.surface}",
+          "borderWidth": {
+            "value": 1,
+            "unit": "px"
+          },
+          "borderColor": "{color.stroke}",
+          "shadow": [
+            {
+              "x": 0,
+              "y": 4,
+              "blur": 12,
+              "spread": 0,
+              "color": "rgba(0,0,0,0.4)"
+            }
+          ],
+          "overflow": "hidden"
+        },
+        "animation": "slide-in"
+      },
+      "transitions": [
+        {
+          "event": "ANIMATION_END",
+          "target": "visible",
+          "guard": null,
+          "actions": []
+        }
+      ],
+      "entry": [],
+      "exit": [],
+      "invoke": []
+    },
+    "visible.countdown": {
+      "path": "visible.countdown",
+      "visual": {
+        "$description": "Progress bar animating, will auto-dismiss when timer expires",
+        "container": {
+          "layout": "stack-v",
+          "size": {
+            "width": {
+              "value": 356,
+              "unit": "px"
+            }
+          },
+          "cornerRadius": "{radius.md}",
+          "background": "{color.surface}",
+          "borderWidth": {
+            "value": 1,
+            "unit": "px"
+          },
+          "borderColor": "{color.stroke}",
+          "shadow": [
+            {
+              "x": 0,
+              "y": 4,
+              "blur": 12,
+              "spread": 0,
+              "color": "rgba(0,0,0,0.4)"
+            }
+          ],
+          "overflow": "hidden"
+        },
+        "slots": {
+          "body": [
+            {
+              "type": "group",
+              "name": "toast-content",
+              "layout": "stack-h",
+              "align": "start",
+              "gap": "{spacing.md}",
+              "padding": {
+                "value": "{spacing.lg}"
+              },
+              "children": [
+                {
+                  "$ref": "severity-icon"
+                },
+                {
+                  "type": "group",
+                  "name": "text-content",
+                  "layout": "stack-v",
+                  "gap": "{spacing.xs}",
+                  "size": {
+                    "width": "fill"
+                  },
+                  "children": [
+                    {
+                      "type": "text",
+                      "bind": "title",
+                      "style": {
+                        "fontSize": "{font.size.base}",
+                        "fontWeight": "{font.weight.medium}",
+                        "color": "{color.text.primary}"
+                      }
+                    },
+                    {
+                      "type": "text",
+                      "bind": "message",
+                      "style": {
+                        "fontSize": "{font.size.sm}",
+                        "color": "{color.text.secondary}"
+                      }
+                    }
+                  ]
+                },
+                {
+                  "type": "button",
+                  "name": "close",
+                  "icon": "X",
+                  "iconSize": {
+                    "value": 14,
+                    "unit": "px"
+                  },
+                  "size": {
+                    "width": {
+                      "value": 24,
+                      "unit": "px"
+                    },
+                    "height": {
+                      "value": 24,
+                      "unit": "px"
+                    }
+                  },
+                  "style": {
+                    "color": "{color.text.secondary}",
+                    "background": "transparent"
+                  },
+                  "interactions": {
+                    "hover": {
+                      "color": "{color.text.primary}"
+                    }
+                  },
+                  "command": "dismiss"
+                }
+              ]
+            }
+          ],
+          "action": [
+            {
+              "$description": "Optional action button (e.g., 'Undo'). Only rendered when context.action is set.",
+              "type": "button",
+              "name": "action",
+              "bind": "actionLabel",
+              "size": {
+                "width": "fill",
+                "height": {
+                  "value": 36,
+                  "unit": "px"
+                }
+              },
+              "style": {
+                "fontSize": "{font.size.sm}",
+                "fontWeight": "{font.weight.medium}",
+                "color": "{color.info}",
+                "background": "{color.infoBg}",
+                "borderTop": "1px solid {color.stroke}"
+              },
+              "command": "executeAction",
+              "conditional": "context.action != null"
+            }
+          ],
+          "progress": [
+            {
+              "$description": "Thin progress bar at the bottom that shrinks to zero over the auto-dismiss duration",
+              "type": "shape",
+              "shape": "rectangle",
+              "name": "progress-bar",
+              "size": {
+                "width": "fill",
+                "height": {
+                  "value": 2,
+                  "unit": "px"
+                }
+              },
+              "transformOrigin": "left",
+              "dynamic": [
+                {
+                  "property": "background",
+                  "expr": [
+                    "if",
+                    [
+                      "==",
+                      [
+                        "var",
+                        "severity"
+                      ],
+                      "success"
+                    ],
+                    "{color.success}",
+                    [
+                      "if",
+                      [
+                        "==",
+                        [
+                          "var",
+                          "severity"
+                        ],
+                        "error"
+                      ],
+                      "{color.error}",
+                      [
+                        "if",
+                        [
+                          "==",
+                          [
+                            "var",
+                            "severity"
+                          ],
+                          "warning"
+                        ],
+                        "{color.warning}",
+                        "{color.info}"
+                      ]
+                    ]
+                  ]
+                }
+              ],
+              "animation": "progress-shrink",
+              "conditional": "context.autoDismiss != null"
+            }
+          ]
+        }
+      },
+      "transitions": [
+        {
+          "event": "TIMER_EXPIRED",
+          "target": "exiting",
+          "guard": null,
+          "actions": []
+        },
+        {
+          "event": "HOVER_START",
+          "target": "paused",
+          "guard": null,
+          "actions": []
+        }
+      ],
+      "entry": [],
+      "exit": [],
+      "invoke": []
+    },
+    "visible.paused": {
+      "path": "visible.paused",
+      "visual": {
+        "$description": "Mouse hovering — progress bar paused, countdown frozen. Toast stays visible indefinitely while hovered.",
+        "container": {
+          "layout": "stack-v",
+          "size": {
+            "width": {
+              "value": 356,
+              "unit": "px"
+            }
+          },
+          "cornerRadius": "{radius.md}",
+          "background": "{color.surface}",
+          "borderWidth": {
+            "value": 1,
+            "unit": "px"
+          },
+          "borderColor": "{color.stroke}",
+          "shadow": [
+            {
+              "x": 0,
+              "y": 4,
+              "blur": 12,
+              "spread": 0,
+              "color": "rgba(0,0,0,0.4)"
+            }
+          ],
+          "overflow": "hidden"
+        },
+        "slots": {
+          "body": [
+            {
+              "type": "group",
+              "name": "toast-content",
+              "layout": "stack-h",
+              "align": "start",
+              "gap": "{spacing.md}",
+              "padding": {
+                "value": "{spacing.lg}"
+              },
+              "children": [
+                {
+                  "$ref": "severity-icon"
+                },
+                {
+                  "type": "group",
+                  "name": "text-content",
+                  "layout": "stack-v",
+                  "gap": "{spacing.xs}",
+                  "size": {
+                    "width": "fill"
+                  },
+                  "children": [
+                    {
+                      "type": "text",
+                      "bind": "title",
+                      "style": {
+                        "fontSize": "{font.size.base}",
+                        "fontWeight": "{font.weight.medium}",
+                        "color": "{color.text.primary}"
+                      }
+                    },
+                    {
+                      "type": "text",
+                      "bind": "message",
+                      "style": {
+                        "fontSize": "{font.size.sm}",
+                        "color": "{color.text.secondary}"
+                      }
+                    }
+                  ]
+                },
+                {
+                  "type": "button",
+                  "name": "close",
+                  "icon": "X",
+                  "iconSize": {
+                    "value": 14,
+                    "unit": "px"
+                  },
+                  "size": {
+                    "width": {
+                      "value": 24,
+                      "unit": "px"
+                    },
+                    "height": {
+                      "value": 24,
+                      "unit": "px"
+                    }
+                  },
+                  "style": {
+                    "color": "{color.text.secondary}",
+                    "background": "transparent"
+                  },
+                  "interactions": {
+                    "hover": {
+                      "color": "{color.text.primary}"
+                    }
+                  },
+                  "command": "dismiss"
+                }
+              ]
+            }
+          ],
+          "action": [
+            {
+              "$description": "Optional action button (e.g., 'Undo'). Only rendered when context.action is set.",
+              "type": "button",
+              "name": "action",
+              "bind": "actionLabel",
+              "size": {
+                "width": "fill",
+                "height": {
+                  "value": 36,
+                  "unit": "px"
+                }
+              },
+              "style": {
+                "fontSize": "{font.size.sm}",
+                "fontWeight": "{font.weight.medium}",
+                "color": "{color.info}",
+                "background": "{color.infoBg}",
+                "borderTop": "1px solid {color.stroke}"
+              },
+              "command": "executeAction",
+              "conditional": "context.action != null"
+            }
+          ],
+          "progress": [
+            {
+              "$description": "Thin progress bar at the bottom that shrinks to zero over the auto-dismiss duration",
+              "type": "shape",
+              "shape": "rectangle",
+              "name": "progress-bar",
+              "size": {
+                "width": "fill",
+                "height": {
+                  "value": 2,
+                  "unit": "px"
+                }
+              },
+              "transformOrigin": "left",
+              "dynamic": [
+                {
+                  "property": "background",
+                  "expr": [
+                    "if",
+                    [
+                      "==",
+                      [
+                        "var",
+                        "severity"
+                      ],
+                      "success"
+                    ],
+                    "{color.success}",
+                    [
+                      "if",
+                      [
+                        "==",
+                        [
+                          "var",
+                          "severity"
+                        ],
+                        "error"
+                      ],
+                      "{color.error}",
+                      [
+                        "if",
+                        [
+                          "==",
+                          [
+                            "var",
+                            "severity"
+                          ],
+                          "warning"
+                        ],
+                        "{color.warning}",
+                        "{color.info}"
+                      ]
+                    ]
+                  ]
+                }
+              ],
+              "animation": "progress-shrink",
+              "conditional": "context.autoDismiss != null"
+            }
+          ]
+        }
+      },
+      "transitions": [
+        {
+          "event": "HOVER_END",
+          "target": "countdown",
+          "guard": null,
+          "actions": []
+        }
+      ],
+      "entry": [],
+      "exit": [],
+      "invoke": []
+    },
+    "exiting": {
+      "path": "exiting",
+      "visual": {
+        "$description": "Toast slides out to the right, then removed from DOM",
+        "container": {
+          "layout": "stack-v",
+          "size": {
+            "width": {
+              "value": 356,
+              "unit": "px"
+            }
+          },
+          "cornerRadius": "{radius.md}",
+          "background": "{color.surface}",
+          "borderWidth": {
+            "value": 1,
+            "unit": "px"
+          },
+          "borderColor": "{color.stroke}",
+          "shadow": [
+            {
+              "x": 0,
+              "y": 4,
+              "blur": 12,
+              "spread": 0,
+              "color": "rgba(0,0,0,0.4)"
+            }
+          ],
+          "overflow": "hidden"
+        },
+        "animation": "slide-out"
+      },
+      "transitions": [
+        {
+          "event": "ANIMATION_END",
+          "target": "idle",
+          "guard": null,
+          "actions": []
+        }
+      ],
+      "entry": [],
+      "exit": [],
+      "invoke": []
+    }
+  },
+  "assertions": [],
+  "$source": "examples/03-toast-notifications.uispec.json"
+}

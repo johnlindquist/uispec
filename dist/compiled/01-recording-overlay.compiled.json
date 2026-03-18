@@ -1,0 +1,746 @@
+{
+  "$format": "uispec-compiled",
+  "$version": "0.2",
+  "initial": "hidden",
+  "contextSchema": {},
+  "eventSchema": {},
+  "states": {
+    "hidden": {
+      "path": "hidden",
+      "visual": {
+        "$description": "Not rendered — zero presence in the view hierarchy",
+        "container": {
+          "layout": "grid",
+          "columns": [
+            "auto",
+            "1fr",
+            "auto"
+          ],
+          "align": "center",
+          "size": {
+            "width": "fill",
+            "height": {
+              "value": 36,
+              "unit": "px"
+            }
+          },
+          "padding": {
+            "vertical": {
+              "value": 0,
+              "unit": "px"
+            },
+            "horizontal": "{spacing.xl}"
+          },
+          "gap": "{spacing.lg}",
+          "cornerRadius": "{radius.pill}",
+          "background": "{color.surface.glass}",
+          "borderWidth": {
+            "value": 1,
+            "unit": "px"
+          },
+          "borderColor": "{color.stroke}",
+          "backdropBlur": {
+            "value": 6,
+            "unit": "px"
+          },
+          "backdropSaturate": 1.4
+        }
+      },
+      "transitions": [
+        {
+          "event": "SHOW",
+          "target": "recording",
+          "guard": null,
+          "actions": []
+        }
+      ],
+      "entry": [],
+      "exit": [],
+      "invoke": []
+    },
+    "recording.active": {
+      "path": "recording.active",
+      "visual": {
+        "$description": "Live recording — waveform bars animate with mic levels, timer counts up",
+        "container": {
+          "layout": "grid",
+          "columns": [
+            "auto",
+            "1fr",
+            "auto"
+          ],
+          "align": "center",
+          "size": {
+            "width": "fill",
+            "height": {
+              "value": 36,
+              "unit": "px"
+            }
+          },
+          "padding": {
+            "vertical": {
+              "value": 0,
+              "unit": "px"
+            },
+            "horizontal": "{spacing.xl}"
+          },
+          "gap": "{spacing.lg}",
+          "cornerRadius": "{radius.pill}",
+          "background": "{color.surface.glass}",
+          "borderWidth": {
+            "value": 1,
+            "unit": "px"
+          },
+          "borderColor": "{color.stroke}",
+          "backdropBlur": {
+            "value": 6,
+            "unit": "px"
+          },
+          "backdropSaturate": 1.4
+        },
+        "slots": {
+          "left": [
+            {
+              "$ref": "logo"
+            },
+            {
+              "$ref": "timer"
+            }
+          ],
+          "middle": [
+            {
+              "type": "group",
+              "name": "waveform",
+              "layout": "stack-h",
+              "align": "end",
+              "justify": "center",
+              "gap": "{spacing.sm}",
+              "size": {
+                "height": {
+                  "value": 20,
+                  "unit": "px"
+                }
+              },
+              "clip": true,
+              "children": {
+                "type": "bar",
+                "repeat": 9,
+                "size": {
+                  "width": {
+                    "value": 3,
+                    "unit": "px"
+                  },
+                  "minHeight": {
+                    "value": 3,
+                    "unit": "px"
+                  },
+                  "maxHeight": {
+                    "value": 18,
+                    "unit": "px"
+                  }
+                },
+                "cornerRadius": "{radius.xs}",
+                "dynamic": [
+                  {
+                    "property": "height",
+                    "expr": [
+                      "+",
+                      4,
+                      [
+                        "*",
+                        16,
+                        [
+                          "pow",
+                          [
+                            "var",
+                            "level"
+                          ],
+                          0.7
+                        ]
+                      ]
+                    ]
+                  },
+                  {
+                    "property": "opacity",
+                    "expr": [
+                      "max",
+                      0.3,
+                      [
+                        "*",
+                        [
+                          "var",
+                          "level"
+                        ],
+                        1.5
+                      ]
+                    ]
+                  },
+                  {
+                    "property": "background",
+                    "expr": [
+                      "if",
+                      [
+                        "var",
+                        "hasSound"
+                      ],
+                      "{color.active}",
+                      "{color.inactive}"
+                    ]
+                  }
+                ]
+              }
+            }
+          ],
+          "right": [
+            {
+              "$ref": "action-button",
+              "id": "crop",
+              "icon": "Crop",
+              "tooltip": "overlay.captureRegionShortcut"
+            },
+            {
+              "$ref": "action-button",
+              "id": "monitor",
+              "icon": "Monitor",
+              "tooltip": "overlay.captureFullscreenShortcut"
+            },
+            {
+              "$ref": "action-button",
+              "id": "window",
+              "icon": "AppWindow",
+              "tooltip": "overlay.captureWindowShortcut"
+            },
+            {
+              "$ref": "action-button",
+              "id": "variations",
+              "icon": "LayoutGrid",
+              "tooltip": "overlay.variationsTooltip"
+            },
+            {
+              "$ref": "action-button",
+              "id": "chat",
+              "icon": "MessageSquare",
+              "tooltip": "overlay.followUpChatTooltip"
+            },
+            {
+              "$ref": "action-button",
+              "id": "cancel",
+              "icon": "EscapeKey",
+              "tooltip": "overlay.cancelShortcut"
+            }
+          ]
+        }
+      },
+      "transitions": [
+        {
+          "event": "PAUSE",
+          "target": "paused",
+          "guard": null,
+          "actions": []
+        }
+      ],
+      "entry": [],
+      "exit": [],
+      "invoke": []
+    },
+    "recording.paused": {
+      "path": "recording.paused",
+      "visual": {
+        "$description": "Recording paused — timer frozen, waveform replaced by Pause icon + 'Paused' label",
+        "container": {
+          "layout": "grid",
+          "columns": [
+            "auto",
+            "1fr",
+            "auto"
+          ],
+          "align": "center",
+          "size": {
+            "width": "fill",
+            "height": {
+              "value": 36,
+              "unit": "px"
+            }
+          },
+          "padding": {
+            "vertical": {
+              "value": 0,
+              "unit": "px"
+            },
+            "horizontal": "{spacing.xl}"
+          },
+          "gap": "{spacing.lg}",
+          "cornerRadius": "{radius.pill}",
+          "background": "{color.surface.glass}",
+          "borderWidth": {
+            "value": 1,
+            "unit": "px"
+          },
+          "borderColor": "{color.stroke}",
+          "backdropBlur": {
+            "value": 6,
+            "unit": "px"
+          },
+          "backdropSaturate": 1.4
+        },
+        "slots": {
+          "middle": [
+            {
+              "type": "group",
+              "name": "pause-indicator",
+              "layout": "stack-h",
+              "align": "center",
+              "justify": "center",
+              "gap": "{spacing.sm}",
+              "size": {
+                "height": {
+                  "value": 20,
+                  "unit": "px"
+                }
+              },
+              "animation": "paused-fade",
+              "children": [
+                {
+                  "type": "icon",
+                  "icon": "Pause",
+                  "size": {
+                    "value": 10,
+                    "unit": "px"
+                  },
+                  "strokeWidth": 2.5,
+                  "color": "{color.text.dimmed}"
+                },
+                {
+                  "type": "text",
+                  "content": "overlay.paused",
+                  "style": {
+                    "fontSize": "{font.size.base}",
+                    "fontWeight": "{font.weight.medium}",
+                    "letterSpacing": "0.04em",
+                    "color": "{color.text.muted}"
+                  }
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "transitions": [
+        {
+          "event": "RESUME",
+          "target": "active",
+          "guard": null,
+          "actions": []
+        }
+      ],
+      "entry": [],
+      "exit": [],
+      "invoke": []
+    },
+    "transcribing.processing": {
+      "path": "transcribing.processing",
+      "visual": {
+        "$description": "Dots pulsing while transcription model runs",
+        "container": {
+          "layout": "grid",
+          "columns": [
+            "auto",
+            "1fr",
+            "auto"
+          ],
+          "align": "center",
+          "size": {
+            "width": "fill",
+            "height": {
+              "value": 36,
+              "unit": "px"
+            }
+          },
+          "padding": {
+            "vertical": {
+              "value": 0,
+              "unit": "px"
+            },
+            "horizontal": "{spacing.xl}"
+          },
+          "gap": "{spacing.lg}",
+          "cornerRadius": "{radius.pill}",
+          "background": "{color.surface.glass}",
+          "borderWidth": {
+            "value": 1,
+            "unit": "px"
+          },
+          "borderColor": "{color.stroke}",
+          "backdropBlur": {
+            "value": 6,
+            "unit": "px"
+          },
+          "backdropSaturate": 1.4
+        },
+        "slots": {
+          "left": [
+            {
+              "$ref": "logo"
+            }
+          ],
+          "middle": [
+            {
+              "type": "group",
+              "name": "dots",
+              "layout": "stack-h",
+              "gap": "{spacing.sm}",
+              "align": "center",
+              "children": {
+                "type": "shape",
+                "shape": "circle",
+                "repeat": 3,
+                "size": {
+                  "value": 4,
+                  "unit": "px"
+                },
+                "fill": "{color.active}",
+                "animation": "dot-pulse",
+                "animationStagger": {
+                  "value": 200,
+                  "unit": "ms"
+                }
+              }
+            }
+          ],
+          "right": []
+        }
+      },
+      "transitions": [
+        {
+          "event": "NO_SPEECH",
+          "target": "noSpeech",
+          "guard": null,
+          "actions": []
+        },
+        {
+          "event": "ERROR",
+          "target": "error",
+          "guard": null,
+          "actions": []
+        }
+      ],
+      "entry": [],
+      "exit": [],
+      "invoke": []
+    },
+    "transcribing.noSpeech": {
+      "path": "transcribing.noSpeech",
+      "visual": {
+        "$description": "No speech detected — red MicOff badge, auto-dismiss 3s",
+        "container": {
+          "layout": "grid",
+          "columns": [
+            "auto",
+            "1fr",
+            "auto"
+          ],
+          "align": "center",
+          "size": {
+            "width": "fill",
+            "height": {
+              "value": 36,
+              "unit": "px"
+            }
+          },
+          "padding": {
+            "vertical": {
+              "value": 0,
+              "unit": "px"
+            },
+            "horizontal": "{spacing.xl}"
+          },
+          "gap": "{spacing.lg}",
+          "cornerRadius": "{radius.pill}",
+          "background": "{color.surface.glass}",
+          "borderWidth": {
+            "value": 1,
+            "unit": "px"
+          },
+          "borderColor": "{color.stroke}",
+          "backdropBlur": {
+            "value": 6,
+            "unit": "px"
+          },
+          "backdropSaturate": 1.4
+        },
+        "slots": {
+          "left": [
+            {
+              "$ref": "logo"
+            }
+          ],
+          "middle": [
+            {
+              "$ref": "error-badge",
+              "icon": "MicOff",
+              "label": "overlay.noSpeechDetected"
+            }
+          ],
+          "right": []
+        },
+        "autoDismiss": {
+          "value": 3000,
+          "unit": "ms"
+        }
+      },
+      "transitions": [],
+      "entry": [],
+      "exit": [],
+      "invoke": []
+    },
+    "transcribing.error": {
+      "path": "transcribing.error",
+      "visual": {
+        "$description": "Transcription failed — red XCircle badge, auto-dismiss 3s",
+        "container": {
+          "layout": "grid",
+          "columns": [
+            "auto",
+            "1fr",
+            "auto"
+          ],
+          "align": "center",
+          "size": {
+            "width": "fill",
+            "height": {
+              "value": 36,
+              "unit": "px"
+            }
+          },
+          "padding": {
+            "vertical": {
+              "value": 0,
+              "unit": "px"
+            },
+            "horizontal": "{spacing.xl}"
+          },
+          "gap": "{spacing.lg}",
+          "cornerRadius": "{radius.pill}",
+          "background": "{color.surface.glass}",
+          "borderWidth": {
+            "value": 1,
+            "unit": "px"
+          },
+          "borderColor": "{color.stroke}",
+          "backdropBlur": {
+            "value": 6,
+            "unit": "px"
+          },
+          "backdropSaturate": 1.4
+        },
+        "slots": {
+          "left": [
+            {
+              "$ref": "logo"
+            }
+          ],
+          "middle": [
+            {
+              "$ref": "error-badge",
+              "icon": "XCircle",
+              "label": "overlay.transcriptionFailed"
+            }
+          ],
+          "right": []
+        },
+        "autoDismiss": {
+          "value": 3000,
+          "unit": "ms"
+        }
+      },
+      "transitions": [],
+      "entry": [],
+      "exit": [],
+      "invoke": []
+    },
+    "confirming": {
+      "path": "confirming",
+      "visual": {
+        "$description": "Long recording threshold. Two buttons: Enter=abort (red), Escape=resume (green). First button auto-focused.",
+        "container": {
+          "layout": "grid",
+          "columns": [
+            "auto",
+            "1fr",
+            "auto"
+          ],
+          "align": "center",
+          "size": {
+            "width": "fill",
+            "height": {
+              "value": 36,
+              "unit": "px"
+            }
+          },
+          "padding": {
+            "vertical": {
+              "value": 0,
+              "unit": "px"
+            },
+            "horizontal": "{spacing.xl}"
+          },
+          "gap": "{spacing.lg}",
+          "cornerRadius": "{radius.pill}",
+          "background": "{color.surface.glass}",
+          "borderWidth": {
+            "value": 1,
+            "unit": "px"
+          },
+          "borderColor": "{color.stroke}",
+          "backdropBlur": {
+            "value": 6,
+            "unit": "px"
+          },
+          "backdropSaturate": 1.4
+        },
+        "slots": {
+          "left": [
+            {
+              "$ref": "logo"
+            }
+          ],
+          "middle": [
+            {
+              "type": "group",
+              "name": "confirm-actions",
+              "role": "group",
+              "layout": "stack-h",
+              "align": "center",
+              "justify": "center",
+              "gap": "{spacing.xxl}",
+              "children": [
+                {
+                  "type": "button",
+                  "name": "abort",
+                  "command": "confirmStop",
+                  "layout": "stack-h",
+                  "align": "center",
+                  "gap": "{spacing.md}",
+                  "cornerRadius": "{radius.md}",
+                  "interactions": {
+                    "hover": {
+                      "background": "{color.fill.hover}"
+                    },
+                    "focus": {
+                      "outlineWidth": {
+                        "value": 2,
+                        "unit": "px"
+                      },
+                      "outlineColor": "{color.focusRing}"
+                    }
+                  },
+                  "children": [
+                    {
+                      "type": "text",
+                      "content": "overlay.abortKey",
+                      "style": {
+                        "fontSize": "{font.size.lg}",
+                        "fontWeight": "{font.weight.regular}",
+                        "color": "{color.text.muted}",
+                        "background": "{color.fill.hover}",
+                        "borderWidth": {
+                          "value": 1,
+                          "unit": "px"
+                        },
+                        "borderColor": "{color.border.medium}",
+                        "cornerRadius": "{radius.md}"
+                      }
+                    },
+                    {
+                      "type": "text",
+                      "content": "overlay.abort",
+                      "style": {
+                        "fontSize": "{font.size.lg}",
+                        "fontWeight": "{font.weight.medium}",
+                        "color": "{color.inactive}"
+                      }
+                    }
+                  ]
+                },
+                {
+                  "type": "button",
+                  "name": "resume",
+                  "command": "dismissConfirmation",
+                  "layout": "stack-h",
+                  "align": "center",
+                  "gap": "{spacing.md}",
+                  "cornerRadius": "{radius.md}",
+                  "interactions": {
+                    "hover": {
+                      "background": "{color.fill.hover}"
+                    },
+                    "focus": {
+                      "outlineWidth": {
+                        "value": 2,
+                        "unit": "px"
+                      },
+                      "outlineColor": "{color.focusRing}"
+                    }
+                  },
+                  "children": [
+                    {
+                      "type": "text",
+                      "content": "overlay.resumeKey",
+                      "style": {
+                        "fontSize": "{font.size.lg}",
+                        "fontWeight": "{font.weight.regular}",
+                        "color": "{color.text.muted}",
+                        "background": "{color.fill.hover}",
+                        "borderWidth": {
+                          "value": 1,
+                          "unit": "px"
+                        },
+                        "borderColor": "{color.border.medium}",
+                        "cornerRadius": "{radius.md}"
+                      }
+                    },
+                    {
+                      "type": "text",
+                      "content": "overlay.resume",
+                      "style": {
+                        "fontSize": "{font.size.lg}",
+                        "fontWeight": "{font.weight.medium}",
+                        "color": "{color.active}"
+                      }
+                    }
+                  ]
+                }
+              ]
+            }
+          ],
+          "right": []
+        },
+        "onEnter": {
+          "focus": "abort"
+        },
+        "keyboard": {
+          "Escape": "DISMISS"
+        }
+      },
+      "transitions": [
+        {
+          "event": "CONFIRM_ABORT",
+          "target": "hidden",
+          "guard": null,
+          "actions": []
+        },
+        {
+          "event": "DISMISS",
+          "target": "recording",
+          "guard": null,
+          "actions": []
+        }
+      ],
+      "entry": [],
+      "exit": [],
+      "invoke": []
+    }
+  },
+  "assertions": [],
+  "$source": "examples/01-recording-overlay.uispec.json"
+}

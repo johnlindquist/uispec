@@ -1,0 +1,253 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://uispec.dev/0.2/schema.json",
+  "title": "UISpec",
+  "type": "object",
+  "required": ["$schema", "$description", "$machine"],
+  "properties": {
+    "$schema": { "type": "string" },
+    "$description": { "type": "string" },
+    "$tokens": { "type": "object" },
+    "$animations": { "type": "object" },
+    "$elements": {
+      "type": "object",
+      "additionalProperties": { "$ref": "#/$defs/element" }
+    },
+    "$context": {
+      "type": "object",
+      "additionalProperties": { "$ref": "#/$defs/contextField" }
+    },
+    "$events": {
+      "type": "object",
+      "additionalProperties": { "$ref": "#/$defs/eventSpec" }
+    },
+    "$actions": {
+      "type": "object",
+      "additionalProperties": { "$ref": "#/$defs/actionSpec" }
+    },
+    "$effects": {
+      "type": "object",
+      "additionalProperties": { "$ref": "#/$defs/effectSpec" }
+    },
+    "$machine": { "$ref": "#/$defs/machine" }
+  },
+  "$defs": {
+    "scalar": {
+      "type": ["string", "number", "boolean", "null"]
+    },
+    "expr": {
+      "anyOf": [
+        { "$ref": "#/$defs/scalar" },
+        {
+          "type": "array",
+          "minItems": 1
+        }
+      ]
+    },
+    "contextField": {
+      "type": "object",
+      "required": ["type"],
+      "properties": {
+        "type": {
+          "enum": ["string", "number", "boolean", "object", "array", "null"]
+        },
+        "default": {},
+        "required": { "type": "boolean" },
+        "$description": { "type": "string" }
+      },
+      "additionalProperties": false
+    },
+    "eventSpec": {
+      "type": "object",
+      "properties": {
+        "source": {
+          "enum": ["user", "system", "timer", "network", "storage"]
+        },
+        "payload": {
+          "type": "object",
+          "additionalProperties": { "$ref": "#/$defs/contextField" }
+        }
+      },
+      "additionalProperties": false
+    },
+    "actionSpec": {
+      "type": "object",
+      "required": ["kind"],
+      "properties": {
+        "kind": {
+          "enum": ["assign", "emit", "log"]
+        },
+        "path": { "type": "string" },
+        "value": { "$ref": "#/$defs/expr" },
+        "event": { "type": "string" },
+        "level": { "enum": ["debug", "info", "warn", "error"] },
+        "message": { "type": "string" }
+      },
+      "additionalProperties": true
+    },
+    "effectSpec": {
+      "type": "object",
+      "required": ["kind"],
+      "properties": {
+        "kind": {
+          "enum": ["http", "timer.start", "timer.cancel", "navigate", "focus", "storage.write"]
+        },
+        "id": { "type": "string" },
+        "ms": { "type": "number" },
+        "event": { "type": "string" },
+        "to": { "type": "string" },
+        "target": { "type": "string" },
+        "request": { "type": "string" }
+      },
+      "additionalProperties": true
+    },
+    "transition": {
+      "oneOf": [
+        { "type": "string" },
+        {
+          "type": "object",
+          "required": ["target"],
+          "properties": {
+            "target": { "type": "string" },
+            "guard": { "$ref": "#/$defs/expr" },
+            "actions": {
+              "type": "array",
+              "items": { "$ref": "#/$defs/actionSpec" }
+            }
+          },
+          "additionalProperties": false
+        }
+      ]
+    },
+    "visual": {
+      "type": "object",
+      "properties": {
+        "$description": { "type": "string" },
+        "container": { "type": "object" },
+        "slots": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "array",
+            "items": { "$ref": "#/$defs/element" }
+          }
+        },
+        "keyboard": { "type": "object" },
+        "onEnter": { "type": "object" },
+        "autoDismiss": {},
+        "animation": { "type": "string" }
+      },
+      "additionalProperties": true
+    },
+    "stateNode": {
+      "type": "object",
+      "properties": {
+        "initial": { "type": "string" },
+        "on": {
+          "type": "object",
+          "additionalProperties": { "$ref": "#/$defs/transition" }
+        },
+        "always": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/transition" }
+        },
+        "entry": {
+          "type": "array",
+          "items": {
+            "oneOf": [
+              { "$ref": "#/$defs/actionSpec" },
+              { "$ref": "#/$defs/effectSpec" }
+            ]
+          }
+        },
+        "exit": {
+          "type": "array",
+          "items": {
+            "oneOf": [
+              { "$ref": "#/$defs/actionSpec" },
+              { "$ref": "#/$defs/effectSpec" }
+            ]
+          }
+        },
+        "invoke": {
+          "type": "array",
+          "items": { "type": "object" }
+        },
+        "states": {
+          "type": "object",
+          "additionalProperties": { "$ref": "#/$defs/stateNode" }
+        },
+        "$visual": { "$ref": "#/$defs/visual" }
+      },
+      "additionalProperties": false
+    },
+    "machine": {
+      "type": "object",
+      "required": ["id", "initial", "states"],
+      "properties": {
+        "id": { "type": "string" },
+        "initial": { "type": "string" },
+        "$visual": { "$ref": "#/$defs/visual" },
+        "states": {
+          "type": "object",
+          "additionalProperties": { "$ref": "#/$defs/stateNode" }
+        }
+      },
+      "additionalProperties": false
+    },
+    "element": {
+      "type": "object",
+      "properties": {
+        "$ref": { "type": "string" },
+        "$description": { "type": "string" },
+        "type": { "type": "string" },
+        "name": { "type": "string" },
+        "binding": { "type": "object" },
+        "visibleWhen": { "$ref": "#/$defs/expr" },
+        "enabledWhen": { "$ref": "#/$defs/expr" },
+        "onPress": {
+          "type": "array",
+          "items": {
+            "oneOf": [
+              { "$ref": "#/$defs/actionSpec" },
+              { "$ref": "#/$defs/effectSpec" }
+            ]
+          }
+        },
+        "onChange": {
+          "type": "array",
+          "items": {
+            "oneOf": [
+              { "$ref": "#/$defs/actionSpec" },
+              { "$ref": "#/$defs/effectSpec" }
+            ]
+          }
+        },
+        "children": {
+          "oneOf": [
+            {
+              "type": "array",
+              "items": { "$ref": "#/$defs/element" }
+            },
+            { "$ref": "#/$defs/element" }
+          ]
+        },
+        "dynamic": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["property", "expr"],
+            "properties": {
+              "property": { "type": "string" },
+              "expr": { "$ref": "#/$defs/expr" },
+              "unit": { "type": "string" }
+            },
+            "additionalProperties": false
+          }
+        },
+        "testId": { "type": "string" },
+        "aria": { "type": "object" }
+      },
+      "additionalProperties": true
+    }
+  }
+}

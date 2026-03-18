@@ -1,0 +1,1171 @@
+{
+  "$format": "uispec-compiled",
+  "$version": "0.2",
+  "initial": "loading",
+  "contextSchema": {
+    "resourceId": {
+      "type": "string",
+      "required": true,
+      "$description": "URL or route param identifying the resource"
+    },
+    "loading": {
+      "type": "boolean",
+      "default": true,
+      "$description": "Whether the initial load is in progress"
+    },
+    "resource": {
+      "type": "object",
+      "default": null,
+      "$description": "The loaded resource object"
+    },
+    "snapshot": {
+      "type": "object",
+      "default": null,
+      "$description": "Pre-save snapshot for rollback on failure"
+    },
+    "draftName": {
+      "type": "string",
+      "default": "",
+      "$description": "Editable name field value"
+    },
+    "draftEmail": {
+      "type": "string",
+      "default": "",
+      "$description": "Editable email field value"
+    },
+    "saving": {
+      "type": "boolean",
+      "default": false,
+      "$description": "Whether a save request is in flight"
+    },
+    "saveError": {
+      "type": "string",
+      "default": null,
+      "$description": "Error message from a failed save"
+    },
+    "loadError": {
+      "type": "string",
+      "default": null,
+      "$description": "Error message from a failed load"
+    },
+    "toastMessage": {
+      "type": "string",
+      "default": null,
+      "$description": "Current toast text"
+    },
+    "toastVariant": {
+      "type": "string",
+      "default": "success",
+      "$description": "Toast style: success or error"
+    }
+  },
+  "eventSchema": {
+    "LOAD_OK": {
+      "source": "network",
+      "payload": {
+        "resource": {
+          "type": "object"
+        }
+      }
+    },
+    "LOAD_EMPTY": {
+      "source": "network",
+      "payload": {}
+    },
+    "LOAD_ERROR": {
+      "source": "network",
+      "payload": {
+        "message": {
+          "type": "string"
+        }
+      }
+    },
+    "RETRY": {
+      "source": "user",
+      "payload": {}
+    },
+    "EDIT": {
+      "source": "user",
+      "payload": {}
+    },
+    "CANCEL_EDIT": {
+      "source": "user",
+      "payload": {}
+    },
+    "FIELD_CHANGED": {
+      "source": "user",
+      "payload": {
+        "name": {
+          "type": "string"
+        },
+        "value": {
+          "type": "string"
+        }
+      }
+    },
+    "SAVE": {
+      "source": "user",
+      "payload": {}
+    },
+    "SAVE_OK": {
+      "source": "network",
+      "payload": {
+        "resource": {
+          "type": "object"
+        }
+      }
+    },
+    "SAVE_ERROR": {
+      "source": "network",
+      "payload": {
+        "message": {
+          "type": "string"
+        }
+      }
+    },
+    "TOAST_DISMISS": {
+      "source": "timer",
+      "payload": {}
+    },
+    "CREATE": {
+      "source": "user",
+      "payload": {}
+    }
+  },
+  "states": {
+    "loading": {
+      "path": "loading",
+      "visual": {
+        "$description": "Skeleton placeholder rows while data loads",
+        "container": {
+          "layout": "stack-v",
+          "size": {
+            "width": "fill",
+            "minHeight": "fill"
+          },
+          "padding": {
+            "horizontal": "{spacing.xl}",
+            "vertical": "{spacing.lg}"
+          },
+          "background": "{color.bg}"
+        },
+        "animation": "fade-in",
+        "slots": {
+          "content": [
+            {
+              "type": "group",
+              "name": "skeleton-container",
+              "layout": "stack-v",
+              "gap": "{spacing.md}",
+              "testId": "loading-skeleton",
+              "aria": {
+                "role": "status",
+                "label": "Loading resource",
+                "busy": true
+              },
+              "children": [
+                {
+                  "$ref": "skeleton-row"
+                },
+                {
+                  "$ref": "skeleton-row"
+                },
+                {
+                  "$ref": "skeleton-row"
+                },
+                {
+                  "$ref": "skeleton-row"
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "transitions": [
+        {
+          "event": "LOAD_OK",
+          "target": "ready",
+          "guard": null,
+          "actions": [
+            {
+              "kind": "assign",
+              "path": "context.resource",
+              "value": [
+                "var",
+                "event.resource"
+              ]
+            },
+            {
+              "kind": "assign",
+              "path": "context.loading",
+              "value": false
+            },
+            {
+              "kind": "log",
+              "level": "info",
+              "message": "resource_load_ok"
+            }
+          ]
+        },
+        {
+          "event": "LOAD_EMPTY",
+          "target": "empty",
+          "guard": null,
+          "actions": [
+            {
+              "kind": "assign",
+              "path": "context.loading",
+              "value": false
+            },
+            {
+              "kind": "log",
+              "level": "info",
+              "message": "resource_load_empty"
+            }
+          ]
+        },
+        {
+          "event": "LOAD_ERROR",
+          "target": "error",
+          "guard": null,
+          "actions": [
+            {
+              "kind": "assign",
+              "path": "context.loadError",
+              "value": [
+                "var",
+                "event.message"
+              ]
+            },
+            {
+              "kind": "assign",
+              "path": "context.loading",
+              "value": false
+            },
+            {
+              "kind": "log",
+              "level": "error",
+              "message": "resource_load_error"
+            }
+          ]
+        }
+      ],
+      "entry": [
+        {
+          "kind": "http",
+          "request": "loadResource"
+        },
+        {
+          "kind": "log",
+          "level": "info",
+          "message": "resource_load_start"
+        }
+      ],
+      "exit": [],
+      "invoke": []
+    },
+    "ready.viewing": {
+      "path": "ready.viewing",
+      "visual": {
+        "$description": "Read-only display of resource fields with an Edit button",
+        "container": {
+          "layout": "stack-v",
+          "size": {
+            "width": "fill",
+            "minHeight": "fill"
+          },
+          "padding": {
+            "horizontal": "{spacing.xl}",
+            "vertical": "{spacing.lg}"
+          },
+          "background": "{color.bg}"
+        },
+        "animation": "fade-in",
+        "slots": {
+          "content": [
+            {
+              "type": "group",
+              "name": "resource-display",
+              "layout": "stack-v",
+              "gap": "{spacing.lg}",
+              "testId": "resource-display",
+              "children": [
+                {
+                  "type": "text",
+                  "name": "resource-name",
+                  "binding": {
+                    "content": [
+                      "var",
+                      "context.draftName"
+                    ]
+                  },
+                  "style": {
+                    "fontSize": "{font.size.xl}",
+                    "fontWeight": "{font.weight.bold}",
+                    "color": "{color.text.primary}"
+                  },
+                  "testId": "resource-name",
+                  "aria": {
+                    "role": "heading",
+                    "level": 1
+                  }
+                },
+                {
+                  "type": "text",
+                  "name": "resource-email",
+                  "binding": {
+                    "content": [
+                      "var",
+                      "context.draftEmail"
+                    ]
+                  },
+                  "style": {
+                    "fontSize": "{font.size.base}",
+                    "color": "{color.text.secondary}"
+                  },
+                  "testId": "resource-email"
+                },
+                {
+                  "type": "button",
+                  "name": "edit-button",
+                  "content": "Edit",
+                  "onPress": [
+                    {
+                      "kind": "emit",
+                      "event": "EDIT"
+                    }
+                  ],
+                  "style": {
+                    "background": "{color.accent}",
+                    "color": "{color.bg}",
+                    "cornerRadius": "{radius.sm}",
+                    "padding": {
+                      "horizontal": "{spacing.md}",
+                      "vertical": "{spacing.sm}"
+                    }
+                  },
+                  "testId": "resource-edit-btn",
+                  "aria": {
+                    "label": "Edit resource"
+                  }
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "transitions": [
+        {
+          "event": "EDIT",
+          "target": "editing",
+          "guard": null,
+          "actions": [
+            {
+              "kind": "assign",
+              "path": "context.snapshot",
+              "value": [
+                "var",
+                "context.resource"
+              ]
+            },
+            {
+              "kind": "log",
+              "level": "info",
+              "message": "resource_edit_start"
+            }
+          ]
+        }
+      ],
+      "entry": [],
+      "exit": [],
+      "invoke": []
+    },
+    "ready.editing": {
+      "path": "ready.editing",
+      "visual": {
+        "$description": "Editable form with name and email fields, Save and Cancel buttons",
+        "container": {
+          "layout": "stack-v",
+          "size": {
+            "width": "fill",
+            "minHeight": "fill"
+          },
+          "padding": {
+            "horizontal": "{spacing.xl}",
+            "vertical": "{spacing.lg}"
+          },
+          "background": "{color.bg}"
+        },
+        "animation": "fade-in",
+        "slots": {
+          "content": [
+            {
+              "type": "group",
+              "name": "edit-form",
+              "layout": "stack-v",
+              "gap": "{spacing.md}",
+              "testId": "resource-edit-form",
+              "aria": {
+                "role": "form",
+                "label": "Edit resource"
+              },
+              "children": [
+                {
+                  "$ref": "field-group",
+                  "name": "draftName",
+                  "label": "Name",
+                  "testId": "edit-name",
+                  "aria": {
+                    "label": "Resource name"
+                  }
+                },
+                {
+                  "$ref": "field-group",
+                  "name": "draftEmail",
+                  "label": "Email",
+                  "testId": "edit-email",
+                  "aria": {
+                    "label": "Resource email"
+                  }
+                },
+                {
+                  "type": "group",
+                  "name": "form-actions",
+                  "layout": "stack-h",
+                  "gap": "{spacing.sm}",
+                  "children": [
+                    {
+                      "type": "button",
+                      "name": "save-button",
+                      "content": "Save",
+                      "onPress": [
+                        {
+                          "kind": "emit",
+                          "event": "SAVE"
+                        }
+                      ],
+                      "enabledWhen": [
+                        "==",
+                        [
+                          "var",
+                          "context.saving"
+                        ],
+                        false
+                      ],
+                      "style": {
+                        "background": "{color.accent}",
+                        "color": "{color.bg}",
+                        "cornerRadius": "{radius.sm}",
+                        "padding": {
+                          "horizontal": "{spacing.md}",
+                          "vertical": "{spacing.sm}"
+                        }
+                      },
+                      "testId": "resource-save-btn",
+                      "aria": {
+                        "label": "Save changes"
+                      }
+                    },
+                    {
+                      "type": "button",
+                      "name": "cancel-button",
+                      "content": "Cancel",
+                      "onPress": [
+                        {
+                          "kind": "emit",
+                          "event": "CANCEL_EDIT"
+                        }
+                      ],
+                      "enabledWhen": [
+                        "==",
+                        [
+                          "var",
+                          "context.saving"
+                        ],
+                        false
+                      ],
+                      "style": {
+                        "background": "transparent",
+                        "color": "{color.text.secondary}",
+                        "borderWidth": {
+                          "value": 1,
+                          "unit": "px"
+                        },
+                        "borderColor": "{color.stroke}",
+                        "cornerRadius": "{radius.sm}",
+                        "padding": {
+                          "horizontal": "{spacing.md}",
+                          "vertical": "{spacing.sm}"
+                        }
+                      },
+                      "testId": "resource-cancel-btn",
+                      "aria": {
+                        "label": "Cancel editing"
+                      }
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "transitions": [
+        {
+          "event": "FIELD_CHANGED",
+          "target": "editing",
+          "guard": null,
+          "actions": [
+            {
+              "kind": "log",
+              "level": "info",
+              "message": "resource_field_changed"
+            }
+          ]
+        },
+        {
+          "event": "SAVE",
+          "target": "saving",
+          "guard": null,
+          "actions": [
+            {
+              "kind": "assign",
+              "path": "context.saving",
+              "value": true
+            },
+            {
+              "kind": "assign",
+              "path": "context.saveError",
+              "value": null
+            },
+            {
+              "kind": "log",
+              "level": "info",
+              "message": "resource_save_start"
+            }
+          ]
+        },
+        {
+          "event": "CANCEL_EDIT",
+          "target": "viewing",
+          "guard": null,
+          "actions": [
+            {
+              "kind": "assign",
+              "path": "context.resource",
+              "value": [
+                "var",
+                "context.snapshot"
+              ]
+            },
+            {
+              "kind": "assign",
+              "path": "context.snapshot",
+              "value": null
+            },
+            {
+              "kind": "log",
+              "level": "info",
+              "message": "resource_edit_cancel"
+            }
+          ]
+        }
+      ],
+      "entry": [],
+      "exit": [],
+      "invoke": []
+    },
+    "ready.saving": {
+      "path": "ready.saving",
+      "visual": {
+        "$description": "Save button shows spinner; form fields disabled; optimistic UI shows updated values",
+        "container": {
+          "layout": "stack-v",
+          "size": {
+            "width": "fill",
+            "minHeight": "fill"
+          },
+          "padding": {
+            "horizontal": "{spacing.xl}",
+            "vertical": "{spacing.lg}"
+          },
+          "background": "{color.bg}"
+        },
+        "animation": "fade-in"
+      },
+      "transitions": [
+        {
+          "event": "SAVE_OK",
+          "target": "viewing",
+          "guard": null,
+          "actions": [
+            {
+              "kind": "assign",
+              "path": "context.resource",
+              "value": [
+                "var",
+                "event.resource"
+              ]
+            },
+            {
+              "kind": "assign",
+              "path": "context.saving",
+              "value": false
+            },
+            {
+              "kind": "assign",
+              "path": "context.snapshot",
+              "value": null
+            },
+            {
+              "kind": "assign",
+              "path": "context.toastMessage",
+              "value": "Changes saved successfully"
+            },
+            {
+              "kind": "assign",
+              "path": "context.toastVariant",
+              "value": "success"
+            },
+            {
+              "kind": "log",
+              "level": "info",
+              "message": "resource_save_ok"
+            }
+          ]
+        },
+        {
+          "event": "SAVE_ERROR",
+          "target": "saveError",
+          "guard": null,
+          "actions": [
+            {
+              "kind": "assign",
+              "path": "context.resource",
+              "value": [
+                "var",
+                "context.snapshot"
+              ]
+            },
+            {
+              "kind": "assign",
+              "path": "context.saving",
+              "value": false
+            },
+            {
+              "kind": "assign",
+              "path": "context.saveError",
+              "value": [
+                "var",
+                "event.message"
+              ]
+            },
+            {
+              "kind": "log",
+              "level": "error",
+              "message": "resource_save_error"
+            }
+          ]
+        }
+      ],
+      "entry": [
+        {
+          "kind": "http",
+          "request": "saveResource"
+        }
+      ],
+      "exit": [],
+      "invoke": []
+    },
+    "ready.saveError": {
+      "path": "ready.saveError",
+      "visual": {
+        "$description": "Inline error banner above form, fields preserved with pre-save values (rollback applied), retry available",
+        "container": {
+          "layout": "stack-v",
+          "size": {
+            "width": "fill",
+            "minHeight": "fill"
+          },
+          "padding": {
+            "horizontal": "{spacing.xl}",
+            "vertical": "{spacing.lg}"
+          },
+          "background": "{color.bg}"
+        },
+        "animation": "fade-in",
+        "slots": {
+          "content": [
+            {
+              "type": "group",
+              "name": "save-error-container",
+              "layout": "stack-v",
+              "gap": "{spacing.md}",
+              "testId": "save-error-container",
+              "children": [
+                {
+                  "type": "group",
+                  "name": "error-banner",
+                  "layout": "stack-h",
+                  "align": "center",
+                  "gap": "{spacing.sm}",
+                  "padding": {
+                    "horizontal": "{spacing.md}",
+                    "vertical": "{spacing.sm}"
+                  },
+                  "background": "{color.errorBg}",
+                  "cornerRadius": "{radius.sm}",
+                  "testId": "save-error-banner",
+                  "aria": {
+                    "role": "alert"
+                  },
+                  "children": [
+                    {
+                      "type": "icon",
+                      "icon": "AlertCircle",
+                      "size": {
+                        "value": 16,
+                        "unit": "px"
+                      },
+                      "color": "{color.error}"
+                    },
+                    {
+                      "type": "text",
+                      "binding": {
+                        "content": [
+                          "var",
+                          "context.saveError"
+                        ]
+                      },
+                      "style": {
+                        "fontSize": "{font.size.sm}",
+                        "color": "{color.error}"
+                      }
+                    }
+                  ]
+                },
+                {
+                  "type": "button",
+                  "name": "retry-save",
+                  "content": "Retry Save",
+                  "onPress": [
+                    {
+                      "kind": "emit",
+                      "event": "SAVE"
+                    }
+                  ],
+                  "style": {
+                    "background": "{color.accent}",
+                    "color": "{color.bg}",
+                    "cornerRadius": "{radius.sm}",
+                    "padding": {
+                      "horizontal": "{spacing.md}",
+                      "vertical": "{spacing.sm}"
+                    }
+                  },
+                  "testId": "save-retry-btn",
+                  "aria": {
+                    "label": "Retry saving changes"
+                  }
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "transitions": [
+        {
+          "event": "SAVE",
+          "target": "saving",
+          "guard": null,
+          "actions": [
+            {
+              "kind": "assign",
+              "path": "context.saving",
+              "value": true
+            },
+            {
+              "kind": "assign",
+              "path": "context.saveError",
+              "value": null
+            }
+          ]
+        },
+        {
+          "event": "CANCEL_EDIT",
+          "target": "viewing",
+          "guard": null,
+          "actions": [
+            {
+              "kind": "assign",
+              "path": "context.saveError",
+              "value": null
+            },
+            {
+              "kind": "assign",
+              "path": "context.snapshot",
+              "value": null
+            }
+          ]
+        }
+      ],
+      "entry": [],
+      "exit": [],
+      "invoke": []
+    },
+    "empty": {
+      "path": "empty",
+      "visual": {
+        "$description": "Zero state — illustration, explanatory text, and a create CTA",
+        "container": {
+          "layout": "stack-v",
+          "size": {
+            "width": "fill",
+            "minHeight": "fill"
+          },
+          "padding": {
+            "horizontal": "{spacing.xl}",
+            "vertical": "{spacing.lg}"
+          },
+          "background": "{color.bg}"
+        },
+        "animation": "fade-in",
+        "slots": {
+          "content": [
+            {
+              "type": "group",
+              "name": "empty-state",
+              "layout": "stack-v",
+              "align": "center",
+              "gap": "{spacing.lg}",
+              "padding": {
+                "vertical": "{spacing.xl}"
+              },
+              "testId": "empty-state",
+              "aria": {
+                "role": "status"
+              },
+              "children": [
+                {
+                  "type": "icon",
+                  "icon": "Inbox",
+                  "size": {
+                    "value": 64,
+                    "unit": "px"
+                  },
+                  "color": "{color.text.muted}"
+                },
+                {
+                  "type": "text",
+                  "content": "No resources found",
+                  "style": {
+                    "fontSize": "{font.size.lg}",
+                    "fontWeight": "{font.weight.medium}",
+                    "color": "{color.text.primary}"
+                  },
+                  "testId": "empty-title"
+                },
+                {
+                  "type": "text",
+                  "content": "Create your first resource to get started.",
+                  "style": {
+                    "fontSize": "{font.size.base}",
+                    "color": "{color.text.secondary}"
+                  },
+                  "testId": "empty-description"
+                },
+                {
+                  "type": "button",
+                  "name": "create-button",
+                  "content": "Create Resource",
+                  "onPress": [
+                    {
+                      "kind": "emit",
+                      "event": "CREATE"
+                    }
+                  ],
+                  "style": {
+                    "background": "{color.accent}",
+                    "color": "{color.bg}",
+                    "cornerRadius": "{radius.sm}",
+                    "padding": {
+                      "horizontal": "{spacing.lg}",
+                      "vertical": "{spacing.sm}"
+                    }
+                  },
+                  "testId": "empty-create-btn",
+                  "aria": {
+                    "label": "Create new resource"
+                  }
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "transitions": [
+        {
+          "event": "CREATE",
+          "target": "loading",
+          "guard": null,
+          "actions": [
+            {
+              "kind": "assign",
+              "path": "context.loading",
+              "value": true
+            },
+            {
+              "kind": "log",
+              "level": "info",
+              "message": "resource_create_start"
+            }
+          ]
+        }
+      ],
+      "entry": [],
+      "exit": [],
+      "invoke": []
+    },
+    "error": {
+      "path": "error",
+      "visual": {
+        "$description": "Load error with retry button",
+        "container": {
+          "layout": "stack-v",
+          "size": {
+            "width": "fill",
+            "minHeight": "fill"
+          },
+          "padding": {
+            "horizontal": "{spacing.xl}",
+            "vertical": "{spacing.lg}"
+          },
+          "background": "{color.bg}"
+        },
+        "animation": "fade-in",
+        "slots": {
+          "content": [
+            {
+              "type": "group",
+              "name": "error-state",
+              "layout": "stack-v",
+              "align": "center",
+              "gap": "{spacing.lg}",
+              "padding": {
+                "vertical": "{spacing.xl}"
+              },
+              "testId": "error-state",
+              "aria": {
+                "role": "alert"
+              },
+              "children": [
+                {
+                  "type": "icon",
+                  "icon": "AlertTriangle",
+                  "size": {
+                    "value": 48,
+                    "unit": "px"
+                  },
+                  "color": "{color.error}"
+                },
+                {
+                  "type": "text",
+                  "content": "Failed to load resource",
+                  "style": {
+                    "fontSize": "{font.size.lg}",
+                    "fontWeight": "{font.weight.medium}",
+                    "color": "{color.text.primary}"
+                  },
+                  "testId": "error-title"
+                },
+                {
+                  "type": "text",
+                  "binding": {
+                    "content": [
+                      "var",
+                      "context.loadError"
+                    ]
+                  },
+                  "style": {
+                    "fontSize": "{font.size.base}",
+                    "color": "{color.text.secondary}"
+                  },
+                  "testId": "error-message"
+                },
+                {
+                  "type": "button",
+                  "name": "retry-button",
+                  "content": "Retry",
+                  "onPress": [
+                    {
+                      "kind": "emit",
+                      "event": "RETRY"
+                    }
+                  ],
+                  "style": {
+                    "background": "{color.accent}",
+                    "color": "{color.bg}",
+                    "cornerRadius": "{radius.sm}",
+                    "padding": {
+                      "horizontal": "{spacing.lg}",
+                      "vertical": "{spacing.sm}"
+                    }
+                  },
+                  "testId": "error-retry-btn",
+                  "aria": {
+                    "label": "Retry loading resource"
+                  }
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "transitions": [
+        {
+          "event": "RETRY",
+          "target": "loading",
+          "guard": null,
+          "actions": [
+            {
+              "kind": "assign",
+              "path": "context.loading",
+              "value": true
+            },
+            {
+              "kind": "assign",
+              "path": "context.loadError",
+              "value": null
+            },
+            {
+              "kind": "log",
+              "level": "info",
+              "message": "resource_retry"
+            }
+          ]
+        }
+      ],
+      "entry": [],
+      "exit": [],
+      "invoke": []
+    }
+  },
+  "assertions": [
+    {
+      "id": "field-input-exists",
+      "type": "element-present",
+      "testId": "field-input"
+    },
+    {
+      "id": "toast-exists",
+      "type": "element-present",
+      "testId": "toast"
+    },
+    {
+      "id": "loading-skeleton-exists",
+      "type": "element-present",
+      "testId": "loading-skeleton"
+    },
+    {
+      "id": "resource-display-exists",
+      "type": "element-present",
+      "testId": "resource-display"
+    },
+    {
+      "id": "resource-name-exists",
+      "type": "element-present",
+      "testId": "resource-name"
+    },
+    {
+      "id": "resource-email-exists",
+      "type": "element-present",
+      "testId": "resource-email"
+    },
+    {
+      "id": "resource-edit-btn-exists",
+      "type": "element-present",
+      "testId": "resource-edit-btn"
+    },
+    {
+      "id": "resource-edit-form-exists",
+      "type": "element-present",
+      "testId": "resource-edit-form"
+    },
+    {
+      "id": "edit-name-exists",
+      "type": "element-present",
+      "testId": "edit-name"
+    },
+    {
+      "id": "edit-email-exists",
+      "type": "element-present",
+      "testId": "edit-email"
+    },
+    {
+      "id": "resource-save-btn-exists",
+      "type": "element-present",
+      "testId": "resource-save-btn"
+    },
+    {
+      "id": "resource-cancel-btn-exists",
+      "type": "element-present",
+      "testId": "resource-cancel-btn"
+    },
+    {
+      "id": "save-error-container-exists",
+      "type": "element-present",
+      "testId": "save-error-container"
+    },
+    {
+      "id": "save-error-banner-exists",
+      "type": "element-present",
+      "testId": "save-error-banner"
+    },
+    {
+      "id": "save-retry-btn-exists",
+      "type": "element-present",
+      "testId": "save-retry-btn"
+    },
+    {
+      "id": "empty-state-exists",
+      "type": "element-present",
+      "testId": "empty-state"
+    },
+    {
+      "id": "empty-title-exists",
+      "type": "element-present",
+      "testId": "empty-title"
+    },
+    {
+      "id": "empty-description-exists",
+      "type": "element-present",
+      "testId": "empty-description"
+    },
+    {
+      "id": "empty-create-btn-exists",
+      "type": "element-present",
+      "testId": "empty-create-btn"
+    },
+    {
+      "id": "error-state-exists",
+      "type": "element-present",
+      "testId": "error-state"
+    },
+    {
+      "id": "error-title-exists",
+      "type": "element-present",
+      "testId": "error-title"
+    },
+    {
+      "id": "error-message-exists",
+      "type": "element-present",
+      "testId": "error-message"
+    },
+    {
+      "id": "error-retry-btn-exists",
+      "type": "element-present",
+      "testId": "error-retry-btn"
+    }
+  ],
+  "$source": "examples/06-data-resource-page.uispec.json"
+}

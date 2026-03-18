@@ -1,0 +1,3200 @@
+{
+  "$format": "uispec-compiled",
+  "$version": "0.2",
+  "initial": "signIn",
+  "contextSchema": {
+    "email": {
+      "type": "string",
+      "default": "",
+      "$description": "Current email field value"
+    },
+    "password": {
+      "type": "string",
+      "default": "",
+      "$description": "Current password field value"
+    },
+    "name": {
+      "type": "string",
+      "default": "",
+      "$description": "User display name (sign-up only)"
+    },
+    "confirmPassword": {
+      "type": "string",
+      "default": "",
+      "$description": "Confirm password field (sign-up only)"
+    },
+    "submitting": {
+      "type": "boolean",
+      "default": false,
+      "$description": "Whether a submit request is in flight"
+    },
+    "errorMessage": {
+      "type": "string",
+      "default": null,
+      "$description": "Most recent error message from the server"
+    },
+    "retryAfterSeconds": {
+      "type": "number",
+      "default": 0,
+      "$description": "Countdown seconds when rate-limited"
+    },
+    "oauthProvider": {
+      "type": "string",
+      "default": null,
+      "$description": "Which OAuth provider is being used"
+    },
+    "userId": {
+      "type": "string",
+      "default": null,
+      "$description": "Authenticated user ID after success"
+    }
+  },
+  "eventSchema": {
+    "FIELD_CHANGED": {
+      "source": "user",
+      "payload": {
+        "name": {
+          "type": "string"
+        },
+        "value": {
+          "type": "string"
+        }
+      }
+    },
+    "SUBMIT": {
+      "source": "user",
+      "payload": {}
+    },
+    "SUBMIT_EMAIL": {
+      "source": "user",
+      "payload": {}
+    },
+    "SUCCESS": {
+      "source": "network",
+      "payload": {
+        "userId": {
+          "type": "string"
+        }
+      }
+    },
+    "INVALID_CREDENTIALS": {
+      "source": "network",
+      "payload": {
+        "message": {
+          "type": "string"
+        }
+      }
+    },
+    "RATE_LIMITED": {
+      "source": "network",
+      "payload": {
+        "retryAfterSeconds": {
+          "type": "number"
+        }
+      }
+    },
+    "NEEDS_VERIFICATION": {
+      "source": "network",
+      "payload": {}
+    },
+    "COOLDOWN_EXPIRED": {
+      "source": "timer",
+      "payload": {}
+    },
+    "EDIT": {
+      "source": "user",
+      "payload": {}
+    },
+    "OAUTH_GITHUB": {
+      "source": "user",
+      "payload": {}
+    },
+    "OAUTH_GOOGLE": {
+      "source": "user",
+      "payload": {}
+    },
+    "OAUTH_SUCCESS": {
+      "source": "network",
+      "payload": {
+        "userId": {
+          "type": "string"
+        }
+      }
+    },
+    "OAUTH_ERROR": {
+      "source": "network",
+      "payload": {
+        "message": {
+          "type": "string"
+        }
+      }
+    },
+    "OAUTH_CANCEL": {
+      "source": "user",
+      "payload": {}
+    },
+    "GO_TO_SIGNUP": {
+      "source": "user",
+      "payload": {}
+    },
+    "GO_TO_SIGNIN": {
+      "source": "user",
+      "payload": {}
+    },
+    "VALIDATE_FIELD": {
+      "source": "user",
+      "payload": {
+        "name": {
+          "type": "string"
+        }
+      }
+    },
+    "VALID": {
+      "source": "system",
+      "payload": {}
+    },
+    "EMAIL_TAKEN": {
+      "source": "network",
+      "payload": {
+        "message": {
+          "type": "string"
+        }
+      }
+    },
+    "WEAK_PASSWORD": {
+      "source": "network",
+      "payload": {
+        "message": {
+          "type": "string"
+        }
+      }
+    },
+    "VERIFIED": {
+      "source": "network",
+      "payload": {}
+    },
+    "RESEND": {
+      "source": "user",
+      "payload": {}
+    },
+    "RESENT": {
+      "source": "network",
+      "payload": {}
+    },
+    "RESEND_FAILED": {
+      "source": "network",
+      "payload": {
+        "message": {
+          "type": "string"
+        }
+      }
+    },
+    "BACK": {
+      "source": "user",
+      "payload": {}
+    }
+  },
+  "states": {
+    "signIn.idle": {
+      "path": "signIn.idle",
+      "visual": {
+        "$description": "Form ready for input",
+        "container": {
+          "layout": "layer",
+          "align": "center",
+          "justify": "center",
+          "size": {
+            "width": "fill",
+            "height": "fill"
+          },
+          "background": "{color.bg}"
+        },
+        "animation": "page-enter",
+        "slots": {
+          "content": [
+            {
+              "type": "group",
+              "name": "auth-card",
+              "layout": "stack-v",
+              "align": "stretch",
+              "gap": "{spacing.lg}",
+              "size": {
+                "width": {
+                  "value": 360,
+                  "unit": "px"
+                }
+              },
+              "padding": {
+                "value": "{spacing.xl}"
+              },
+              "background": "{color.surface}",
+              "cornerRadius": "{radius.lg}",
+              "borderWidth": {
+                "value": 1,
+                "unit": "px"
+              },
+              "borderColor": "{color.stroke}",
+              "testId": "auth-card",
+              "children": [
+                {
+                  "type": "text",
+                  "content": "auth.signIn.title",
+                  "style": {
+                    "fontSize": "{font.size.xl}",
+                    "fontWeight": "{font.weight.bold}",
+                    "color": "{color.text.primary}"
+                  },
+                  "testId": "auth-title",
+                  "aria": {
+                    "role": "heading",
+                    "level": 1
+                  }
+                },
+                {
+                  "$ref": "text-input",
+                  "name": "email",
+                  "label": "auth.email",
+                  "placeholder": "auth.emailPlaceholder",
+                  "inputType": "email",
+                  "testId": "auth-email",
+                  "aria": {
+                    "label": "Email address",
+                    "required": true
+                  }
+                },
+                {
+                  "$ref": "text-input",
+                  "name": "password",
+                  "label": "auth.password",
+                  "placeholder": "auth.passwordPlaceholder",
+                  "inputType": "password",
+                  "testId": "auth-password",
+                  "aria": {
+                    "label": "Password",
+                    "required": true
+                  }
+                },
+                {
+                  "$ref": "primary-button",
+                  "label": "auth.signIn.submit",
+                  "onPress": [
+                    {
+                      "kind": "emit",
+                      "event": "SUBMIT_EMAIL"
+                    }
+                  ],
+                  "enabledWhen": [
+                    "==",
+                    [
+                      "var",
+                      "context.submitting"
+                    ],
+                    false
+                  ],
+                  "testId": "auth-submit",
+                  "aria": {
+                    "label": "Sign in"
+                  }
+                },
+                {
+                  "type": "group",
+                  "name": "divider",
+                  "layout": "stack-h",
+                  "align": "center",
+                  "gap": "{spacing.md}",
+                  "children": [
+                    {
+                      "type": "shape",
+                      "shape": "rectangle",
+                      "size": {
+                        "width": "fill",
+                        "height": {
+                          "value": 1,
+                          "unit": "px"
+                        }
+                      },
+                      "fill": "{color.stroke}"
+                    },
+                    {
+                      "type": "text",
+                      "content": "auth.or",
+                      "style": {
+                        "fontSize": "{font.size.sm}",
+                        "color": "{color.text.muted}"
+                      }
+                    },
+                    {
+                      "type": "shape",
+                      "shape": "rectangle",
+                      "size": {
+                        "width": "fill",
+                        "height": {
+                          "value": 1,
+                          "unit": "px"
+                        }
+                      },
+                      "fill": "{color.stroke}"
+                    }
+                  ]
+                },
+                {
+                  "$ref": "oauth-button",
+                  "provider": "github",
+                  "icon": "Github",
+                  "label": "auth.continueWithGithub",
+                  "onPress": [
+                    {
+                      "kind": "emit",
+                      "event": "OAUTH_GITHUB"
+                    }
+                  ],
+                  "testId": "auth-oauth-github"
+                },
+                {
+                  "$ref": "oauth-button",
+                  "provider": "google",
+                  "icon": "Google",
+                  "label": "auth.continueWithGoogle",
+                  "onPress": [
+                    {
+                      "kind": "emit",
+                      "event": "OAUTH_GOOGLE"
+                    }
+                  ],
+                  "testId": "auth-oauth-google"
+                },
+                {
+                  "type": "text",
+                  "content": "auth.noAccount",
+                  "style": {
+                    "fontSize": "{font.size.sm}",
+                    "color": "{color.text.muted}",
+                    "textAlign": "center"
+                  },
+                  "children": [
+                    {
+                      "type": "text",
+                      "content": "auth.signUpLink",
+                      "style": {
+                        "color": "{color.accent}"
+                      },
+                      "onPress": [
+                        {
+                          "kind": "emit",
+                          "event": "GO_TO_SIGNUP"
+                        }
+                      ],
+                      "testId": "auth-signup-link"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "transitions": [
+        {
+          "event": "SUBMIT",
+          "target": "loading",
+          "guard": null,
+          "actions": [
+            {
+              "kind": "assign",
+              "path": "context.submitting",
+              "value": true
+            }
+          ]
+        }
+      ],
+      "entry": [
+        {
+          "kind": "assign",
+          "path": "context.submitting",
+          "value": false
+        },
+        {
+          "kind": "assign",
+          "path": "context.errorMessage",
+          "value": null
+        }
+      ],
+      "exit": [],
+      "invoke": []
+    },
+    "signIn.loading": {
+      "path": "signIn.loading",
+      "visual": {
+        "$description": "Submit button shows spinner, inputs disabled",
+        "container": {
+          "layout": "layer",
+          "align": "center",
+          "justify": "center",
+          "size": {
+            "width": "fill",
+            "height": "fill"
+          },
+          "background": "{color.bg}"
+        },
+        "animation": "page-enter",
+        "slots": {
+          "content": [
+            {
+              "$description": "Same card but submit button shows spinner animation and all inputs are disabled"
+            }
+          ]
+        }
+      },
+      "transitions": [
+        {
+          "event": "SUCCESS",
+          "target": "success",
+          "guard": null,
+          "actions": []
+        },
+        {
+          "event": "INVALID_CREDENTIALS",
+          "target": "error",
+          "guard": null,
+          "actions": [
+            {
+              "kind": "assign",
+              "path": "context.errorMessage",
+              "value": [
+                "var",
+                "event.message"
+              ]
+            },
+            {
+              "kind": "assign",
+              "path": "context.submitting",
+              "value": false
+            }
+          ]
+        },
+        {
+          "event": "RATE_LIMITED",
+          "target": "rateLimited",
+          "guard": null,
+          "actions": [
+            {
+              "kind": "assign",
+              "path": "context.retryAfterSeconds",
+              "value": [
+                "var",
+                "event.retryAfterSeconds"
+              ]
+            },
+            {
+              "kind": "assign",
+              "path": "context.submitting",
+              "value": false
+            }
+          ]
+        },
+        {
+          "event": "NEEDS_VERIFICATION",
+          "target": "needsVerification",
+          "guard": null,
+          "actions": []
+        }
+      ],
+      "entry": [
+        {
+          "kind": "http",
+          "request": "signIn"
+        },
+        {
+          "kind": "log",
+          "level": "info",
+          "message": "auth_signin_submit"
+        }
+      ],
+      "exit": [],
+      "invoke": []
+    },
+    "signIn.error": {
+      "path": "signIn.error",
+      "visual": {
+        "$description": "Card shakes, error message appears below password field",
+        "container": {
+          "layout": "layer",
+          "align": "center",
+          "justify": "center",
+          "size": {
+            "width": "fill",
+            "height": "fill"
+          },
+          "background": "{color.bg}"
+        },
+        "animation": "shake",
+        "slots": {
+          "content": [
+            {
+              "type": "group",
+              "name": "auth-card",
+              "layout": "stack-v",
+              "align": "stretch",
+              "gap": "{spacing.lg}",
+              "size": {
+                "width": {
+                  "value": 360,
+                  "unit": "px"
+                }
+              },
+              "padding": {
+                "value": "{spacing.xl}"
+              },
+              "background": "{color.surface}",
+              "cornerRadius": "{radius.lg}",
+              "borderWidth": {
+                "value": 1,
+                "unit": "px"
+              },
+              "borderColor": "{color.stroke}",
+              "testId": "auth-card",
+              "children": [
+                {
+                  "type": "text",
+                  "content": "auth.signIn.title",
+                  "style": {
+                    "fontSize": "{font.size.xl}",
+                    "fontWeight": "{font.weight.bold}",
+                    "color": "{color.text.primary}"
+                  },
+                  "testId": "auth-title",
+                  "aria": {
+                    "role": "heading",
+                    "level": 1
+                  }
+                },
+                {
+                  "$ref": "text-input",
+                  "name": "email",
+                  "label": "auth.email",
+                  "placeholder": "auth.emailPlaceholder",
+                  "inputType": "email",
+                  "testId": "auth-email",
+                  "aria": {
+                    "label": "Email address",
+                    "required": true
+                  }
+                },
+                {
+                  "$ref": "text-input",
+                  "name": "password",
+                  "label": "auth.password",
+                  "placeholder": "auth.passwordPlaceholder",
+                  "inputType": "password",
+                  "testId": "auth-password",
+                  "aria": {
+                    "label": "Password",
+                    "required": true
+                  }
+                },
+                {
+                  "$ref": "primary-button",
+                  "label": "auth.signIn.submit",
+                  "onPress": [
+                    {
+                      "kind": "emit",
+                      "event": "SUBMIT_EMAIL"
+                    }
+                  ],
+                  "enabledWhen": [
+                    "==",
+                    [
+                      "var",
+                      "context.submitting"
+                    ],
+                    false
+                  ],
+                  "testId": "auth-submit",
+                  "aria": {
+                    "label": "Sign in"
+                  }
+                },
+                {
+                  "type": "group",
+                  "name": "divider",
+                  "layout": "stack-h",
+                  "align": "center",
+                  "gap": "{spacing.md}",
+                  "children": [
+                    {
+                      "type": "shape",
+                      "shape": "rectangle",
+                      "size": {
+                        "width": "fill",
+                        "height": {
+                          "value": 1,
+                          "unit": "px"
+                        }
+                      },
+                      "fill": "{color.stroke}"
+                    },
+                    {
+                      "type": "text",
+                      "content": "auth.or",
+                      "style": {
+                        "fontSize": "{font.size.sm}",
+                        "color": "{color.text.muted}"
+                      }
+                    },
+                    {
+                      "type": "shape",
+                      "shape": "rectangle",
+                      "size": {
+                        "width": "fill",
+                        "height": {
+                          "value": 1,
+                          "unit": "px"
+                        }
+                      },
+                      "fill": "{color.stroke}"
+                    }
+                  ]
+                },
+                {
+                  "$ref": "oauth-button",
+                  "provider": "github",
+                  "icon": "Github",
+                  "label": "auth.continueWithGithub",
+                  "onPress": [
+                    {
+                      "kind": "emit",
+                      "event": "OAUTH_GITHUB"
+                    }
+                  ],
+                  "testId": "auth-oauth-github"
+                },
+                {
+                  "$ref": "oauth-button",
+                  "provider": "google",
+                  "icon": "Google",
+                  "label": "auth.continueWithGoogle",
+                  "onPress": [
+                    {
+                      "kind": "emit",
+                      "event": "OAUTH_GOOGLE"
+                    }
+                  ],
+                  "testId": "auth-oauth-google"
+                },
+                {
+                  "type": "text",
+                  "content": "auth.noAccount",
+                  "style": {
+                    "fontSize": "{font.size.sm}",
+                    "color": "{color.text.muted}",
+                    "textAlign": "center"
+                  },
+                  "children": [
+                    {
+                      "type": "text",
+                      "content": "auth.signUpLink",
+                      "style": {
+                        "color": "{color.accent}"
+                      },
+                      "onPress": [
+                        {
+                          "kind": "emit",
+                          "event": "GO_TO_SIGNUP"
+                        }
+                      ],
+                      "testId": "auth-signup-link"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "transitions": [
+        {
+          "event": "SUBMIT",
+          "target": "loading",
+          "guard": null,
+          "actions": [
+            {
+              "kind": "assign",
+              "path": "context.submitting",
+              "value": true
+            }
+          ]
+        },
+        {
+          "event": "EDIT",
+          "target": "idle",
+          "guard": null,
+          "actions": []
+        }
+      ],
+      "entry": [],
+      "exit": [],
+      "invoke": []
+    },
+    "signIn.rateLimited": {
+      "path": "signIn.rateLimited",
+      "visual": {
+        "$description": "Error message: 'Too many attempts. Try again in {retryAfterSeconds}s.' Submit button disabled with countdown.",
+        "container": {
+          "layout": "layer",
+          "align": "center",
+          "justify": "center",
+          "size": {
+            "width": "fill",
+            "height": "fill"
+          },
+          "background": "{color.bg}"
+        },
+        "animation": "page-enter",
+        "slots": {
+          "content": [
+            {
+              "type": "group",
+              "name": "auth-card",
+              "layout": "stack-v",
+              "align": "stretch",
+              "gap": "{spacing.lg}",
+              "size": {
+                "width": {
+                  "value": 360,
+                  "unit": "px"
+                }
+              },
+              "padding": {
+                "value": "{spacing.xl}"
+              },
+              "background": "{color.surface}",
+              "cornerRadius": "{radius.lg}",
+              "borderWidth": {
+                "value": 1,
+                "unit": "px"
+              },
+              "borderColor": "{color.stroke}",
+              "testId": "auth-card",
+              "children": [
+                {
+                  "type": "text",
+                  "content": "auth.signIn.title",
+                  "style": {
+                    "fontSize": "{font.size.xl}",
+                    "fontWeight": "{font.weight.bold}",
+                    "color": "{color.text.primary}"
+                  },
+                  "testId": "auth-title",
+                  "aria": {
+                    "role": "heading",
+                    "level": 1
+                  }
+                },
+                {
+                  "$ref": "text-input",
+                  "name": "email",
+                  "label": "auth.email",
+                  "placeholder": "auth.emailPlaceholder",
+                  "inputType": "email",
+                  "testId": "auth-email",
+                  "aria": {
+                    "label": "Email address",
+                    "required": true
+                  }
+                },
+                {
+                  "$ref": "text-input",
+                  "name": "password",
+                  "label": "auth.password",
+                  "placeholder": "auth.passwordPlaceholder",
+                  "inputType": "password",
+                  "testId": "auth-password",
+                  "aria": {
+                    "label": "Password",
+                    "required": true
+                  }
+                },
+                {
+                  "$ref": "primary-button",
+                  "label": "auth.signIn.submit",
+                  "onPress": [
+                    {
+                      "kind": "emit",
+                      "event": "SUBMIT_EMAIL"
+                    }
+                  ],
+                  "enabledWhen": [
+                    "==",
+                    [
+                      "var",
+                      "context.submitting"
+                    ],
+                    false
+                  ],
+                  "testId": "auth-submit",
+                  "aria": {
+                    "label": "Sign in"
+                  }
+                },
+                {
+                  "type": "group",
+                  "name": "divider",
+                  "layout": "stack-h",
+                  "align": "center",
+                  "gap": "{spacing.md}",
+                  "children": [
+                    {
+                      "type": "shape",
+                      "shape": "rectangle",
+                      "size": {
+                        "width": "fill",
+                        "height": {
+                          "value": 1,
+                          "unit": "px"
+                        }
+                      },
+                      "fill": "{color.stroke}"
+                    },
+                    {
+                      "type": "text",
+                      "content": "auth.or",
+                      "style": {
+                        "fontSize": "{font.size.sm}",
+                        "color": "{color.text.muted}"
+                      }
+                    },
+                    {
+                      "type": "shape",
+                      "shape": "rectangle",
+                      "size": {
+                        "width": "fill",
+                        "height": {
+                          "value": 1,
+                          "unit": "px"
+                        }
+                      },
+                      "fill": "{color.stroke}"
+                    }
+                  ]
+                },
+                {
+                  "$ref": "oauth-button",
+                  "provider": "github",
+                  "icon": "Github",
+                  "label": "auth.continueWithGithub",
+                  "onPress": [
+                    {
+                      "kind": "emit",
+                      "event": "OAUTH_GITHUB"
+                    }
+                  ],
+                  "testId": "auth-oauth-github"
+                },
+                {
+                  "$ref": "oauth-button",
+                  "provider": "google",
+                  "icon": "Google",
+                  "label": "auth.continueWithGoogle",
+                  "onPress": [
+                    {
+                      "kind": "emit",
+                      "event": "OAUTH_GOOGLE"
+                    }
+                  ],
+                  "testId": "auth-oauth-google"
+                },
+                {
+                  "type": "text",
+                  "content": "auth.noAccount",
+                  "style": {
+                    "fontSize": "{font.size.sm}",
+                    "color": "{color.text.muted}",
+                    "textAlign": "center"
+                  },
+                  "children": [
+                    {
+                      "type": "text",
+                      "content": "auth.signUpLink",
+                      "style": {
+                        "color": "{color.accent}"
+                      },
+                      "onPress": [
+                        {
+                          "kind": "emit",
+                          "event": "GO_TO_SIGNUP"
+                        }
+                      ],
+                      "testId": "auth-signup-link"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "transitions": [
+        {
+          "event": "COOLDOWN_EXPIRED",
+          "target": "idle",
+          "guard": null,
+          "actions": []
+        }
+      ],
+      "entry": [
+        {
+          "kind": "timer.start",
+          "id": "cooldown",
+          "ms": 1000,
+          "event": "COOLDOWN_EXPIRED"
+        },
+        {
+          "kind": "log",
+          "level": "info",
+          "message": "auth_rate_limited"
+        }
+      ],
+      "exit": [],
+      "invoke": []
+    },
+    "signIn.needsVerification": {
+      "path": "signIn.needsVerification",
+      "visual": {
+        "$description": "Transitions to emailVerification state",
+        "container": {
+          "layout": "layer",
+          "align": "center",
+          "justify": "center",
+          "size": {
+            "width": "fill",
+            "height": "fill"
+          },
+          "background": "{color.bg}"
+        },
+        "animation": "page-enter",
+        "slots": {
+          "content": [
+            {
+              "type": "group",
+              "name": "auth-card",
+              "layout": "stack-v",
+              "align": "stretch",
+              "gap": "{spacing.lg}",
+              "size": {
+                "width": {
+                  "value": 360,
+                  "unit": "px"
+                }
+              },
+              "padding": {
+                "value": "{spacing.xl}"
+              },
+              "background": "{color.surface}",
+              "cornerRadius": "{radius.lg}",
+              "borderWidth": {
+                "value": 1,
+                "unit": "px"
+              },
+              "borderColor": "{color.stroke}",
+              "testId": "auth-card",
+              "children": [
+                {
+                  "type": "text",
+                  "content": "auth.signIn.title",
+                  "style": {
+                    "fontSize": "{font.size.xl}",
+                    "fontWeight": "{font.weight.bold}",
+                    "color": "{color.text.primary}"
+                  },
+                  "testId": "auth-title",
+                  "aria": {
+                    "role": "heading",
+                    "level": 1
+                  }
+                },
+                {
+                  "$ref": "text-input",
+                  "name": "email",
+                  "label": "auth.email",
+                  "placeholder": "auth.emailPlaceholder",
+                  "inputType": "email",
+                  "testId": "auth-email",
+                  "aria": {
+                    "label": "Email address",
+                    "required": true
+                  }
+                },
+                {
+                  "$ref": "text-input",
+                  "name": "password",
+                  "label": "auth.password",
+                  "placeholder": "auth.passwordPlaceholder",
+                  "inputType": "password",
+                  "testId": "auth-password",
+                  "aria": {
+                    "label": "Password",
+                    "required": true
+                  }
+                },
+                {
+                  "$ref": "primary-button",
+                  "label": "auth.signIn.submit",
+                  "onPress": [
+                    {
+                      "kind": "emit",
+                      "event": "SUBMIT_EMAIL"
+                    }
+                  ],
+                  "enabledWhen": [
+                    "==",
+                    [
+                      "var",
+                      "context.submitting"
+                    ],
+                    false
+                  ],
+                  "testId": "auth-submit",
+                  "aria": {
+                    "label": "Sign in"
+                  }
+                },
+                {
+                  "type": "group",
+                  "name": "divider",
+                  "layout": "stack-h",
+                  "align": "center",
+                  "gap": "{spacing.md}",
+                  "children": [
+                    {
+                      "type": "shape",
+                      "shape": "rectangle",
+                      "size": {
+                        "width": "fill",
+                        "height": {
+                          "value": 1,
+                          "unit": "px"
+                        }
+                      },
+                      "fill": "{color.stroke}"
+                    },
+                    {
+                      "type": "text",
+                      "content": "auth.or",
+                      "style": {
+                        "fontSize": "{font.size.sm}",
+                        "color": "{color.text.muted}"
+                      }
+                    },
+                    {
+                      "type": "shape",
+                      "shape": "rectangle",
+                      "size": {
+                        "width": "fill",
+                        "height": {
+                          "value": 1,
+                          "unit": "px"
+                        }
+                      },
+                      "fill": "{color.stroke}"
+                    }
+                  ]
+                },
+                {
+                  "$ref": "oauth-button",
+                  "provider": "github",
+                  "icon": "Github",
+                  "label": "auth.continueWithGithub",
+                  "onPress": [
+                    {
+                      "kind": "emit",
+                      "event": "OAUTH_GITHUB"
+                    }
+                  ],
+                  "testId": "auth-oauth-github"
+                },
+                {
+                  "$ref": "oauth-button",
+                  "provider": "google",
+                  "icon": "Google",
+                  "label": "auth.continueWithGoogle",
+                  "onPress": [
+                    {
+                      "kind": "emit",
+                      "event": "OAUTH_GOOGLE"
+                    }
+                  ],
+                  "testId": "auth-oauth-google"
+                },
+                {
+                  "type": "text",
+                  "content": "auth.noAccount",
+                  "style": {
+                    "fontSize": "{font.size.sm}",
+                    "color": "{color.text.muted}",
+                    "textAlign": "center"
+                  },
+                  "children": [
+                    {
+                      "type": "text",
+                      "content": "auth.signUpLink",
+                      "style": {
+                        "color": "{color.accent}"
+                      },
+                      "onPress": [
+                        {
+                          "kind": "emit",
+                          "event": "GO_TO_SIGNUP"
+                        }
+                      ],
+                      "testId": "auth-signup-link"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "transitions": [
+        {
+          "event": null,
+          "target": "emailVerification",
+          "guard": true,
+          "actions": []
+        }
+      ],
+      "entry": [],
+      "exit": [],
+      "invoke": []
+    },
+    "signIn.success": {
+      "path": "signIn.success",
+      "visual": {
+        "$description": "Brief green checkmark, then redirect",
+        "container": {
+          "layout": "layer",
+          "align": "center",
+          "justify": "center",
+          "size": {
+            "width": "fill",
+            "height": "fill"
+          },
+          "background": "{color.bg}"
+        },
+        "animation": "page-enter",
+        "slots": {
+          "content": [
+            {
+              "type": "group",
+              "name": "auth-card",
+              "layout": "stack-v",
+              "align": "stretch",
+              "gap": "{spacing.lg}",
+              "size": {
+                "width": {
+                  "value": 360,
+                  "unit": "px"
+                }
+              },
+              "padding": {
+                "value": "{spacing.xl}"
+              },
+              "background": "{color.surface}",
+              "cornerRadius": "{radius.lg}",
+              "borderWidth": {
+                "value": 1,
+                "unit": "px"
+              },
+              "borderColor": "{color.stroke}",
+              "testId": "auth-card",
+              "children": [
+                {
+                  "type": "text",
+                  "content": "auth.signIn.title",
+                  "style": {
+                    "fontSize": "{font.size.xl}",
+                    "fontWeight": "{font.weight.bold}",
+                    "color": "{color.text.primary}"
+                  },
+                  "testId": "auth-title",
+                  "aria": {
+                    "role": "heading",
+                    "level": 1
+                  }
+                },
+                {
+                  "$ref": "text-input",
+                  "name": "email",
+                  "label": "auth.email",
+                  "placeholder": "auth.emailPlaceholder",
+                  "inputType": "email",
+                  "testId": "auth-email",
+                  "aria": {
+                    "label": "Email address",
+                    "required": true
+                  }
+                },
+                {
+                  "$ref": "text-input",
+                  "name": "password",
+                  "label": "auth.password",
+                  "placeholder": "auth.passwordPlaceholder",
+                  "inputType": "password",
+                  "testId": "auth-password",
+                  "aria": {
+                    "label": "Password",
+                    "required": true
+                  }
+                },
+                {
+                  "$ref": "primary-button",
+                  "label": "auth.signIn.submit",
+                  "onPress": [
+                    {
+                      "kind": "emit",
+                      "event": "SUBMIT_EMAIL"
+                    }
+                  ],
+                  "enabledWhen": [
+                    "==",
+                    [
+                      "var",
+                      "context.submitting"
+                    ],
+                    false
+                  ],
+                  "testId": "auth-submit",
+                  "aria": {
+                    "label": "Sign in"
+                  }
+                },
+                {
+                  "type": "group",
+                  "name": "divider",
+                  "layout": "stack-h",
+                  "align": "center",
+                  "gap": "{spacing.md}",
+                  "children": [
+                    {
+                      "type": "shape",
+                      "shape": "rectangle",
+                      "size": {
+                        "width": "fill",
+                        "height": {
+                          "value": 1,
+                          "unit": "px"
+                        }
+                      },
+                      "fill": "{color.stroke}"
+                    },
+                    {
+                      "type": "text",
+                      "content": "auth.or",
+                      "style": {
+                        "fontSize": "{font.size.sm}",
+                        "color": "{color.text.muted}"
+                      }
+                    },
+                    {
+                      "type": "shape",
+                      "shape": "rectangle",
+                      "size": {
+                        "width": "fill",
+                        "height": {
+                          "value": 1,
+                          "unit": "px"
+                        }
+                      },
+                      "fill": "{color.stroke}"
+                    }
+                  ]
+                },
+                {
+                  "$ref": "oauth-button",
+                  "provider": "github",
+                  "icon": "Github",
+                  "label": "auth.continueWithGithub",
+                  "onPress": [
+                    {
+                      "kind": "emit",
+                      "event": "OAUTH_GITHUB"
+                    }
+                  ],
+                  "testId": "auth-oauth-github"
+                },
+                {
+                  "$ref": "oauth-button",
+                  "provider": "google",
+                  "icon": "Google",
+                  "label": "auth.continueWithGoogle",
+                  "onPress": [
+                    {
+                      "kind": "emit",
+                      "event": "OAUTH_GOOGLE"
+                    }
+                  ],
+                  "testId": "auth-oauth-google"
+                },
+                {
+                  "type": "text",
+                  "content": "auth.noAccount",
+                  "style": {
+                    "fontSize": "{font.size.sm}",
+                    "color": "{color.text.muted}",
+                    "textAlign": "center"
+                  },
+                  "children": [
+                    {
+                      "type": "text",
+                      "content": "auth.signUpLink",
+                      "style": {
+                        "color": "{color.accent}"
+                      },
+                      "onPress": [
+                        {
+                          "kind": "emit",
+                          "event": "GO_TO_SIGNUP"
+                        }
+                      ],
+                      "testId": "auth-signup-link"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "transitions": [
+        {
+          "event": null,
+          "target": "authenticated",
+          "guard": true,
+          "actions": []
+        }
+      ],
+      "entry": [
+        {
+          "kind": "assign",
+          "path": "context.submitting",
+          "value": false
+        },
+        {
+          "kind": "log",
+          "level": "info",
+          "message": "auth_signin_success"
+        }
+      ],
+      "exit": [],
+      "invoke": []
+    },
+    "signUp.idle": {
+      "path": "signUp.idle",
+      "visual": {
+        "$description": "Form ready for input",
+        "container": {
+          "layout": "layer",
+          "align": "center",
+          "justify": "center",
+          "size": {
+            "width": "fill",
+            "height": "fill"
+          },
+          "background": "{color.bg}"
+        },
+        "animation": "page-enter",
+        "slots": {
+          "content": [
+            {
+              "type": "group",
+              "name": "auth-card",
+              "layout": "stack-v",
+              "align": "stretch",
+              "gap": "{spacing.lg}",
+              "size": {
+                "width": {
+                  "value": 360,
+                  "unit": "px"
+                }
+              },
+              "padding": {
+                "value": "{spacing.xl}"
+              },
+              "background": "{color.surface}",
+              "cornerRadius": "{radius.lg}",
+              "testId": "signup-card",
+              "children": [
+                {
+                  "type": "text",
+                  "content": "auth.signUp.title",
+                  "style": {
+                    "fontSize": "{font.size.xl}",
+                    "fontWeight": "{font.weight.bold}",
+                    "color": "{color.text.primary}"
+                  },
+                  "testId": "signup-title",
+                  "aria": {
+                    "role": "heading",
+                    "level": 1
+                  }
+                },
+                {
+                  "$ref": "text-input",
+                  "name": "name",
+                  "label": "auth.name",
+                  "placeholder": "auth.namePlaceholder",
+                  "inputType": "text",
+                  "testId": "signup-name"
+                },
+                {
+                  "$ref": "text-input",
+                  "name": "email",
+                  "label": "auth.email",
+                  "placeholder": "auth.emailPlaceholder",
+                  "inputType": "email",
+                  "testId": "signup-email"
+                },
+                {
+                  "$ref": "text-input",
+                  "name": "password",
+                  "label": "auth.password",
+                  "placeholder": "auth.passwordPlaceholder",
+                  "inputType": "password",
+                  "testId": "signup-password"
+                },
+                {
+                  "$ref": "text-input",
+                  "name": "confirmPassword",
+                  "label": "auth.confirmPassword",
+                  "placeholder": "auth.confirmPasswordPlaceholder",
+                  "inputType": "password",
+                  "testId": "signup-confirm-password"
+                },
+                {
+                  "$ref": "primary-button",
+                  "label": "auth.signUp.submit",
+                  "onPress": [
+                    {
+                      "kind": "emit",
+                      "event": "SUBMIT"
+                    }
+                  ],
+                  "enabledWhen": [
+                    "==",
+                    [
+                      "var",
+                      "context.submitting"
+                    ],
+                    false
+                  ],
+                  "testId": "signup-submit",
+                  "aria": {
+                    "label": "Create account"
+                  }
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "transitions": [
+        {
+          "event": "SUBMIT",
+          "target": "loading",
+          "guard": null,
+          "actions": []
+        },
+        {
+          "event": "VALIDATE_FIELD",
+          "target": "validating",
+          "guard": null,
+          "actions": []
+        }
+      ],
+      "entry": [
+        {
+          "kind": "assign",
+          "path": "context.submitting",
+          "value": false
+        },
+        {
+          "kind": "assign",
+          "path": "context.errorMessage",
+          "value": null
+        }
+      ],
+      "exit": [],
+      "invoke": []
+    },
+    "signUp.validating": {
+      "path": "signUp.validating",
+      "visual": {
+        "$description": "Real-time field validation — password strength indicator, email format check. Per-field error messages appear below invalid fields.",
+        "container": {
+          "layout": "layer",
+          "align": "center",
+          "justify": "center",
+          "size": {
+            "width": "fill",
+            "height": "fill"
+          },
+          "background": "{color.bg}"
+        },
+        "animation": "page-enter",
+        "slots": {
+          "content": [
+            {
+              "type": "group",
+              "name": "auth-card",
+              "layout": "stack-v",
+              "align": "stretch",
+              "gap": "{spacing.lg}",
+              "size": {
+                "width": {
+                  "value": 360,
+                  "unit": "px"
+                }
+              },
+              "padding": {
+                "value": "{spacing.xl}"
+              },
+              "background": "{color.surface}",
+              "cornerRadius": "{radius.lg}",
+              "testId": "signup-card",
+              "children": [
+                {
+                  "type": "text",
+                  "content": "auth.signUp.title",
+                  "style": {
+                    "fontSize": "{font.size.xl}",
+                    "fontWeight": "{font.weight.bold}",
+                    "color": "{color.text.primary}"
+                  },
+                  "testId": "signup-title",
+                  "aria": {
+                    "role": "heading",
+                    "level": 1
+                  }
+                },
+                {
+                  "$ref": "text-input",
+                  "name": "name",
+                  "label": "auth.name",
+                  "placeholder": "auth.namePlaceholder",
+                  "inputType": "text",
+                  "testId": "signup-name"
+                },
+                {
+                  "$ref": "text-input",
+                  "name": "email",
+                  "label": "auth.email",
+                  "placeholder": "auth.emailPlaceholder",
+                  "inputType": "email",
+                  "testId": "signup-email"
+                },
+                {
+                  "$ref": "text-input",
+                  "name": "password",
+                  "label": "auth.password",
+                  "placeholder": "auth.passwordPlaceholder",
+                  "inputType": "password",
+                  "testId": "signup-password"
+                },
+                {
+                  "$ref": "text-input",
+                  "name": "confirmPassword",
+                  "label": "auth.confirmPassword",
+                  "placeholder": "auth.confirmPasswordPlaceholder",
+                  "inputType": "password",
+                  "testId": "signup-confirm-password"
+                },
+                {
+                  "$ref": "primary-button",
+                  "label": "auth.signUp.submit",
+                  "onPress": [
+                    {
+                      "kind": "emit",
+                      "event": "SUBMIT"
+                    }
+                  ],
+                  "enabledWhen": [
+                    "==",
+                    [
+                      "var",
+                      "context.submitting"
+                    ],
+                    false
+                  ],
+                  "testId": "signup-submit",
+                  "aria": {
+                    "label": "Create account"
+                  }
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "transitions": [
+        {
+          "event": "VALID",
+          "target": "idle",
+          "guard": null,
+          "actions": []
+        },
+        {
+          "event": "SUBMIT",
+          "target": "loading",
+          "guard": null,
+          "actions": []
+        }
+      ],
+      "entry": [],
+      "exit": [],
+      "invoke": []
+    },
+    "signUp.loading": {
+      "path": "signUp.loading",
+      "visual": {
+        "$description": "Spinner on submit, all fields disabled",
+        "container": {
+          "layout": "layer",
+          "align": "center",
+          "justify": "center",
+          "size": {
+            "width": "fill",
+            "height": "fill"
+          },
+          "background": "{color.bg}"
+        },
+        "animation": "page-enter",
+        "slots": {
+          "content": [
+            {
+              "type": "group",
+              "name": "auth-card",
+              "layout": "stack-v",
+              "align": "stretch",
+              "gap": "{spacing.lg}",
+              "size": {
+                "width": {
+                  "value": 360,
+                  "unit": "px"
+                }
+              },
+              "padding": {
+                "value": "{spacing.xl}"
+              },
+              "background": "{color.surface}",
+              "cornerRadius": "{radius.lg}",
+              "testId": "signup-card",
+              "children": [
+                {
+                  "type": "text",
+                  "content": "auth.signUp.title",
+                  "style": {
+                    "fontSize": "{font.size.xl}",
+                    "fontWeight": "{font.weight.bold}",
+                    "color": "{color.text.primary}"
+                  },
+                  "testId": "signup-title",
+                  "aria": {
+                    "role": "heading",
+                    "level": 1
+                  }
+                },
+                {
+                  "$ref": "text-input",
+                  "name": "name",
+                  "label": "auth.name",
+                  "placeholder": "auth.namePlaceholder",
+                  "inputType": "text",
+                  "testId": "signup-name"
+                },
+                {
+                  "$ref": "text-input",
+                  "name": "email",
+                  "label": "auth.email",
+                  "placeholder": "auth.emailPlaceholder",
+                  "inputType": "email",
+                  "testId": "signup-email"
+                },
+                {
+                  "$ref": "text-input",
+                  "name": "password",
+                  "label": "auth.password",
+                  "placeholder": "auth.passwordPlaceholder",
+                  "inputType": "password",
+                  "testId": "signup-password"
+                },
+                {
+                  "$ref": "text-input",
+                  "name": "confirmPassword",
+                  "label": "auth.confirmPassword",
+                  "placeholder": "auth.confirmPasswordPlaceholder",
+                  "inputType": "password",
+                  "testId": "signup-confirm-password"
+                },
+                {
+                  "$ref": "primary-button",
+                  "label": "auth.signUp.submit",
+                  "onPress": [
+                    {
+                      "kind": "emit",
+                      "event": "SUBMIT"
+                    }
+                  ],
+                  "enabledWhen": [
+                    "==",
+                    [
+                      "var",
+                      "context.submitting"
+                    ],
+                    false
+                  ],
+                  "testId": "signup-submit",
+                  "aria": {
+                    "label": "Create account"
+                  }
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "transitions": [
+        {
+          "event": "SUCCESS",
+          "target": "success",
+          "guard": null,
+          "actions": []
+        },
+        {
+          "event": "EMAIL_TAKEN",
+          "target": "error",
+          "guard": null,
+          "actions": [
+            {
+              "kind": "assign",
+              "path": "context.errorMessage",
+              "value": [
+                "var",
+                "event.message"
+              ]
+            },
+            {
+              "kind": "assign",
+              "path": "context.submitting",
+              "value": false
+            }
+          ]
+        },
+        {
+          "event": "WEAK_PASSWORD",
+          "target": "error",
+          "guard": null,
+          "actions": [
+            {
+              "kind": "assign",
+              "path": "context.errorMessage",
+              "value": [
+                "var",
+                "event.message"
+              ]
+            },
+            {
+              "kind": "assign",
+              "path": "context.submitting",
+              "value": false
+            }
+          ]
+        }
+      ],
+      "entry": [
+        {
+          "kind": "assign",
+          "path": "context.submitting",
+          "value": true
+        },
+        {
+          "kind": "http",
+          "request": "signUp"
+        },
+        {
+          "kind": "log",
+          "level": "info",
+          "message": "auth_signup_submit"
+        }
+      ],
+      "exit": [],
+      "invoke": []
+    },
+    "signUp.error": {
+      "path": "signUp.error",
+      "visual": {
+        "$description": "Shake + field-level errors. email: 'Already registered', password: 'Must be 8+ characters'",
+        "container": {
+          "layout": "layer",
+          "align": "center",
+          "justify": "center",
+          "size": {
+            "width": "fill",
+            "height": "fill"
+          },
+          "background": "{color.bg}"
+        },
+        "animation": "shake",
+        "slots": {
+          "content": [
+            {
+              "type": "group",
+              "name": "auth-card",
+              "layout": "stack-v",
+              "align": "stretch",
+              "gap": "{spacing.lg}",
+              "size": {
+                "width": {
+                  "value": 360,
+                  "unit": "px"
+                }
+              },
+              "padding": {
+                "value": "{spacing.xl}"
+              },
+              "background": "{color.surface}",
+              "cornerRadius": "{radius.lg}",
+              "testId": "signup-card",
+              "children": [
+                {
+                  "type": "text",
+                  "content": "auth.signUp.title",
+                  "style": {
+                    "fontSize": "{font.size.xl}",
+                    "fontWeight": "{font.weight.bold}",
+                    "color": "{color.text.primary}"
+                  },
+                  "testId": "signup-title",
+                  "aria": {
+                    "role": "heading",
+                    "level": 1
+                  }
+                },
+                {
+                  "$ref": "text-input",
+                  "name": "name",
+                  "label": "auth.name",
+                  "placeholder": "auth.namePlaceholder",
+                  "inputType": "text",
+                  "testId": "signup-name"
+                },
+                {
+                  "$ref": "text-input",
+                  "name": "email",
+                  "label": "auth.email",
+                  "placeholder": "auth.emailPlaceholder",
+                  "inputType": "email",
+                  "testId": "signup-email"
+                },
+                {
+                  "$ref": "text-input",
+                  "name": "password",
+                  "label": "auth.password",
+                  "placeholder": "auth.passwordPlaceholder",
+                  "inputType": "password",
+                  "testId": "signup-password"
+                },
+                {
+                  "$ref": "text-input",
+                  "name": "confirmPassword",
+                  "label": "auth.confirmPassword",
+                  "placeholder": "auth.confirmPasswordPlaceholder",
+                  "inputType": "password",
+                  "testId": "signup-confirm-password"
+                },
+                {
+                  "$ref": "primary-button",
+                  "label": "auth.signUp.submit",
+                  "onPress": [
+                    {
+                      "kind": "emit",
+                      "event": "SUBMIT"
+                    }
+                  ],
+                  "enabledWhen": [
+                    "==",
+                    [
+                      "var",
+                      "context.submitting"
+                    ],
+                    false
+                  ],
+                  "testId": "signup-submit",
+                  "aria": {
+                    "label": "Create account"
+                  }
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "transitions": [
+        {
+          "event": "EDIT",
+          "target": "idle",
+          "guard": null,
+          "actions": []
+        },
+        {
+          "event": "SUBMIT",
+          "target": "loading",
+          "guard": null,
+          "actions": []
+        }
+      ],
+      "entry": [],
+      "exit": [],
+      "invoke": []
+    },
+    "signUp.success": {
+      "path": "signUp.success",
+      "visual": {
+        "$description": "Redirect to email verification",
+        "container": {
+          "layout": "layer",
+          "align": "center",
+          "justify": "center",
+          "size": {
+            "width": "fill",
+            "height": "fill"
+          },
+          "background": "{color.bg}"
+        },
+        "animation": "page-enter",
+        "slots": {
+          "content": [
+            {
+              "type": "group",
+              "name": "auth-card",
+              "layout": "stack-v",
+              "align": "stretch",
+              "gap": "{spacing.lg}",
+              "size": {
+                "width": {
+                  "value": 360,
+                  "unit": "px"
+                }
+              },
+              "padding": {
+                "value": "{spacing.xl}"
+              },
+              "background": "{color.surface}",
+              "cornerRadius": "{radius.lg}",
+              "testId": "signup-card",
+              "children": [
+                {
+                  "type": "text",
+                  "content": "auth.signUp.title",
+                  "style": {
+                    "fontSize": "{font.size.xl}",
+                    "fontWeight": "{font.weight.bold}",
+                    "color": "{color.text.primary}"
+                  },
+                  "testId": "signup-title",
+                  "aria": {
+                    "role": "heading",
+                    "level": 1
+                  }
+                },
+                {
+                  "$ref": "text-input",
+                  "name": "name",
+                  "label": "auth.name",
+                  "placeholder": "auth.namePlaceholder",
+                  "inputType": "text",
+                  "testId": "signup-name"
+                },
+                {
+                  "$ref": "text-input",
+                  "name": "email",
+                  "label": "auth.email",
+                  "placeholder": "auth.emailPlaceholder",
+                  "inputType": "email",
+                  "testId": "signup-email"
+                },
+                {
+                  "$ref": "text-input",
+                  "name": "password",
+                  "label": "auth.password",
+                  "placeholder": "auth.passwordPlaceholder",
+                  "inputType": "password",
+                  "testId": "signup-password"
+                },
+                {
+                  "$ref": "text-input",
+                  "name": "confirmPassword",
+                  "label": "auth.confirmPassword",
+                  "placeholder": "auth.confirmPasswordPlaceholder",
+                  "inputType": "password",
+                  "testId": "signup-confirm-password"
+                },
+                {
+                  "$ref": "primary-button",
+                  "label": "auth.signUp.submit",
+                  "onPress": [
+                    {
+                      "kind": "emit",
+                      "event": "SUBMIT"
+                    }
+                  ],
+                  "enabledWhen": [
+                    "==",
+                    [
+                      "var",
+                      "context.submitting"
+                    ],
+                    false
+                  ],
+                  "testId": "signup-submit",
+                  "aria": {
+                    "label": "Create account"
+                  }
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "transitions": [
+        {
+          "event": null,
+          "target": "emailVerification",
+          "guard": true,
+          "actions": []
+        }
+      ],
+      "entry": [
+        {
+          "kind": "log",
+          "level": "info",
+          "message": "auth_signup_success"
+        }
+      ],
+      "exit": [],
+      "invoke": []
+    },
+    "emailVerification.waiting": {
+      "path": "emailVerification.waiting",
+      "visual": {
+        "$description": "Waiting for user to click email link",
+        "container": {
+          "layout": "layer",
+          "align": "center",
+          "justify": "center",
+          "size": {
+            "width": "fill",
+            "height": "fill"
+          },
+          "background": "{color.bg}"
+        },
+        "animation": "page-enter",
+        "slots": {
+          "content": [
+            {
+              "type": "group",
+              "name": "verification-card",
+              "layout": "stack-v",
+              "align": "center",
+              "gap": "{spacing.lg}",
+              "size": {
+                "width": {
+                  "value": 360,
+                  "unit": "px"
+                }
+              },
+              "padding": {
+                "value": "{spacing.xl}"
+              },
+              "background": "{color.surface}",
+              "cornerRadius": "{radius.lg}",
+              "testId": "verification-card",
+              "children": [
+                {
+                  "type": "icon",
+                  "icon": "Mail",
+                  "size": {
+                    "value": 48,
+                    "unit": "px"
+                  },
+                  "color": "{color.accent}",
+                  "testId": "verification-icon"
+                },
+                {
+                  "type": "text",
+                  "content": "auth.verification.title",
+                  "style": {
+                    "fontSize": "{font.size.lg}",
+                    "fontWeight": "{font.weight.bold}",
+                    "color": "{color.text.primary}",
+                    "textAlign": "center"
+                  },
+                  "aria": {
+                    "role": "heading",
+                    "level": 1
+                  }
+                },
+                {
+                  "type": "text",
+                  "content": "auth.verification.description",
+                  "style": {
+                    "fontSize": "{font.size.base}",
+                    "color": "{color.text.secondary}",
+                    "textAlign": "center"
+                  },
+                  "binding": {
+                    "content": [
+                      "var",
+                      "context.email"
+                    ]
+                  }
+                },
+                {
+                  "$ref": "primary-button",
+                  "label": "auth.verification.resend",
+                  "onPress": [
+                    {
+                      "kind": "emit",
+                      "event": "RESEND"
+                    }
+                  ],
+                  "testId": "verification-resend",
+                  "aria": {
+                    "label": "Resend verification email"
+                  }
+                },
+                {
+                  "type": "text",
+                  "content": "auth.verification.backToSignIn",
+                  "style": {
+                    "fontSize": "{font.size.sm}",
+                    "color": "{color.accent}",
+                    "textAlign": "center"
+                  },
+                  "onPress": [
+                    {
+                      "kind": "emit",
+                      "event": "BACK"
+                    }
+                  ],
+                  "testId": "verification-back"
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "transitions": [
+        {
+          "event": "RESEND",
+          "target": "resending",
+          "guard": null,
+          "actions": []
+        }
+      ],
+      "entry": [
+        {
+          "kind": "log",
+          "level": "info",
+          "message": "auth_verification_waiting"
+        }
+      ],
+      "exit": [],
+      "invoke": []
+    },
+    "emailVerification.resending": {
+      "path": "emailVerification.resending",
+      "visual": {
+        "$description": "Resend button shows spinner",
+        "container": {
+          "layout": "layer",
+          "align": "center",
+          "justify": "center",
+          "size": {
+            "width": "fill",
+            "height": "fill"
+          },
+          "background": "{color.bg}"
+        },
+        "animation": "page-enter",
+        "slots": {
+          "content": [
+            {
+              "type": "group",
+              "name": "verification-card",
+              "layout": "stack-v",
+              "align": "center",
+              "gap": "{spacing.lg}",
+              "size": {
+                "width": {
+                  "value": 360,
+                  "unit": "px"
+                }
+              },
+              "padding": {
+                "value": "{spacing.xl}"
+              },
+              "background": "{color.surface}",
+              "cornerRadius": "{radius.lg}",
+              "testId": "verification-card",
+              "children": [
+                {
+                  "type": "icon",
+                  "icon": "Mail",
+                  "size": {
+                    "value": 48,
+                    "unit": "px"
+                  },
+                  "color": "{color.accent}",
+                  "testId": "verification-icon"
+                },
+                {
+                  "type": "text",
+                  "content": "auth.verification.title",
+                  "style": {
+                    "fontSize": "{font.size.lg}",
+                    "fontWeight": "{font.weight.bold}",
+                    "color": "{color.text.primary}",
+                    "textAlign": "center"
+                  },
+                  "aria": {
+                    "role": "heading",
+                    "level": 1
+                  }
+                },
+                {
+                  "type": "text",
+                  "content": "auth.verification.description",
+                  "style": {
+                    "fontSize": "{font.size.base}",
+                    "color": "{color.text.secondary}",
+                    "textAlign": "center"
+                  },
+                  "binding": {
+                    "content": [
+                      "var",
+                      "context.email"
+                    ]
+                  }
+                },
+                {
+                  "$ref": "primary-button",
+                  "label": "auth.verification.resend",
+                  "onPress": [
+                    {
+                      "kind": "emit",
+                      "event": "RESEND"
+                    }
+                  ],
+                  "testId": "verification-resend",
+                  "aria": {
+                    "label": "Resend verification email"
+                  }
+                },
+                {
+                  "type": "text",
+                  "content": "auth.verification.backToSignIn",
+                  "style": {
+                    "fontSize": "{font.size.sm}",
+                    "color": "{color.accent}",
+                    "textAlign": "center"
+                  },
+                  "onPress": [
+                    {
+                      "kind": "emit",
+                      "event": "BACK"
+                    }
+                  ],
+                  "testId": "verification-back"
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "transitions": [
+        {
+          "event": "RESENT",
+          "target": "resent",
+          "guard": null,
+          "actions": []
+        },
+        {
+          "event": "RESEND_FAILED",
+          "target": "resendError",
+          "guard": null,
+          "actions": []
+        }
+      ],
+      "entry": [
+        {
+          "kind": "http",
+          "request": "resendVerification"
+        },
+        {
+          "kind": "log",
+          "level": "info",
+          "message": "auth_verification_resend"
+        }
+      ],
+      "exit": [],
+      "invoke": []
+    },
+    "emailVerification.resent": {
+      "path": "emailVerification.resent",
+      "visual": {
+        "$description": "Green checkmark replaces resend button, 'Email sent!' confirmation text",
+        "container": {
+          "layout": "layer",
+          "align": "center",
+          "justify": "center",
+          "size": {
+            "width": "fill",
+            "height": "fill"
+          },
+          "background": "{color.bg}"
+        },
+        "animation": "page-enter",
+        "slots": {
+          "content": [
+            {
+              "type": "group",
+              "name": "verification-card",
+              "layout": "stack-v",
+              "align": "center",
+              "gap": "{spacing.lg}",
+              "size": {
+                "width": {
+                  "value": 360,
+                  "unit": "px"
+                }
+              },
+              "padding": {
+                "value": "{spacing.xl}"
+              },
+              "background": "{color.surface}",
+              "cornerRadius": "{radius.lg}",
+              "testId": "verification-card",
+              "children": [
+                {
+                  "type": "icon",
+                  "icon": "Mail",
+                  "size": {
+                    "value": 48,
+                    "unit": "px"
+                  },
+                  "color": "{color.accent}",
+                  "testId": "verification-icon"
+                },
+                {
+                  "type": "text",
+                  "content": "auth.verification.title",
+                  "style": {
+                    "fontSize": "{font.size.lg}",
+                    "fontWeight": "{font.weight.bold}",
+                    "color": "{color.text.primary}",
+                    "textAlign": "center"
+                  },
+                  "aria": {
+                    "role": "heading",
+                    "level": 1
+                  }
+                },
+                {
+                  "type": "text",
+                  "content": "auth.verification.description",
+                  "style": {
+                    "fontSize": "{font.size.base}",
+                    "color": "{color.text.secondary}",
+                    "textAlign": "center"
+                  },
+                  "binding": {
+                    "content": [
+                      "var",
+                      "context.email"
+                    ]
+                  }
+                },
+                {
+                  "$ref": "primary-button",
+                  "label": "auth.verification.resend",
+                  "onPress": [
+                    {
+                      "kind": "emit",
+                      "event": "RESEND"
+                    }
+                  ],
+                  "testId": "verification-resend",
+                  "aria": {
+                    "label": "Resend verification email"
+                  }
+                },
+                {
+                  "type": "text",
+                  "content": "auth.verification.backToSignIn",
+                  "style": {
+                    "fontSize": "{font.size.sm}",
+                    "color": "{color.accent}",
+                    "textAlign": "center"
+                  },
+                  "onPress": [
+                    {
+                      "kind": "emit",
+                      "event": "BACK"
+                    }
+                  ],
+                  "testId": "verification-back"
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "transitions": [],
+      "entry": [],
+      "exit": [],
+      "invoke": []
+    },
+    "emailVerification.resendError": {
+      "path": "emailVerification.resendError",
+      "visual": {
+        "$description": "Red error text: 'Failed to resend. Try again.'",
+        "container": {
+          "layout": "layer",
+          "align": "center",
+          "justify": "center",
+          "size": {
+            "width": "fill",
+            "height": "fill"
+          },
+          "background": "{color.bg}"
+        },
+        "animation": "page-enter",
+        "slots": {
+          "content": [
+            {
+              "type": "group",
+              "name": "verification-card",
+              "layout": "stack-v",
+              "align": "center",
+              "gap": "{spacing.lg}",
+              "size": {
+                "width": {
+                  "value": 360,
+                  "unit": "px"
+                }
+              },
+              "padding": {
+                "value": "{spacing.xl}"
+              },
+              "background": "{color.surface}",
+              "cornerRadius": "{radius.lg}",
+              "testId": "verification-card",
+              "children": [
+                {
+                  "type": "icon",
+                  "icon": "Mail",
+                  "size": {
+                    "value": 48,
+                    "unit": "px"
+                  },
+                  "color": "{color.accent}",
+                  "testId": "verification-icon"
+                },
+                {
+                  "type": "text",
+                  "content": "auth.verification.title",
+                  "style": {
+                    "fontSize": "{font.size.lg}",
+                    "fontWeight": "{font.weight.bold}",
+                    "color": "{color.text.primary}",
+                    "textAlign": "center"
+                  },
+                  "aria": {
+                    "role": "heading",
+                    "level": 1
+                  }
+                },
+                {
+                  "type": "text",
+                  "content": "auth.verification.description",
+                  "style": {
+                    "fontSize": "{font.size.base}",
+                    "color": "{color.text.secondary}",
+                    "textAlign": "center"
+                  },
+                  "binding": {
+                    "content": [
+                      "var",
+                      "context.email"
+                    ]
+                  }
+                },
+                {
+                  "$ref": "primary-button",
+                  "label": "auth.verification.resend",
+                  "onPress": [
+                    {
+                      "kind": "emit",
+                      "event": "RESEND"
+                    }
+                  ],
+                  "testId": "verification-resend",
+                  "aria": {
+                    "label": "Resend verification email"
+                  }
+                },
+                {
+                  "type": "text",
+                  "content": "auth.verification.backToSignIn",
+                  "style": {
+                    "fontSize": "{font.size.sm}",
+                    "color": "{color.accent}",
+                    "textAlign": "center"
+                  },
+                  "onPress": [
+                    {
+                      "kind": "emit",
+                      "event": "BACK"
+                    }
+                  ],
+                  "testId": "verification-back"
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "transitions": [
+        {
+          "event": "RESEND",
+          "target": "resending",
+          "guard": null,
+          "actions": []
+        }
+      ],
+      "entry": [],
+      "exit": [],
+      "invoke": []
+    },
+    "oauthRedirect": {
+      "path": "oauthRedirect",
+      "visual": {
+        "$description": "Full-page loading state with provider logo and 'Redirecting to {provider}...' text. Spinner animation.",
+        "container": {
+          "layout": "layer",
+          "align": "center",
+          "justify": "center",
+          "size": {
+            "width": "fill",
+            "height": "fill"
+          },
+          "background": "{color.bg}"
+        },
+        "slots": {
+          "content": [
+            {
+              "type": "group",
+              "layout": "stack-v",
+              "align": "center",
+              "gap": "{spacing.lg}",
+              "testId": "oauth-redirect",
+              "children": [
+                {
+                  "type": "icon",
+                  "icon": "Loader2",
+                  "size": {
+                    "value": 32,
+                    "unit": "px"
+                  },
+                  "color": "{color.text.secondary}",
+                  "animation": "spinner"
+                },
+                {
+                  "type": "text",
+                  "binding": {
+                    "content": [
+                      "var",
+                      "context.oauthProvider"
+                    ]
+                  },
+                  "style": {
+                    "fontSize": "{font.size.base}",
+                    "color": "{color.text.secondary}"
+                  },
+                  "aria": {
+                    "role": "status",
+                    "live": "polite"
+                  }
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "transitions": [
+        {
+          "event": "OAUTH_SUCCESS",
+          "target": "authenticated",
+          "guard": null,
+          "actions": [
+            {
+              "kind": "assign",
+              "path": "context.userId",
+              "value": [
+                "var",
+                "event.userId"
+              ]
+            },
+            {
+              "kind": "log",
+              "level": "info",
+              "message": "auth_oauth_success"
+            }
+          ]
+        },
+        {
+          "event": "OAUTH_ERROR",
+          "target": "signIn.error",
+          "guard": null,
+          "actions": [
+            {
+              "kind": "assign",
+              "path": "context.errorMessage",
+              "value": [
+                "var",
+                "event.message"
+              ]
+            }
+          ]
+        },
+        {
+          "event": "OAUTH_CANCEL",
+          "target": "signIn",
+          "guard": null,
+          "actions": []
+        }
+      ],
+      "entry": [
+        {
+          "kind": "http",
+          "request": "oauthRedirect"
+        },
+        {
+          "kind": "log",
+          "level": "info",
+          "message": "auth_oauth_redirect"
+        }
+      ],
+      "exit": [],
+      "invoke": []
+    },
+    "authenticated": {
+      "path": "authenticated",
+      "visual": {
+        "$description": "Terminal state — app redirects to main content",
+        "container": {
+          "layout": "layer",
+          "align": "center",
+          "justify": "center",
+          "size": {
+            "width": "fill",
+            "height": "fill"
+          },
+          "background": "{color.bg}"
+        }
+      },
+      "transitions": [],
+      "entry": [
+        {
+          "kind": "log",
+          "level": "info",
+          "message": "auth_authenticated"
+        },
+        {
+          "kind": "navigate",
+          "to": "/dashboard"
+        }
+      ],
+      "exit": [],
+      "invoke": []
+    }
+  },
+  "assertions": [
+    {
+      "id": "input-field-exists",
+      "type": "element-present",
+      "testId": "input-field"
+    },
+    {
+      "id": "auth-card-exists",
+      "type": "element-present",
+      "testId": "auth-card"
+    },
+    {
+      "id": "auth-title-exists",
+      "type": "element-present",
+      "testId": "auth-title"
+    },
+    {
+      "id": "auth-email-exists",
+      "type": "element-present",
+      "testId": "auth-email"
+    },
+    {
+      "id": "auth-password-exists",
+      "type": "element-present",
+      "testId": "auth-password"
+    },
+    {
+      "id": "auth-submit-exists",
+      "type": "element-present",
+      "testId": "auth-submit"
+    },
+    {
+      "id": "auth-oauth-github-exists",
+      "type": "element-present",
+      "testId": "auth-oauth-github"
+    },
+    {
+      "id": "auth-oauth-google-exists",
+      "type": "element-present",
+      "testId": "auth-oauth-google"
+    },
+    {
+      "id": "auth-signup-link-exists",
+      "type": "element-present",
+      "testId": "auth-signup-link"
+    },
+    {
+      "id": "auth-card-exists",
+      "type": "element-present",
+      "testId": "auth-card"
+    },
+    {
+      "id": "auth-title-exists",
+      "type": "element-present",
+      "testId": "auth-title"
+    },
+    {
+      "id": "auth-email-exists",
+      "type": "element-present",
+      "testId": "auth-email"
+    },
+    {
+      "id": "auth-password-exists",
+      "type": "element-present",
+      "testId": "auth-password"
+    },
+    {
+      "id": "auth-submit-exists",
+      "type": "element-present",
+      "testId": "auth-submit"
+    },
+    {
+      "id": "auth-oauth-github-exists",
+      "type": "element-present",
+      "testId": "auth-oauth-github"
+    },
+    {
+      "id": "auth-oauth-google-exists",
+      "type": "element-present",
+      "testId": "auth-oauth-google"
+    },
+    {
+      "id": "auth-signup-link-exists",
+      "type": "element-present",
+      "testId": "auth-signup-link"
+    },
+    {
+      "id": "auth-card-exists",
+      "type": "element-present",
+      "testId": "auth-card"
+    },
+    {
+      "id": "auth-title-exists",
+      "type": "element-present",
+      "testId": "auth-title"
+    },
+    {
+      "id": "auth-email-exists",
+      "type": "element-present",
+      "testId": "auth-email"
+    },
+    {
+      "id": "auth-password-exists",
+      "type": "element-present",
+      "testId": "auth-password"
+    },
+    {
+      "id": "auth-submit-exists",
+      "type": "element-present",
+      "testId": "auth-submit"
+    },
+    {
+      "id": "auth-oauth-github-exists",
+      "type": "element-present",
+      "testId": "auth-oauth-github"
+    },
+    {
+      "id": "auth-oauth-google-exists",
+      "type": "element-present",
+      "testId": "auth-oauth-google"
+    },
+    {
+      "id": "auth-signup-link-exists",
+      "type": "element-present",
+      "testId": "auth-signup-link"
+    },
+    {
+      "id": "auth-card-exists",
+      "type": "element-present",
+      "testId": "auth-card"
+    },
+    {
+      "id": "auth-title-exists",
+      "type": "element-present",
+      "testId": "auth-title"
+    },
+    {
+      "id": "auth-email-exists",
+      "type": "element-present",
+      "testId": "auth-email"
+    },
+    {
+      "id": "auth-password-exists",
+      "type": "element-present",
+      "testId": "auth-password"
+    },
+    {
+      "id": "auth-submit-exists",
+      "type": "element-present",
+      "testId": "auth-submit"
+    },
+    {
+      "id": "auth-oauth-github-exists",
+      "type": "element-present",
+      "testId": "auth-oauth-github"
+    },
+    {
+      "id": "auth-oauth-google-exists",
+      "type": "element-present",
+      "testId": "auth-oauth-google"
+    },
+    {
+      "id": "auth-signup-link-exists",
+      "type": "element-present",
+      "testId": "auth-signup-link"
+    },
+    {
+      "id": "auth-card-exists",
+      "type": "element-present",
+      "testId": "auth-card"
+    },
+    {
+      "id": "auth-title-exists",
+      "type": "element-present",
+      "testId": "auth-title"
+    },
+    {
+      "id": "auth-email-exists",
+      "type": "element-present",
+      "testId": "auth-email"
+    },
+    {
+      "id": "auth-password-exists",
+      "type": "element-present",
+      "testId": "auth-password"
+    },
+    {
+      "id": "auth-submit-exists",
+      "type": "element-present",
+      "testId": "auth-submit"
+    },
+    {
+      "id": "auth-oauth-github-exists",
+      "type": "element-present",
+      "testId": "auth-oauth-github"
+    },
+    {
+      "id": "auth-oauth-google-exists",
+      "type": "element-present",
+      "testId": "auth-oauth-google"
+    },
+    {
+      "id": "auth-signup-link-exists",
+      "type": "element-present",
+      "testId": "auth-signup-link"
+    },
+    {
+      "id": "signup-card-exists",
+      "type": "element-present",
+      "testId": "signup-card"
+    },
+    {
+      "id": "signup-title-exists",
+      "type": "element-present",
+      "testId": "signup-title"
+    },
+    {
+      "id": "signup-name-exists",
+      "type": "element-present",
+      "testId": "signup-name"
+    },
+    {
+      "id": "signup-email-exists",
+      "type": "element-present",
+      "testId": "signup-email"
+    },
+    {
+      "id": "signup-password-exists",
+      "type": "element-present",
+      "testId": "signup-password"
+    },
+    {
+      "id": "signup-confirm-password-exists",
+      "type": "element-present",
+      "testId": "signup-confirm-password"
+    },
+    {
+      "id": "signup-submit-exists",
+      "type": "element-present",
+      "testId": "signup-submit"
+    },
+    {
+      "id": "signup-card-exists",
+      "type": "element-present",
+      "testId": "signup-card"
+    },
+    {
+      "id": "signup-title-exists",
+      "type": "element-present",
+      "testId": "signup-title"
+    },
+    {
+      "id": "signup-name-exists",
+      "type": "element-present",
+      "testId": "signup-name"
+    },
+    {
+      "id": "signup-email-exists",
+      "type": "element-present",
+      "testId": "signup-email"
+    },
+    {
+      "id": "signup-password-exists",
+      "type": "element-present",
+      "testId": "signup-password"
+    },
+    {
+      "id": "signup-confirm-password-exists",
+      "type": "element-present",
+      "testId": "signup-confirm-password"
+    },
+    {
+      "id": "signup-submit-exists",
+      "type": "element-present",
+      "testId": "signup-submit"
+    },
+    {
+      "id": "signup-card-exists",
+      "type": "element-present",
+      "testId": "signup-card"
+    },
+    {
+      "id": "signup-title-exists",
+      "type": "element-present",
+      "testId": "signup-title"
+    },
+    {
+      "id": "signup-name-exists",
+      "type": "element-present",
+      "testId": "signup-name"
+    },
+    {
+      "id": "signup-email-exists",
+      "type": "element-present",
+      "testId": "signup-email"
+    },
+    {
+      "id": "signup-password-exists",
+      "type": "element-present",
+      "testId": "signup-password"
+    },
+    {
+      "id": "signup-confirm-password-exists",
+      "type": "element-present",
+      "testId": "signup-confirm-password"
+    },
+    {
+      "id": "signup-submit-exists",
+      "type": "element-present",
+      "testId": "signup-submit"
+    },
+    {
+      "id": "signup-card-exists",
+      "type": "element-present",
+      "testId": "signup-card"
+    },
+    {
+      "id": "signup-title-exists",
+      "type": "element-present",
+      "testId": "signup-title"
+    },
+    {
+      "id": "signup-name-exists",
+      "type": "element-present",
+      "testId": "signup-name"
+    },
+    {
+      "id": "signup-email-exists",
+      "type": "element-present",
+      "testId": "signup-email"
+    },
+    {
+      "id": "signup-password-exists",
+      "type": "element-present",
+      "testId": "signup-password"
+    },
+    {
+      "id": "signup-confirm-password-exists",
+      "type": "element-present",
+      "testId": "signup-confirm-password"
+    },
+    {
+      "id": "signup-submit-exists",
+      "type": "element-present",
+      "testId": "signup-submit"
+    },
+    {
+      "id": "signup-card-exists",
+      "type": "element-present",
+      "testId": "signup-card"
+    },
+    {
+      "id": "signup-title-exists",
+      "type": "element-present",
+      "testId": "signup-title"
+    },
+    {
+      "id": "signup-name-exists",
+      "type": "element-present",
+      "testId": "signup-name"
+    },
+    {
+      "id": "signup-email-exists",
+      "type": "element-present",
+      "testId": "signup-email"
+    },
+    {
+      "id": "signup-password-exists",
+      "type": "element-present",
+      "testId": "signup-password"
+    },
+    {
+      "id": "signup-confirm-password-exists",
+      "type": "element-present",
+      "testId": "signup-confirm-password"
+    },
+    {
+      "id": "signup-submit-exists",
+      "type": "element-present",
+      "testId": "signup-submit"
+    },
+    {
+      "id": "verification-card-exists",
+      "type": "element-present",
+      "testId": "verification-card"
+    },
+    {
+      "id": "verification-icon-exists",
+      "type": "element-present",
+      "testId": "verification-icon"
+    },
+    {
+      "id": "verification-resend-exists",
+      "type": "element-present",
+      "testId": "verification-resend"
+    },
+    {
+      "id": "verification-back-exists",
+      "type": "element-present",
+      "testId": "verification-back"
+    },
+    {
+      "id": "verification-card-exists",
+      "type": "element-present",
+      "testId": "verification-card"
+    },
+    {
+      "id": "verification-icon-exists",
+      "type": "element-present",
+      "testId": "verification-icon"
+    },
+    {
+      "id": "verification-resend-exists",
+      "type": "element-present",
+      "testId": "verification-resend"
+    },
+    {
+      "id": "verification-back-exists",
+      "type": "element-present",
+      "testId": "verification-back"
+    },
+    {
+      "id": "verification-card-exists",
+      "type": "element-present",
+      "testId": "verification-card"
+    },
+    {
+      "id": "verification-icon-exists",
+      "type": "element-present",
+      "testId": "verification-icon"
+    },
+    {
+      "id": "verification-resend-exists",
+      "type": "element-present",
+      "testId": "verification-resend"
+    },
+    {
+      "id": "verification-back-exists",
+      "type": "element-present",
+      "testId": "verification-back"
+    },
+    {
+      "id": "verification-card-exists",
+      "type": "element-present",
+      "testId": "verification-card"
+    },
+    {
+      "id": "verification-icon-exists",
+      "type": "element-present",
+      "testId": "verification-icon"
+    },
+    {
+      "id": "verification-resend-exists",
+      "type": "element-present",
+      "testId": "verification-resend"
+    },
+    {
+      "id": "verification-back-exists",
+      "type": "element-present",
+      "testId": "verification-back"
+    },
+    {
+      "id": "oauth-redirect-exists",
+      "type": "element-present",
+      "testId": "oauth-redirect"
+    }
+  ],
+  "$source": "examples/02-auth-flow.uispec.json"
+}

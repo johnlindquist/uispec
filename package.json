@@ -1,0 +1,12 @@
+{
+  "name": "uispec",
+  "version": "0.2.0",
+  "description": "UISpec — unified state machine + visual specification for AI agents",
+  "type": "module",
+  "scripts": {
+    "test": "bun test",
+    "validate": "bun run src/compiler/cli.ts validate",
+    "compile": "bun run src/compiler/cli.ts compile"
+  },
+  "devDependencies": {}
+}

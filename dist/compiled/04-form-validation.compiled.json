@@ -1,0 +1,1006 @@
+{
+  "$format": "uispec-compiled",
+  "$version": "0.2",
+  "initial": "editing",
+  "contextSchema": {},
+  "eventSchema": {},
+  "states": {
+    "editing.pristine": {
+      "path": "editing.pristine",
+      "visual": {
+        "$description": "No fields touched yet — all fields in default state, no errors shown",
+        "container": {
+          "layout": "layer",
+          "align": "center",
+          "justify": "center",
+          "size": {
+            "width": "fill",
+            "height": "fill"
+          },
+          "background": "{color.bg}"
+        },
+        "slots": {
+          "content": [
+            {
+              "type": "group",
+              "name": "form-card",
+              "layout": "stack-v",
+              "align": "stretch",
+              "gap": "{spacing.lg}",
+              "size": {
+                "width": {
+                  "value": 480,
+                  "unit": "px"
+                }
+              },
+              "padding": {
+                "value": "{spacing.xl}"
+              },
+              "background": "{color.card}",
+              "cornerRadius": "{radius.lg}",
+              "borderWidth": {
+                "value": 1,
+                "unit": "px"
+              },
+              "borderColor": "{color.stroke}",
+              "children": [
+                {
+                  "type": "text",
+                  "content": "form.title",
+                  "style": {
+                    "fontSize": "{font.size.xl}",
+                    "fontWeight": "{font.weight.medium}",
+                    "color": "{color.text.primary}"
+                  }
+                },
+                {
+                  "type": "text",
+                  "content": "form.subtitle",
+                  "style": {
+                    "fontSize": "{font.size.sm}",
+                    "color": "{color.text.secondary}"
+                  }
+                },
+                {
+                  "$ref": "field",
+                  "name": "fullName",
+                  "label": "form.name",
+                  "placeholder": "form.namePlaceholder",
+                  "inputType": "text",
+                  "required": true
+                },
+                {
+                  "$ref": "field",
+                  "name": "email",
+                  "label": "form.email",
+                  "placeholder": "form.emailPlaceholder",
+                  "inputType": "email",
+                  "required": true,
+                  "helperText": "form.emailHelper"
+                },
+                {
+                  "$ref": "field",
+                  "name": "subject",
+                  "label": "form.subject",
+                  "placeholder": "form.subjectPlaceholder",
+                  "inputType": "text"
+                },
+                {
+                  "type": "group",
+                  "layout": "stack-v",
+                  "gap": "{spacing.xs}",
+                  "children": [
+                    {
+                      "$ref": "field",
+                      "name": "message",
+                      "label": "form.message",
+                      "placeholder": "form.messagePlaceholder",
+                      "inputType": "textarea",
+                      "required": true,
+                      "maxLength": 500
+                    }
+                  ]
+                },
+                {
+                  "type": "button",
+                  "name": "submit",
+                  "command": "submitForm",
+                  "size": {
+                    "width": "fill",
+                    "height": {
+                      "value": 40,
+                      "unit": "px"
+                    }
+                  },
+                  "cornerRadius": "{radius.sm}",
+                  "style": {
+                    "background": "{color.accent}",
+                    "fontSize": "{font.size.base}",
+                    "fontWeight": "{font.weight.medium}",
+                    "color": "{color.text.primary}"
+                  },
+                  "interactions": {
+                    "hover": {
+                      "background": "{color.accentHover}"
+                    },
+                    "disabled": {
+                      "opacity": 0.5
+                    }
+                  },
+                  "dynamic": [
+                    {
+                      "property": "disabled",
+                      "expr": [
+                        "!",
+                        [
+                          "var",
+                          "formValid"
+                        ]
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "transitions": [
+        {
+          "event": "FOCUS_FIELD",
+          "target": "dirty",
+          "guard": null,
+          "actions": []
+        },
+        {
+          "event": "TYPE",
+          "target": "dirty",
+          "guard": null,
+          "actions": []
+        }
+      ],
+      "entry": [],
+      "exit": [],
+      "invoke": []
+    },
+    "editing.dirty": {
+      "path": "editing.dirty",
+      "visual": {
+        "$description": "At least one field modified. Validation runs on blur (touched). Real-time validation for char counter.",
+        "container": {
+          "layout": "layer",
+          "align": "center",
+          "justify": "center",
+          "size": {
+            "width": "fill",
+            "height": "fill"
+          },
+          "background": "{color.bg}"
+        },
+        "slots": {
+          "content": [
+            {
+              "type": "group",
+              "name": "form-card",
+              "layout": "stack-v",
+              "align": "stretch",
+              "gap": "{spacing.lg}",
+              "size": {
+                "width": {
+                  "value": 480,
+                  "unit": "px"
+                }
+              },
+              "padding": {
+                "value": "{spacing.xl}"
+              },
+              "background": "{color.card}",
+              "cornerRadius": "{radius.lg}",
+              "borderWidth": {
+                "value": 1,
+                "unit": "px"
+              },
+              "borderColor": "{color.stroke}",
+              "children": [
+                {
+                  "type": "text",
+                  "content": "form.title",
+                  "style": {
+                    "fontSize": "{font.size.xl}",
+                    "fontWeight": "{font.weight.medium}",
+                    "color": "{color.text.primary}"
+                  }
+                },
+                {
+                  "type": "text",
+                  "content": "form.subtitle",
+                  "style": {
+                    "fontSize": "{font.size.sm}",
+                    "color": "{color.text.secondary}"
+                  }
+                },
+                {
+                  "$ref": "field",
+                  "name": "fullName",
+                  "label": "form.name",
+                  "placeholder": "form.namePlaceholder",
+                  "inputType": "text",
+                  "required": true
+                },
+                {
+                  "$ref": "field",
+                  "name": "email",
+                  "label": "form.email",
+                  "placeholder": "form.emailPlaceholder",
+                  "inputType": "email",
+                  "required": true,
+                  "helperText": "form.emailHelper"
+                },
+                {
+                  "$ref": "field",
+                  "name": "subject",
+                  "label": "form.subject",
+                  "placeholder": "form.subjectPlaceholder",
+                  "inputType": "text"
+                },
+                {
+                  "type": "group",
+                  "layout": "stack-v",
+                  "gap": "{spacing.xs}",
+                  "children": [
+                    {
+                      "$ref": "field",
+                      "name": "message",
+                      "label": "form.message",
+                      "placeholder": "form.messagePlaceholder",
+                      "inputType": "textarea",
+                      "required": true,
+                      "maxLength": 500
+                    }
+                  ]
+                },
+                {
+                  "type": "button",
+                  "name": "submit",
+                  "command": "submitForm",
+                  "size": {
+                    "width": "fill",
+                    "height": {
+                      "value": 40,
+                      "unit": "px"
+                    }
+                  },
+                  "cornerRadius": "{radius.sm}",
+                  "style": {
+                    "background": "{color.accent}",
+                    "fontSize": "{font.size.base}",
+                    "fontWeight": "{font.weight.medium}",
+                    "color": "{color.text.primary}"
+                  },
+                  "interactions": {
+                    "hover": {
+                      "background": "{color.accentHover}"
+                    },
+                    "disabled": {
+                      "opacity": 0.5
+                    }
+                  },
+                  "dynamic": [
+                    {
+                      "property": "disabled",
+                      "expr": [
+                        "!",
+                        [
+                          "var",
+                          "formValid"
+                        ]
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "transitions": [
+        {
+          "event": "BLUR_FIELD",
+          "target": "validating",
+          "guard": null,
+          "actions": []
+        },
+        {
+          "event": "SUBMIT",
+          "target": "validating",
+          "guard": null,
+          "actions": []
+        }
+      ],
+      "entry": [],
+      "exit": [],
+      "invoke": []
+    },
+    "editing.validating": {
+      "path": "editing.validating",
+      "visual": {
+        "$description": "Field-level validation running. Async fields (email) show spinner. Sync fields resolve immediately.",
+        "container": {
+          "layout": "layer",
+          "align": "center",
+          "justify": "center",
+          "size": {
+            "width": "fill",
+            "height": "fill"
+          },
+          "background": "{color.bg}"
+        },
+        "slots": {
+          "content": [
+            {
+              "type": "group",
+              "name": "form-card",
+              "layout": "stack-v",
+              "align": "stretch",
+              "gap": "{spacing.lg}",
+              "size": {
+                "width": {
+                  "value": 480,
+                  "unit": "px"
+                }
+              },
+              "padding": {
+                "value": "{spacing.xl}"
+              },
+              "background": "{color.card}",
+              "cornerRadius": "{radius.lg}",
+              "borderWidth": {
+                "value": 1,
+                "unit": "px"
+              },
+              "borderColor": "{color.stroke}",
+              "children": [
+                {
+                  "type": "text",
+                  "content": "form.title",
+                  "style": {
+                    "fontSize": "{font.size.xl}",
+                    "fontWeight": "{font.weight.medium}",
+                    "color": "{color.text.primary}"
+                  }
+                },
+                {
+                  "type": "text",
+                  "content": "form.subtitle",
+                  "style": {
+                    "fontSize": "{font.size.sm}",
+                    "color": "{color.text.secondary}"
+                  }
+                },
+                {
+                  "$ref": "field",
+                  "name": "fullName",
+                  "label": "form.name",
+                  "placeholder": "form.namePlaceholder",
+                  "inputType": "text",
+                  "required": true
+                },
+                {
+                  "$ref": "field",
+                  "name": "email",
+                  "label": "form.email",
+                  "placeholder": "form.emailPlaceholder",
+                  "inputType": "email",
+                  "required": true,
+                  "helperText": "form.emailHelper"
+                },
+                {
+                  "$ref": "field",
+                  "name": "subject",
+                  "label": "form.subject",
+                  "placeholder": "form.subjectPlaceholder",
+                  "inputType": "text"
+                },
+                {
+                  "type": "group",
+                  "layout": "stack-v",
+                  "gap": "{spacing.xs}",
+                  "children": [
+                    {
+                      "$ref": "field",
+                      "name": "message",
+                      "label": "form.message",
+                      "placeholder": "form.messagePlaceholder",
+                      "inputType": "textarea",
+                      "required": true,
+                      "maxLength": 500
+                    }
+                  ]
+                },
+                {
+                  "type": "button",
+                  "name": "submit",
+                  "command": "submitForm",
+                  "size": {
+                    "width": "fill",
+                    "height": {
+                      "value": 40,
+                      "unit": "px"
+                    }
+                  },
+                  "cornerRadius": "{radius.sm}",
+                  "style": {
+                    "background": "{color.accent}",
+                    "fontSize": "{font.size.base}",
+                    "fontWeight": "{font.weight.medium}",
+                    "color": "{color.text.primary}"
+                  },
+                  "interactions": {
+                    "hover": {
+                      "background": "{color.accentHover}"
+                    },
+                    "disabled": {
+                      "opacity": 0.5
+                    }
+                  },
+                  "dynamic": [
+                    {
+                      "property": "disabled",
+                      "expr": [
+                        "!",
+                        [
+                          "var",
+                          "formValid"
+                        ]
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "transitions": [
+        {
+          "event": "ALL_VALID",
+          "target": "valid",
+          "guard": null,
+          "actions": []
+        },
+        {
+          "event": "HAS_ERRORS",
+          "target": "invalid",
+          "guard": null,
+          "actions": []
+        },
+        {
+          "event": "TYPE",
+          "target": "dirty",
+          "guard": null,
+          "actions": []
+        }
+      ],
+      "entry": [],
+      "exit": [],
+      "invoke": []
+    },
+    "editing.valid": {
+      "path": "editing.valid",
+      "visual": {
+        "$description": "All touched fields valid — submit button enabled. Untouched optional fields are not validated.",
+        "container": {
+          "layout": "layer",
+          "align": "center",
+          "justify": "center",
+          "size": {
+            "width": "fill",
+            "height": "fill"
+          },
+          "background": "{color.bg}"
+        },
+        "slots": {
+          "content": [
+            {
+              "type": "group",
+              "name": "form-card",
+              "layout": "stack-v",
+              "align": "stretch",
+              "gap": "{spacing.lg}",
+              "size": {
+                "width": {
+                  "value": 480,
+                  "unit": "px"
+                }
+              },
+              "padding": {
+                "value": "{spacing.xl}"
+              },
+              "background": "{color.card}",
+              "cornerRadius": "{radius.lg}",
+              "borderWidth": {
+                "value": 1,
+                "unit": "px"
+              },
+              "borderColor": "{color.stroke}",
+              "children": [
+                {
+                  "type": "text",
+                  "content": "form.title",
+                  "style": {
+                    "fontSize": "{font.size.xl}",
+                    "fontWeight": "{font.weight.medium}",
+                    "color": "{color.text.primary}"
+                  }
+                },
+                {
+                  "type": "text",
+                  "content": "form.subtitle",
+                  "style": {
+                    "fontSize": "{font.size.sm}",
+                    "color": "{color.text.secondary}"
+                  }
+                },
+                {
+                  "$ref": "field",
+                  "name": "fullName",
+                  "label": "form.name",
+                  "placeholder": "form.namePlaceholder",
+                  "inputType": "text",
+                  "required": true
+                },
+                {
+                  "$ref": "field",
+                  "name": "email",
+                  "label": "form.email",
+                  "placeholder": "form.emailPlaceholder",
+                  "inputType": "email",
+                  "required": true,
+                  "helperText": "form.emailHelper"
+                },
+                {
+                  "$ref": "field",
+                  "name": "subject",
+                  "label": "form.subject",
+                  "placeholder": "form.subjectPlaceholder",
+                  "inputType": "text"
+                },
+                {
+                  "type": "group",
+                  "layout": "stack-v",
+                  "gap": "{spacing.xs}",
+                  "children": [
+                    {
+                      "$ref": "field",
+                      "name": "message",
+                      "label": "form.message",
+                      "placeholder": "form.messagePlaceholder",
+                      "inputType": "textarea",
+                      "required": true,
+                      "maxLength": 500
+                    }
+                  ]
+                },
+                {
+                  "type": "button",
+                  "name": "submit",
+                  "command": "submitForm",
+                  "size": {
+                    "width": "fill",
+                    "height": {
+                      "value": 40,
+                      "unit": "px"
+                    }
+                  },
+                  "cornerRadius": "{radius.sm}",
+                  "style": {
+                    "background": "{color.accent}",
+                    "fontSize": "{font.size.base}",
+                    "fontWeight": "{font.weight.medium}",
+                    "color": "{color.text.primary}"
+                  },
+                  "interactions": {
+                    "hover": {
+                      "background": "{color.accentHover}"
+                    },
+                    "disabled": {
+                      "opacity": 0.5
+                    }
+                  },
+                  "dynamic": [
+                    {
+                      "property": "disabled",
+                      "expr": [
+                        "!",
+                        [
+                          "var",
+                          "formValid"
+                        ]
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "transitions": [
+        {
+          "event": "TYPE",
+          "target": "dirty",
+          "guard": null,
+          "actions": []
+        },
+        {
+          "event": "SUBMIT",
+          "target": "submitting",
+          "guard": null,
+          "actions": []
+        }
+      ],
+      "entry": [],
+      "exit": [],
+      "invoke": []
+    },
+    "editing.invalid": {
+      "path": "editing.invalid",
+      "visual": {
+        "$description": "One or more fields have errors — error messages shown below invalid fields with error-appear animation. Submit button disabled.",
+        "container": {
+          "layout": "layer",
+          "align": "center",
+          "justify": "center",
+          "size": {
+            "width": "fill",
+            "height": "fill"
+          },
+          "background": "{color.bg}"
+        },
+        "slots": {
+          "content": [
+            {
+              "type": "group",
+              "name": "form-card",
+              "layout": "stack-v",
+              "align": "stretch",
+              "gap": "{spacing.lg}",
+              "size": {
+                "width": {
+                  "value": 480,
+                  "unit": "px"
+                }
+              },
+              "padding": {
+                "value": "{spacing.xl}"
+              },
+              "background": "{color.card}",
+              "cornerRadius": "{radius.lg}",
+              "borderWidth": {
+                "value": 1,
+                "unit": "px"
+              },
+              "borderColor": "{color.stroke}",
+              "children": [
+                {
+                  "type": "text",
+                  "content": "form.title",
+                  "style": {
+                    "fontSize": "{font.size.xl}",
+                    "fontWeight": "{font.weight.medium}",
+                    "color": "{color.text.primary}"
+                  }
+                },
+                {
+                  "type": "text",
+                  "content": "form.subtitle",
+                  "style": {
+                    "fontSize": "{font.size.sm}",
+                    "color": "{color.text.secondary}"
+                  }
+                },
+                {
+                  "$ref": "field",
+                  "name": "fullName",
+                  "label": "form.name",
+                  "placeholder": "form.namePlaceholder",
+                  "inputType": "text",
+                  "required": true
+                },
+                {
+                  "$ref": "field",
+                  "name": "email",
+                  "label": "form.email",
+                  "placeholder": "form.emailPlaceholder",
+                  "inputType": "email",
+                  "required": true,
+                  "helperText": "form.emailHelper"
+                },
+                {
+                  "$ref": "field",
+                  "name": "subject",
+                  "label": "form.subject",
+                  "placeholder": "form.subjectPlaceholder",
+                  "inputType": "text"
+                },
+                {
+                  "type": "group",
+                  "layout": "stack-v",
+                  "gap": "{spacing.xs}",
+                  "children": [
+                    {
+                      "$ref": "field",
+                      "name": "message",
+                      "label": "form.message",
+                      "placeholder": "form.messagePlaceholder",
+                      "inputType": "textarea",
+                      "required": true,
+                      "maxLength": 500
+                    }
+                  ]
+                },
+                {
+                  "type": "button",
+                  "name": "submit",
+                  "command": "submitForm",
+                  "size": {
+                    "width": "fill",
+                    "height": {
+                      "value": 40,
+                      "unit": "px"
+                    }
+                  },
+                  "cornerRadius": "{radius.sm}",
+                  "style": {
+                    "background": "{color.accent}",
+                    "fontSize": "{font.size.base}",
+                    "fontWeight": "{font.weight.medium}",
+                    "color": "{color.text.primary}"
+                  },
+                  "interactions": {
+                    "hover": {
+                      "background": "{color.accentHover}"
+                    },
+                    "disabled": {
+                      "opacity": 0.5
+                    }
+                  },
+                  "dynamic": [
+                    {
+                      "property": "disabled",
+                      "expr": [
+                        "!",
+                        [
+                          "var",
+                          "formValid"
+                        ]
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "transitions": [
+        {
+          "event": "TYPE",
+          "target": "dirty",
+          "guard": null,
+          "actions": []
+        },
+        {
+          "event": "FOCUS_FIELD",
+          "target": "dirty",
+          "guard": null,
+          "actions": []
+        }
+      ],
+      "entry": [],
+      "exit": [],
+      "invoke": []
+    },
+    "submitting": {
+      "path": "submitting",
+      "visual": {
+        "$description": "All fields disabled, submit button shows spinner. Form cannot be edited during submission.",
+        "container": {
+          "layout": "layer",
+          "align": "center",
+          "justify": "center",
+          "size": {
+            "width": "fill",
+            "height": "fill"
+          },
+          "background": "{color.bg}"
+        }
+      },
+      "transitions": [
+        {
+          "event": "SUCCESS",
+          "target": "success",
+          "guard": null,
+          "actions": []
+        },
+        {
+          "event": "SERVER_ERROR",
+          "target": "serverError",
+          "guard": null,
+          "actions": []
+        },
+        {
+          "event": "NETWORK_ERROR",
+          "target": "networkError",
+          "guard": null,
+          "actions": []
+        }
+      ],
+      "entry": [],
+      "exit": [],
+      "invoke": []
+    },
+    "success": {
+      "path": "success",
+      "visual": {
+        "$description": "Form replaced by success message — green checkmark icon, 'Message sent!' heading, 'We will get back to you soon.' body, and 'Send another' link.",
+        "container": {
+          "layout": "layer",
+          "align": "center",
+          "justify": "center",
+          "size": {
+            "width": "fill",
+            "height": "fill"
+          },
+          "background": "{color.bg}"
+        },
+        "slots": {
+          "content": [
+            {
+              "type": "group",
+              "name": "success-card",
+              "layout": "stack-v",
+              "align": "center",
+              "gap": "{spacing.lg}",
+              "size": {
+                "width": {
+                  "value": 480,
+                  "unit": "px"
+                }
+              },
+              "padding": {
+                "value": "{spacing.xxl}"
+              },
+              "background": "{color.card}",
+              "cornerRadius": "{radius.lg}",
+              "children": [
+                {
+                  "type": "icon",
+                  "icon": "CheckCircle",
+                  "size": {
+                    "value": 48,
+                    "unit": "px"
+                  },
+                  "color": "{color.success}"
+                },
+                {
+                  "type": "text",
+                  "content": "form.success.title",
+                  "style": {
+                    "fontSize": "{font.size.lg}",
+                    "fontWeight": "{font.weight.medium}",
+                    "color": "{color.text.primary}",
+                    "textAlign": "center"
+                  }
+                },
+                {
+                  "type": "text",
+                  "content": "form.success.body",
+                  "style": {
+                    "fontSize": "{font.size.base}",
+                    "color": "{color.text.secondary}",
+                    "textAlign": "center"
+                  }
+                },
+                {
+                  "type": "text",
+                  "content": "form.success.sendAnother",
+                  "style": {
+                    "fontSize": "{font.size.sm}",
+                    "color": "{color.accent}"
+                  },
+                  "command": "resetForm"
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "transitions": [
+        {
+          "event": "RESET",
+          "target": "editing",
+          "guard": null,
+          "actions": []
+        }
+      ],
+      "entry": [],
+      "exit": [],
+      "invoke": []
+    },
+    "serverError": {
+      "path": "serverError",
+      "visual": {
+        "$description": "Form re-enabled with banner at top: 'Server error. Please try again.' Retry button.",
+        "container": {
+          "layout": "layer",
+          "align": "center",
+          "justify": "center",
+          "size": {
+            "width": "fill",
+            "height": "fill"
+          },
+          "background": "{color.bg}"
+        }
+      },
+      "transitions": [
+        {
+          "event": "RETRY",
+          "target": "submitting",
+          "guard": null,
+          "actions": []
+        },
+        {
+          "event": "EDIT",
+          "target": "editing.dirty",
+          "guard": null,
+          "actions": []
+        }
+      ],
+      "entry": [],
+      "exit": [],
+      "invoke": []
+    },
+    "networkError": {
+      "path": "networkError",
+      "visual": {
+        "$description": "Form re-enabled with banner: 'No internet connection.' Shows offline icon and retry button.",
+        "container": {
+          "layout": "layer",
+          "align": "center",
+          "justify": "center",
+          "size": {
+            "width": "fill",
+            "height": "fill"
+          },
+          "background": "{color.bg}"
+        }
+      },
+      "transitions": [
+        {
+          "event": "RETRY",
+          "target": "submitting",
+          "guard": null,
+          "actions": []
+        },
+        {
+          "event": "ONLINE",
+          "target": "submitting",
+          "guard": null,
+          "actions": []
+        },
+        {
+          "event": "EDIT",
+          "target": "editing.dirty",
+          "guard": null,
+          "actions": []
+        }
+      ],
+      "entry": [],
+      "exit": [],
+      "invoke": []
+    }
+  },
+  "assertions": [],
+  "$source": "examples/04-form-validation.uispec.json"
+}

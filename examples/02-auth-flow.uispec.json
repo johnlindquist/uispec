@@ -1,5 +1,5 @@
 {
-  "$schema": "https://uispec.dev/0.1/schema.json",
+  "$schema": "https://uispec.dev/0.2/schema.json",
   "$description": "Authentication flow — multi-page with conditional routing. Demonstrates guards (via context), form inputs, error states, loading substates, and page-level layout transitions. Edge cases: OAuth redirect, email verification pending, rate limiting.",
 
   "$tokens": {
@@ -99,13 +99,20 @@
       "gap": "{spacing.xs}",
       "children": [
         {
-          "type": "text", "bind": "label",
+          "type": "text",
+          "binding": { "content": ["var", "context.label"] },
           "style": { "fontSize": "{font.size.sm}", "fontWeight": "{font.weight.medium}", "color": "{color.text.secondary}" }
         },
         {
-          "type": "input", "bind": "name",
-          "inputType": { "$bind": "inputType" },
-          "placeholder": { "$bind": "placeholder" },
+          "type": "input",
+          "binding": {
+            "name": ["var", "context.name"],
+            "inputType": ["var", "context.inputType"],
+            "placeholder": ["var", "context.placeholder"]
+          },
+          "onChange": [
+            { "kind": "emit", "event": "FIELD_CHANGED" }
+          ],
           "style": {
             "height": { "value": 40, "unit": "px" },
             "padding": { "horizontal": "{spacing.md}" },
@@ -119,17 +126,14 @@
           "interactions": {
             "focus": { "borderColor": "{color.accent}", "outlineWidth": { "value": 2, "unit": "px" }, "outlineColor": "rgba(0, 112, 243, 0.3)" }
           },
-          "errorStyle": {
-            "borderColor": "{color.error}",
-            "background": "{color.errorBg}"
-          }
+          "testId": "input-field"
         }
       ]
     },
     "primary-button": {
       "$description": "Full-width primary action button",
       "type": "button",
-      "params": ["label", "command"],
+      "params": ["label"],
       "size": { "width": "fill", "height": { "value": 40, "unit": "px" } },
       "cornerRadius": "{radius.sm}",
       "style": {
@@ -146,7 +150,7 @@
     "oauth-button": {
       "$description": "OAuth provider button with icon",
       "type": "button",
-      "params": ["provider", "icon", "label", "bgColor"],
+      "params": ["provider", "icon", "label"],
       "size": { "width": "fill", "height": { "value": 40, "unit": "px" } },
       "cornerRadius": "{radius.sm}",
       "layout": "stack-h",
@@ -172,7 +176,144 @@
       "style": {
         "fontSize": "{font.size.sm}",
         "color": "{color.error}"
+      },
+      "aria": { "role": "alert", "live": "assertive" }
+    }
+  },
+
+  "$context": {
+    "email":              { "type": "string",  "default": "",    "$description": "Current email field value" },
+    "password":           { "type": "string",  "default": "",    "$description": "Current password field value" },
+    "name":               { "type": "string",  "default": "",    "$description": "User display name (sign-up only)" },
+    "confirmPassword":    { "type": "string",  "default": "",    "$description": "Confirm password field (sign-up only)" },
+    "submitting":         { "type": "boolean", "default": false, "$description": "Whether a submit request is in flight" },
+    "errorMessage":       { "type": "string",  "default": null,  "$description": "Most recent error message from the server" },
+    "retryAfterSeconds":  { "type": "number",  "default": 0,     "$description": "Countdown seconds when rate-limited" },
+    "oauthProvider":      { "type": "string",  "default": null,  "$description": "Which OAuth provider is being used" },
+    "userId":             { "type": "string",  "default": null,  "$description": "Authenticated user ID after success" }
+  },
+
+  "$events": {
+    "FIELD_CHANGED": {
+      "source": "user",
+      "payload": {
+        "name":  { "type": "string" },
+        "value": { "type": "string" }
       }
+    },
+    "SUBMIT": {
+      "source": "user",
+      "payload": {}
+    },
+    "SUBMIT_EMAIL": {
+      "source": "user",
+      "payload": {}
+    },
+    "SUCCESS": {
+      "source": "network",
+      "payload": {
+        "userId": { "type": "string" }
+      }
+    },
+    "INVALID_CREDENTIALS": {
+      "source": "network",
+      "payload": {
+        "message": { "type": "string" }
+      }
+    },
+    "RATE_LIMITED": {
+      "source": "network",
+      "payload": {
+        "retryAfterSeconds": { "type": "number" }
+      }
+    },
+    "NEEDS_VERIFICATION": {
+      "source": "network",
+      "payload": {}
+    },
+    "COOLDOWN_EXPIRED": {
+      "source": "timer",
+      "payload": {}
+    },
+    "EDIT": {
+      "source": "user",
+      "payload": {}
+    },
+    "OAUTH_GITHUB": {
+      "source": "user",
+      "payload": {}
+    },
+    "OAUTH_GOOGLE": {
+      "source": "user",
+      "payload": {}
+    },
+    "OAUTH_SUCCESS": {
+      "source": "network",
+      "payload": {
+        "userId": { "type": "string" }
+      }
+    },
+    "OAUTH_ERROR": {
+      "source": "network",
+      "payload": {
+        "message": { "type": "string" }
+      }
+    },
+    "OAUTH_CANCEL": {
+      "source": "user",
+      "payload": {}
+    },
+    "GO_TO_SIGNUP": {
+      "source": "user",
+      "payload": {}
+    },
+    "GO_TO_SIGNIN": {
+      "source": "user",
+      "payload": {}
+    },
+    "VALIDATE_FIELD": {
+      "source": "user",
+      "payload": {
+        "name": { "type": "string" }
+      }
+    },
+    "VALID": {
+      "source": "system",
+      "payload": {}
+    },
+    "EMAIL_TAKEN": {
+      "source": "network",
+      "payload": {
+        "message": { "type": "string" }
+      }
+    },
+    "WEAK_PASSWORD": {
+      "source": "network",
+      "payload": {
+        "message": { "type": "string" }
+      }
+    },
+    "VERIFIED": {
+      "source": "network",
+      "payload": {}
+    },
+    "RESEND": {
+      "source": "user",
+      "payload": {}
+    },
+    "RESENT": {
+      "source": "network",
+      "payload": {}
+    },
+    "RESEND_FAILED": {
+      "source": "network",
+      "payload": {
+        "message": { "type": "string" }
+      }
+    },
+    "BACK": {
+      "source": "user",
+      "payload": {}
     }
   },
 
@@ -194,9 +335,24 @@
     "states": {
       "signIn": {
         "on": {
-          "SUBMIT_EMAIL": "signIn.loading",
-          "OAUTH_GITHUB": "oauthRedirect",
-          "OAUTH_GOOGLE": "oauthRedirect",
+          "SUBMIT_EMAIL": {
+            "target": "signIn.loading",
+            "actions": [
+              { "kind": "assign", "path": "context.submitting", "value": true }
+            ]
+          },
+          "OAUTH_GITHUB": {
+            "target": "oauthRedirect",
+            "actions": [
+              { "kind": "assign", "path": "context.oauthProvider", "value": "github" }
+            ]
+          },
+          "OAUTH_GOOGLE": {
+            "target": "oauthRedirect",
+            "actions": [
+              { "kind": "assign", "path": "context.oauthProvider", "value": "google" }
+            ]
+          },
           "GO_TO_SIGNUP": "signUp"
         },
         "initial": "idle",
@@ -215,20 +371,62 @@
                 "cornerRadius": "{radius.lg}",
                 "borderWidth": { "value": 1, "unit": "px" },
                 "borderColor": "{color.stroke}",
+                "testId": "auth-card",
                 "children": [
-                  { "type": "text", "content": "auth.signIn.title", "style": { "fontSize": "{font.size.xl}", "fontWeight": "{font.weight.bold}", "color": "{color.text.primary}" } },
-                  { "$ref": "text-input", "name": "email", "label": "auth.email", "placeholder": "auth.emailPlaceholder", "inputType": "email" },
-                  { "$ref": "text-input", "name": "password", "label": "auth.password", "placeholder": "auth.passwordPlaceholder", "inputType": "password" },
-                  { "$ref": "primary-button", "label": "auth.signIn.submit", "command": "submitSignIn" },
+                  {
+                    "type": "text",
+                    "content": "auth.signIn.title",
+                    "style": { "fontSize": "{font.size.xl}", "fontWeight": "{font.weight.bold}", "color": "{color.text.primary}" },
+                    "testId": "auth-title",
+                    "aria": { "role": "heading", "level": 1 }
+                  },
+                  {
+                    "$ref": "text-input", "name": "email", "label": "auth.email", "placeholder": "auth.emailPlaceholder", "inputType": "email",
+                    "testId": "auth-email",
+                    "aria": { "label": "Email address", "required": true }
+                  },
+                  {
+                    "$ref": "text-input", "name": "password", "label": "auth.password", "placeholder": "auth.passwordPlaceholder", "inputType": "password",
+                    "testId": "auth-password",
+                    "aria": { "label": "Password", "required": true }
+                  },
+                  {
+                    "$ref": "primary-button", "label": "auth.signIn.submit",
+                    "onPress": [
+                      { "kind": "emit", "event": "SUBMIT_EMAIL" }
+                    ],
+                    "enabledWhen": ["==", ["var", "context.submitting"], false],
+                    "testId": "auth-submit",
+                    "aria": { "label": "Sign in" }
+                  },
                   { "type": "group", "name": "divider", "layout": "stack-h", "align": "center", "gap": "{spacing.md}", "children": [
                     { "type": "shape", "shape": "rectangle", "size": { "width": "fill", "height": { "value": 1, "unit": "px" } }, "fill": "{color.stroke}" },
                     { "type": "text", "content": "auth.or", "style": { "fontSize": "{font.size.sm}", "color": "{color.text.muted}" } },
                     { "type": "shape", "shape": "rectangle", "size": { "width": "fill", "height": { "value": 1, "unit": "px" } }, "fill": "{color.stroke}" }
                   ]},
-                  { "$ref": "oauth-button", "provider": "github", "icon": "Github", "label": "auth.continueWithGithub" },
-                  { "$ref": "oauth-button", "provider": "google", "icon": "Google", "label": "auth.continueWithGoogle" },
+                  {
+                    "$ref": "oauth-button", "provider": "github", "icon": "Github", "label": "auth.continueWithGithub",
+                    "onPress": [
+                      { "kind": "emit", "event": "OAUTH_GITHUB" }
+                    ],
+                    "testId": "auth-oauth-github"
+                  },
+                  {
+                    "$ref": "oauth-button", "provider": "google", "icon": "Google", "label": "auth.continueWithGoogle",
+                    "onPress": [
+                      { "kind": "emit", "event": "OAUTH_GOOGLE" }
+                    ],
+                    "testId": "auth-oauth-google"
+                  },
                   { "type": "text", "content": "auth.noAccount", "style": { "fontSize": "{font.size.sm}", "color": "{color.text.muted}", "textAlign": "center" },
-                    "children": [{ "type": "text", "content": "auth.signUpLink", "style": { "color": "{color.accent}" }, "command": "goToSignUp" }]
+                    "children": [{
+                      "type": "text", "content": "auth.signUpLink",
+                      "style": { "color": "{color.accent}" },
+                      "onPress": [
+                        { "kind": "emit", "event": "GO_TO_SIGNUP" }
+                      ],
+                      "testId": "auth-signup-link"
+                    }]
                   }
                 ]
               }
@@ -237,10 +435,25 @@
         },
         "states": {
           "idle": {
+            "entry": [
+              { "kind": "assign", "path": "context.submitting",   "value": false },
+              { "kind": "assign", "path": "context.errorMessage", "value": null }
+            ],
             "$visual": { "$description": "Form ready for input" },
-            "on": { "SUBMIT": "loading" }
+            "on": {
+              "SUBMIT": {
+                "target": "loading",
+                "actions": [
+                  { "kind": "assign", "path": "context.submitting", "value": true }
+                ]
+              }
+            }
           },
           "loading": {
+            "entry": [
+              { "kind": "http", "request": "signIn" },
+              { "kind": "log", "level": "info", "message": "auth_signin_submit" }
+            ],
             "$visual": {
               "$description": "Submit button shows spinner, inputs disabled",
               "slots": {
@@ -248,32 +461,64 @@
               }
             },
             "on": {
-              "SUCCESS": "success",
-              "INVALID_CREDENTIALS": "error",
-              "RATE_LIMITED": "rateLimited",
+              "SUCCESS":              "success",
+              "INVALID_CREDENTIALS":  {
+                "target": "error",
+                "actions": [
+                  { "kind": "assign", "path": "context.errorMessage",  "value": ["var", "event.message"] },
+                  { "kind": "assign", "path": "context.submitting",    "value": false }
+                ]
+              },
+              "RATE_LIMITED": {
+                "target": "rateLimited",
+                "actions": [
+                  { "kind": "assign", "path": "context.retryAfterSeconds", "value": ["var", "event.retryAfterSeconds"] },
+                  { "kind": "assign", "path": "context.submitting",        "value": false }
+                ]
+              },
               "NEEDS_VERIFICATION": "needsVerification"
             }
           },
           "error": {
             "$visual": {
-              "$description": "Card shakes, error message appears below password field: 'Invalid email or password'",
+              "$description": "Card shakes, error message appears below password field",
               "animation": "shake"
             },
-            "on": { "SUBMIT": "loading", "EDIT": "idle" }
+            "on": {
+              "SUBMIT": {
+                "target": "loading",
+                "actions": [
+                  { "kind": "assign", "path": "context.submitting", "value": true }
+                ]
+              },
+              "EDIT": "idle"
+            }
           },
           "rateLimited": {
+            "entry": [
+              { "kind": "timer.start", "id": "cooldown", "ms": 1000, "event": "COOLDOWN_EXPIRED" },
+              { "kind": "log", "level": "info", "message": "auth_rate_limited" }
+            ],
             "$visual": {
               "$description": "Error message: 'Too many attempts. Try again in {retryAfterSeconds}s.' Submit button disabled with countdown."
             },
             "on": { "COOLDOWN_EXPIRED": "idle" }
           },
           "needsVerification": {
-            "$visual": { "$description": "Transitions to emailVerification state" },
-            "on": { "": "emailVerification" }
+            "always": [
+              { "target": "emailVerification", "guard": true, "actions": [] }
+            ],
+            "$visual": { "$description": "Transitions to emailVerification state" }
           },
           "success": {
-            "$visual": { "$description": "Brief green checkmark, then redirect" },
-            "on": { "": "authenticated" }
+            "entry": [
+              { "kind": "assign", "path": "context.submitting", "value": false },
+              { "kind": "log", "level": "info", "message": "auth_signin_success" }
+            ],
+            "always": [
+              { "target": "authenticated", "guard": true, "actions": [] }
+            ],
+            "$visual": { "$description": "Brief green checkmark, then redirect" }
           }
         }
       },
@@ -294,13 +539,39 @@
                 "padding": { "value": "{spacing.xl}" },
                 "background": "{color.surface}",
                 "cornerRadius": "{radius.lg}",
+                "testId": "signup-card",
                 "children": [
-                  { "type": "text", "content": "auth.signUp.title", "style": { "fontSize": "{font.size.xl}", "fontWeight": "{font.weight.bold}", "color": "{color.text.primary}" } },
-                  { "$ref": "text-input", "name": "name", "label": "auth.name", "placeholder": "auth.namePlaceholder", "inputType": "text" },
-                  { "$ref": "text-input", "name": "email", "label": "auth.email", "placeholder": "auth.emailPlaceholder", "inputType": "email" },
-                  { "$ref": "text-input", "name": "password", "label": "auth.password", "placeholder": "auth.passwordPlaceholder", "inputType": "password" },
-                  { "$ref": "text-input", "name": "confirmPassword", "label": "auth.confirmPassword", "placeholder": "auth.confirmPasswordPlaceholder", "inputType": "password" },
-                  { "$ref": "primary-button", "label": "auth.signUp.submit", "command": "submitSignUp" }
+                  {
+                    "type": "text", "content": "auth.signUp.title",
+                    "style": { "fontSize": "{font.size.xl}", "fontWeight": "{font.weight.bold}", "color": "{color.text.primary}" },
+                    "testId": "signup-title",
+                    "aria": { "role": "heading", "level": 1 }
+                  },
+                  {
+                    "$ref": "text-input", "name": "name", "label": "auth.name", "placeholder": "auth.namePlaceholder", "inputType": "text",
+                    "testId": "signup-name"
+                  },
+                  {
+                    "$ref": "text-input", "name": "email", "label": "auth.email", "placeholder": "auth.emailPlaceholder", "inputType": "email",
+                    "testId": "signup-email"
+                  },
+                  {
+                    "$ref": "text-input", "name": "password", "label": "auth.password", "placeholder": "auth.passwordPlaceholder", "inputType": "password",
+                    "testId": "signup-password"
+                  },
+                  {
+                    "$ref": "text-input", "name": "confirmPassword", "label": "auth.confirmPassword", "placeholder": "auth.confirmPasswordPlaceholder", "inputType": "password",
+                    "testId": "signup-confirm-password"
+                  },
+                  {
+                    "$ref": "primary-button", "label": "auth.signUp.submit",
+                    "onPress": [
+                      { "kind": "emit", "event": "SUBMIT" }
+                    ],
+                    "enabledWhen": ["==", ["var", "context.submitting"], false],
+                    "testId": "signup-submit",
+                    "aria": { "label": "Create account" }
+                  }
                 ]
               }
             ]
@@ -308,6 +579,10 @@
         },
         "states": {
           "idle": {
+            "entry": [
+              { "kind": "assign", "path": "context.submitting",   "value": false },
+              { "kind": "assign", "path": "context.errorMessage", "value": null }
+            ],
             "$visual": { "$description": "Form ready for input" },
             "on": { "SUBMIT": "loading", "VALIDATE_FIELD": "validating" }
           },
@@ -316,22 +591,52 @@
             "on": { "VALID": "idle", "SUBMIT": "loading" }
           },
           "loading": {
+            "entry": [
+              { "kind": "assign", "path": "context.submitting", "value": true },
+              { "kind": "http", "request": "signUp" },
+              { "kind": "log", "level": "info", "message": "auth_signup_submit" }
+            ],
             "$visual": { "$description": "Spinner on submit, all fields disabled" },
-            "on": { "SUCCESS": "success", "EMAIL_TAKEN": "error", "WEAK_PASSWORD": "error" }
+            "on": {
+              "SUCCESS": "success",
+              "EMAIL_TAKEN": {
+                "target": "error",
+                "actions": [
+                  { "kind": "assign", "path": "context.errorMessage",  "value": ["var", "event.message"] },
+                  { "kind": "assign", "path": "context.submitting",    "value": false }
+                ]
+              },
+              "WEAK_PASSWORD": {
+                "target": "error",
+                "actions": [
+                  { "kind": "assign", "path": "context.errorMessage",  "value": ["var", "event.message"] },
+                  { "kind": "assign", "path": "context.submitting",    "value": false }
+                ]
+              }
+            }
           },
           "error": {
             "$visual": { "$description": "Shake + field-level errors. email: 'Already registered', password: 'Must be 8+ characters'", "animation": "shake" },
             "on": { "EDIT": "idle", "SUBMIT": "loading" }
           },
           "success": {
-            "$visual": { "$description": "Redirect to email verification" },
-            "on": { "": "emailVerification" }
+            "entry": [
+              { "kind": "log", "level": "info", "message": "auth_signup_success" }
+            ],
+            "always": [
+              { "target": "emailVerification", "guard": true, "actions": [] }
+            ],
+            "$visual": { "$description": "Redirect to email verification" }
           }
         }
       },
 
       "emailVerification": {
-        "on": { "VERIFIED": "authenticated", "RESEND": "emailVerification.resending", "BACK": "signIn" },
+        "on": {
+          "VERIFIED": "authenticated",
+          "RESEND": "emailVerification.resending",
+          "BACK": "signIn"
+        },
         "initial": "waiting",
         "$visual": {
           "$description": "Email verification pending. Shows envelope icon, 'Check your email' heading, description with the email address, and a resend button.",
@@ -346,12 +651,35 @@
                 "padding": { "value": "{spacing.xl}" },
                 "background": "{color.surface}",
                 "cornerRadius": "{radius.lg}",
+                "testId": "verification-card",
                 "children": [
-                  { "type": "icon", "icon": "Mail", "size": { "value": 48, "unit": "px" }, "color": "{color.accent}" },
-                  { "type": "text", "content": "auth.verification.title", "style": { "fontSize": "{font.size.lg}", "fontWeight": "{font.weight.bold}", "color": "{color.text.primary}", "textAlign": "center" } },
-                  { "type": "text", "content": "auth.verification.description", "style": { "fontSize": "{font.size.base}", "color": "{color.text.secondary}", "textAlign": "center" } },
-                  { "$ref": "primary-button", "label": "auth.verification.resend", "command": "resendVerification" },
-                  { "type": "text", "content": "auth.verification.backToSignIn", "style": { "fontSize": "{font.size.sm}", "color": "{color.accent}", "textAlign": "center" }, "command": "backToSignIn" }
+                  { "type": "icon", "icon": "Mail", "size": { "value": 48, "unit": "px" }, "color": "{color.accent}", "testId": "verification-icon" },
+                  {
+                    "type": "text", "content": "auth.verification.title",
+                    "style": { "fontSize": "{font.size.lg}", "fontWeight": "{font.weight.bold}", "color": "{color.text.primary}", "textAlign": "center" },
+                    "aria": { "role": "heading", "level": 1 }
+                  },
+                  {
+                    "type": "text", "content": "auth.verification.description",
+                    "style": { "fontSize": "{font.size.base}", "color": "{color.text.secondary}", "textAlign": "center" },
+                    "binding": { "content": ["var", "context.email"] }
+                  },
+                  {
+                    "$ref": "primary-button", "label": "auth.verification.resend",
+                    "onPress": [
+                      { "kind": "emit", "event": "RESEND" }
+                    ],
+                    "testId": "verification-resend",
+                    "aria": { "label": "Resend verification email" }
+                  },
+                  {
+                    "type": "text", "content": "auth.verification.backToSignIn",
+                    "style": { "fontSize": "{font.size.sm}", "color": "{color.accent}", "textAlign": "center" },
+                    "onPress": [
+                      { "kind": "emit", "event": "BACK" }
+                    ],
+                    "testId": "verification-back"
+                  }
                 ]
               }
             ]
@@ -359,10 +687,17 @@
         },
         "states": {
           "waiting": {
+            "entry": [
+              { "kind": "log", "level": "info", "message": "auth_verification_waiting" }
+            ],
             "$visual": { "$description": "Waiting for user to click email link" },
             "on": { "RESEND": "resending" }
           },
           "resending": {
+            "entry": [
+              { "kind": "http", "request": "resendVerification" },
+              { "kind": "log", "level": "info", "message": "auth_verification_resend" }
+            ],
             "$visual": { "$description": "Resend button shows spinner" },
             "on": { "RESENT": "resent", "RESEND_FAILED": "resendError" }
           },
@@ -378,28 +713,53 @@
       },
 
       "oauthRedirect": {
+        "entry": [
+          { "kind": "http", "request": "oauthRedirect" },
+          { "kind": "log", "level": "info", "message": "auth_oauth_redirect" }
+        ],
         "$visual": {
           "$description": "Full-page loading state with provider logo and 'Redirecting to {provider}...' text. Spinner animation.",
           "slots": {
             "content": [
               {
                 "type": "group", "layout": "stack-v", "align": "center", "gap": "{spacing.lg}",
+                "testId": "oauth-redirect",
                 "children": [
                   { "type": "icon", "icon": "Loader2", "size": { "value": 32, "unit": "px" }, "color": "{color.text.secondary}", "animation": "spinner" },
-                  { "type": "text", "content": "auth.oauth.redirecting", "style": { "fontSize": "{font.size.base}", "color": "{color.text.secondary}" } }
+                  {
+                    "type": "text",
+                    "binding": { "content": ["var", "context.oauthProvider"] },
+                    "style": { "fontSize": "{font.size.base}", "color": "{color.text.secondary}" },
+                    "aria": { "role": "status", "live": "polite" }
+                  }
                 ]
               }
             ]
           }
         },
         "on": {
-          "OAUTH_SUCCESS": "authenticated",
-          "OAUTH_ERROR": "signIn.error",
+          "OAUTH_SUCCESS": {
+            "target": "authenticated",
+            "actions": [
+              { "kind": "assign", "path": "context.userId", "value": ["var", "event.userId"] },
+              { "kind": "log", "level": "info", "message": "auth_oauth_success" }
+            ]
+          },
+          "OAUTH_ERROR": {
+            "target": "signIn.error",
+            "actions": [
+              { "kind": "assign", "path": "context.errorMessage", "value": ["var", "event.message"] }
+            ]
+          },
           "OAUTH_CANCEL": "signIn"
         }
       },
 
       "authenticated": {
+        "entry": [
+          { "kind": "log", "level": "info", "message": "auth_authenticated" },
+          { "kind": "navigate", "to": "/dashboard" }
+        ],
         "$visual": { "$description": "Terminal state — app redirects to main content" }
       }
     }

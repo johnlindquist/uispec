@@ -1,4 +1,4 @@
-# UISpec Format Specification v0.1
+# UISpec Format Specification v0.2
 
 ## Purpose
 
@@ -29,12 +29,16 @@ State machines are excellent at describing application behavior in a way that is
 
 ```json
 {
-  "$schema": "https://uispec.dev/0.1/schema.json",
+  "$schema": "https://uispec.dev/0.2/schema.json",
   "$description": "Human-readable description of this component",
 
   "$tokens": { },
   "$animations": { },
   "$elements": { },
+  "$context": { },
+  "$events": { },
+  "$actions": { },
+  "$effects": { },
   "$machine": { }
 }
 ```
@@ -76,10 +80,209 @@ Each state node:
 
 | Property | Type | Description |
 |----------|------|-------------|
-| `on` | object | Event → target state transitions |
+| `on` | object | Event → transition mappings |
+| `always` | array | Transient transitions evaluated immediately on state entry |
+| `entry` | array | Actions/effects executed when entering the state |
+| `exit` | array | Actions/effects executed when leaving the state |
+| `invoke` | array | Long-running effects active while the state is entered |
 | `initial` | string | Initial child state (for compound states) |
 | `states` | object | Child state nodes (for compound states) |
 | `$visual` | object | Visual specification for this state |
+
+### `$context`
+
+`$context` declares the typed runtime state available to expressions, bindings, guards,
+and effects. An implementation MUST initialize every declared field to its `default` value
+when the machine starts. An implementation MUST reject any `var` reference to a context
+field that is not declared in `$context`.
+
+```json
+"$context": {
+  "email": {
+    "type": "string",
+    "default": "",
+    "required": true,
+    "$description": "Current email field value"
+  },
+  "submitting": {
+    "type": "boolean",
+    "default": false
+  },
+  "error": {
+    "type": "string",
+    "default": null
+  }
+}
+```
+
+Each field MUST declare a `type`. Allowed `type` values:
+
+* `string`
+* `number`
+* `boolean`
+* `object`
+* `array`
+* `null`
+
+Optional properties:
+
+| Property | Type | Description |
+|----------|------|-------------|
+| `default` | any | Initial value. MUST match the declared `type` (or be `null`). |
+| `required` | boolean | If `true`, the field MUST be provided by the host before the machine starts. |
+| `$description` | string | Human-readable explanation. |
+
+### `$events`
+
+`$events` declares every event that MAY be sent to the machine. An implementation
+SHOULD warn when a transition references an event not declared in `$events`.
+
+```json
+"$events": {
+  "INPUT_CHANGED": {
+    "source": "user",
+    "payload": {
+      "name": { "type": "string" },
+      "value": { "type": "string" }
+    }
+  },
+  "SUBMIT": {
+    "source": "user",
+    "payload": {}
+  },
+  "HTTP_OK": {
+    "source": "network",
+    "payload": {
+      "userId": { "type": "string" }
+    }
+  },
+  "HTTP_ERROR": {
+    "source": "network",
+    "payload": {
+      "message": { "type": "string" }
+    }
+  }
+}
+```
+
+Each event MAY declare:
+
+| Property | Type | Description |
+|----------|------|-------------|
+| `source` | string | Origin category. Allowed values: `user`, `system`, `timer`, `network`, `storage`. |
+| `payload` | object | Typed payload fields. Each field follows the same schema as a `$context` field. |
+
+### `$actions`
+
+`$actions` declares named, reusable pure state mutations. Actions MUST NOT produce
+external side effects.
+
+Built-in action kinds:
+
+| Kind | Required fields | Description |
+|------|----------------|-------------|
+| `assign` | `path`, `value` | Set a context field. `path` MUST start with `context.`. |
+| `emit` | `event` | Send an event to the machine. The event MUST be declared in `$events`. |
+| `log` | `level`, `message` | Emit a structured log line. `level` MUST be one of `debug`, `info`, `warn`, `error`. |
+
+Example:
+
+```json
+{ "kind": "assign", "path": "context.email", "value": ["var", "event.value"] }
+{ "kind": "emit", "event": "SUBMIT" }
+{ "kind": "log", "level": "info", "message": "submit_clicked" }
+```
+
+### `$effects`
+
+`$effects` declares named side-effecting operations. Effects interact with the outside
+world and MUST be idempotent or keyed so they are safe to retry.
+
+Built-in effect kinds:
+
+| Kind | Required fields | Description |
+|------|----------------|-------------|
+| `http` | `request` | Invoke a named HTTP request definition. |
+| `timer.start` | `id`, `ms`, `event` | Start a timer that sends `event` after `ms` milliseconds. |
+| `timer.cancel` | `id` | Cancel a running timer. |
+| `navigate` | `to` | Navigate to a route. |
+| `focus` | `target` | Move focus to the named element. |
+| `storage.write` | `key`, `value` | Write a value to persistent storage. |
+
+Example:
+
+```json
+{ "kind": "http", "request": "signInRequest" }
+{ "kind": "timer.start", "id": "cooldown", "ms": 3000, "event": "COOLDOWN_EXPIRED" }
+{ "kind": "focus", "target": "email" }
+{ "kind": "navigate", "to": "/dashboard" }
+```
+
+### Transitions
+
+A transition maps an event (or the `always` keyword) to a target state, an optional
+guard expression, and an optional list of actions.
+
+Short form (event → target string):
+
+```json
+"on": { "SUBMIT": "loading" }
+```
+
+Object form (with guard and actions):
+
+```json
+"on": {
+  "SUBMIT": {
+    "target": "submitting",
+    "guard": ["==", ["var", "context.submitting"], false],
+    "actions": [
+      { "kind": "assign", "path": "context.submitting", "value": true }
+    ]
+  }
+}
+```
+
+`always` transitions are evaluated immediately when the state is entered. They MUST
+include a `guard` to prevent infinite loops:
+
+```json
+"always": [
+  { "target": "success", "guard": ["==", ["var", "context.verified"], true] }
+]
+```
+
+### `entry` and `exit`
+
+`entry` is an array of actions and/or effects executed when the machine enters a state.
+`exit` is an array executed when the machine leaves a state. Entry and exit blocks run
+in declared order.
+
+```json
+"loading": {
+  "entry": [
+    { "kind": "assign", "path": "context.loading", "value": true },
+    { "kind": "http", "request": "loadResource" }
+  ],
+  "exit": [
+    { "kind": "assign", "path": "context.loading", "value": false }
+  ]
+}
+```
+
+### `invoke`
+
+`invoke` declares long-running effects that are active for the entire duration the
+machine is in the state. When the machine exits the state, the invoked effect MUST be
+cancelled.
+
+```json
+"recording": {
+  "invoke": [
+    { "kind": "timer.start", "id": "recording-tick", "ms": 1000, "event": "TICK" }
+  ]
+}
+```
 
 ## Visual Specification (`$visual`)
 
@@ -143,6 +346,78 @@ Platform-agnostic layout types:
 
 Elements with `repeat: N` are rendered N times. When combined with `dynamic` properties, each instance receives an `index` variable.
 
+### Element Runtime Properties
+
+Elements MAY declare the following runtime properties:
+
+| Property | Type | Description |
+|----------|------|-------------|
+| `binding` | object | Maps element properties to context variables or event payloads. |
+| `visibleWhen` | expr | The element is rendered only when this expression evaluates to truthy. |
+| `enabledWhen` | expr | The element is interactive only when this expression evaluates to truthy. When falsy, the element MUST render in a disabled state. |
+| `onPress` | array | Actions/effects triggered when the element is pressed/clicked. |
+| `onChange` | array | Actions/effects triggered when the element's value changes. |
+| `testId` | string | Stable identifier for automated testing and verification. Implementations MUST surface this as a `data-testid` attribute (web) or equivalent accessibility identifier. |
+| `aria` | object | Accessibility metadata. Keys map to ARIA attributes (e.g., `{ "label": "Submit form", "live": "polite" }`). |
+
+Example:
+
+```json
+{
+  "type": "button",
+  "name": "submit",
+  "binding": {
+    "content": ["var", "context.buttonLabel"]
+  },
+  "enabledWhen": ["==", ["var", "context.submitting"], false],
+  "onPress": [
+    { "kind": "emit", "event": "SUBMIT" }
+  ],
+  "testId": "auth-submit",
+  "aria": { "label": "Sign in" }
+}
+```
+
+#### `binding`
+
+`binding` maps element properties to runtime values. Each key is a property name on the
+element; each value is an expression that resolves against `$context` or event payload.
+
+```json
+"binding": {
+  "content": ["var", "context.actionLabel"],
+  "placeholder": ["var", "context.emailPlaceholder"]
+}
+```
+
+### Interaction States
+
+Elements MAY declare an `interactions` object mapping interaction state names to style
+overrides. This is a visual-only concern and does not affect runtime behavior.
+
+Recognized interaction states: `hover`, `focus`, `press`, `disabled`.
+
+```json
+"interactions": {
+  "hover": { "background": "{color.accentHover}" },
+  "focus": { "outlineWidth": { "value": 2, "unit": "px" }, "outlineColor": "rgba(0, 112, 243, 0.3)" },
+  "disabled": { "opacity": 0.5 }
+}
+```
+
+> **Note — legacy fields.** Existing examples use the following fields that are superseded
+> by the runtime properties above. Implementations SHOULD treat them as aliases during a
+> migration period:
+>
+> | Legacy field | Replacement |
+> |-------------|-------------|
+> | `command` | `onPress` with `{ "kind": "emit", "event": "..." }` |
+> | `bind` | `binding` with a `content` key |
+> | `$bind` | Parameter binding within `$elements` — distinct from runtime `binding` |
+> | `conditional` | `visibleWhen` expression |
+> | `errorStyle` | Conditional styling via `interactions.error` or a `visibleWhen` wrapper |
+> | `stateStyles` | Per-field-state styling — use `visibleWhen` + sibling elements |
+
 ## Dynamic Expressions
 
 Some properties depend on runtime context (e.g., audio levels, form values). These are declared in a `dynamic` array on the element:
@@ -156,20 +431,64 @@ Some properties depend on runtime context (e.g., audio levels, form values). The
 }
 ```
 
-Expressions use S-expression arrays. The instruction set:
+Expressions use S-expression arrays. An implementation MUST support all operators listed
+below. An implementation MUST reject any operator not in this table.
+
+#### Arithmetic Operators
 
 | Op | Args | Meaning |
 |----|------|---------|
-| `var` | name | Read runtime context variable |
-| `+` `-` `*` `/` | a, b | Arithmetic |
+| `+` | a, b | Addition |
+| `-` | a, b | Subtraction |
+| `*` | a, b | Multiplication |
+| `/` | a, b | Division |
 | `pow` | base, exp | Exponentiation |
-| `min` `max` | a, b | Clamping |
-| `lerp` | a, b, t | Linear interpolation |
-| `if` | cond, then, else | Conditional |
-| `round` `floor` `ceil` | value | Rounding |
-| `clamp` | value, min, max | Range clamping |
 
-Literals (numbers, strings) are passed through as-is.
+#### Comparison Operators
+
+| Op | Args | Meaning |
+|----|------|---------|
+| `==` | a, b | Equality (value, not reference) |
+| `!=` | a, b | Inequality |
+| `<` | a, b | Less than |
+| `<=` | a, b | Less than or equal |
+| `>` | a, b | Greater than |
+| `>=` | a, b | Greater than or equal |
+
+#### Boolean Operators
+
+| Op | Args | Meaning |
+|----|------|---------|
+| `!` | a | Logical NOT |
+| `&&` | a, b | Logical AND (short-circuiting) |
+| `\|\|` | a, b | Logical OR (short-circuiting) |
+
+#### Access and Utility Operators
+
+| Op | Args | Meaning |
+|----|------|---------|
+| `var` | name | Read a runtime variable. The name MUST use dot-separated paths (e.g., `context.email`, `event.value`). |
+| `get` | object, key | Property access on an object value. |
+| `coalesce` | a, b | Return `a` if non-null, otherwise `b`. |
+| `if` | cond, then, else | Conditional. |
+| `min` | a, b | Minimum of two values. |
+| `max` | a, b | Maximum of two values. |
+| `clamp` | value, min, max | Clamp value to range. |
+| `lerp` | a, b, t | Linear interpolation. |
+| `round` | value | Round to nearest integer. |
+| `floor` | value | Round down. |
+| `ceil` | value | Round up. |
+
+Example:
+
+```json
+["&&",
+  ["!=", ["var", "context.action"], null],
+  ["==", ["var", "context.submitting"], false]
+]
+```
+
+Literals (numbers, strings, booleans, `null`) are passed through as-is.
 
 ## Token References
 
