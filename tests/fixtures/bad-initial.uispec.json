@@ -1,0 +1,11 @@
+{
+  "$schema": "https://uispec.dev/0.2/schema.json",
+  "$description": "bad initial for testing",
+  "$machine": {
+    "id": "test",
+    "initial": "missing",
+    "states": {
+      "idle": {}
+    }
+  }
+}

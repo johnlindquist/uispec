@@ -194,7 +194,7 @@
       },
       "additionalProperties": false
     },
-    "element": {
+    "elementBase": {
       "type": "object",
       "properties": {
         "$ref": { "type": "string" },
@@ -222,15 +222,6 @@
             ]
           }
         },
-        "children": {
-          "oneOf": [
-            {
-              "type": "array",
-              "items": { "$ref": "#/$defs/element" }
-            },
-            { "$ref": "#/$defs/element" }
-          ]
-        },
         "dynamic": {
           "type": "array",
           "items": {
@@ -248,6 +239,59 @@
         "aria": { "type": "object" }
       },
       "additionalProperties": true
+    },
+    "containerElement": {
+      "$comment": "Container-capable elements: group, layer, grid, stack-h, stack-v. MAY declare children.",
+      "allOf": [
+        { "$ref": "#/$defs/elementBase" },
+        {
+          "type": "object",
+          "properties": {
+            "type": { "enum": ["group", "layer", "grid", "stack-h", "stack-v"] },
+            "children": {
+              "oneOf": [
+                {
+                  "type": "array",
+                  "items": { "$ref": "#/$defs/element" }
+                },
+                { "$ref": "#/$defs/element" }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    "leafElement": {
+      "$comment": "Leaf control elements: input, button, text, icon, shape, badge, bar. MUST NOT declare children.",
+      "allOf": [
+        { "$ref": "#/$defs/elementBase" },
+        {
+          "type": "object",
+          "properties": {
+            "type": { "enum": ["input", "button", "text", "icon", "shape", "badge", "bar"] }
+          },
+          "not": {
+            "required": ["children"]
+          }
+        }
+      ]
+    },
+    "refElement": {
+      "$comment": "Element reference via $ref. Children allowed since the referenced element may be a container.",
+      "allOf": [
+        { "$ref": "#/$defs/elementBase" },
+        {
+          "type": "object",
+          "required": ["$ref"]
+        }
+      ]
+    },
+    "element": {
+      "oneOf": [
+        { "$ref": "#/$defs/containerElement" },
+        { "$ref": "#/$defs/leafElement" },
+        { "$ref": "#/$defs/refElement" }
+      ]
     }
   }
 }

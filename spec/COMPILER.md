@@ -191,6 +191,171 @@ This enables:
 }
 ```
 
+## Compiler Contract
+
+- `compile()` never throws for authoring errors; it returns `{ ok, compiled, issues, trace }`.
+- `compiled.initial` is always a leaf state path.
+- CLI success fields:
+  - `ok`
+  - `file`
+  - `output`
+  - `states`
+  - `assertions`
+  - `unresolvedRefs`
+  - `unresolvedTokenAliases`
+  - `leafInitial`
+  - `trace`
+- CLI failure fields:
+  - `ok`
+  - `file`
+  - `issues`
+  - `trace`
+- Trace kinds:
+  - `token`
+  - `ref`
+  - `initial`
+  - `target`
+  - `io`
+  - `summary`
+- Trace phases:
+  - `resolve`
+  - `state-paths`
+  - `validate`
+  - `compile`
+  - `cli`
+
+### CLI Success Example
+
+```json
+{"file":"examples/02-auth-flow.uispec.json","ok":true,"output":"dist/compiled/02-auth-flow.compiled.json","states":17,"assertions":21,"unresolvedRefs":0,"unresolvedTokenAliases":0,"leafInitial":true,"trace":[]}
+```
+
+### CLI Failure Example
+
+```json
+{"file":"tests/fixtures/bad-initial.uispec.json","ok":false,"issues":[{"code":"INVALID_MACHINE_INITIAL","message":"Machine initial \"missing\" does not resolve to a state","path":"$machine.initial","phase":"state-paths"}],"trace":[]}
+```
+
+### Issue Codes
+
+| Code | Phase | Meaning |
+|------|-------|---------|
+| `UNDECLARED_CONTEXT_VAR` | validate | Expression references undeclared `$context` variable |
+| `UNDECLARED_EVENT` | validate | Transition or emit uses undeclared `$events` key |
+| `UNDECLARED_TARGET` | state-paths | Transition target does not resolve to any state |
+| `UNSUPPORTED_EXPR_OP` | validate | Expression uses an operator outside the supported set |
+| `INVALID_ASSIGN_PATH` | validate | Assign action path does not start with `context.` |
+| `UNKNOWN_TOKEN_REFERENCE` | resolve | `{token.path}` not found in `$tokens` |
+| `UNKNOWN_ELEMENT_REFERENCE` | resolve | `$ref` name not found in `$elements` |
+| `INVALID_MACHINE_INITIAL` | state-paths | `$machine.initial` does not resolve to a state |
+| `INVALID_COMPOUND_INITIAL` | state-paths | Compound state `initial` references nonexistent child |
+| `READ_FAILED` | cli | File could not be read or parsed |
+
+### Trace Entry Shape
+
+Every trace entry follows this schema. The `status`, `code`, `detail`, and `attempts` fields are optional and additive — older consumers that only read `phase`/`kind`/`path`/`input`/`output` continue to work.
+
+```json
+{
+  "phase": "state-paths",
+  "kind": "initial",
+  "path": "$machine.initial",
+  "input": "missing",
+  "output": null,
+  "status": "error",
+  "code": "INVALID_MACHINE_INITIAL",
+  "detail": "Machine initial \"missing\" does not resolve to a state",
+  "attempts": ["missing"]
+}
+```
+
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| `phase` | `"resolve" \| "state-paths" \| "validate" \| "compile" \| "cli"` | yes | Compiler phase that produced the entry |
+| `kind` | `"token" \| "ref" \| "initial" \| "target" \| "io" \| "summary"` | yes | Category of the traced operation |
+| `path` | `string` | yes | JSON-path location in the source document |
+| `input` | `string` | yes | The raw value being resolved |
+| `output` | `string \| undefined` | no | The resolved value (present on success) |
+| `status` | `"ok" \| "error"` | no | Explicit success/failure indicator |
+| `code` | `CompilerIssueCode` | no | Issue code on failure |
+| `detail` | `string` | no | Human-readable explanation |
+| `attempts` | `string[]` | no | Resolution candidates tried before failure |
+
+### CLI Inspect Command
+
+The `inspect` command provides a machine-readable debug view of a compiled spec without writing output files. It exposes resolved state graphs, visual trees, assertions, and conformance summaries in one JSON response — letting agents query the compiler directly instead of reverse-engineering compiled artifacts.
+
+```
+bun run src/compiler/cli.ts inspect [--trace] [file...]
+```
+
+#### Inspect Success Output
+
+```json
+{
+  "file": "examples/02-auth-flow.uispec.json",
+  "ok": true,
+  "views": {
+    "resolvedInitial": "signIn.idle",
+    "stateIndex": {
+      "all": ["signIn", "signIn.idle", "signIn.loading", "..."],
+      "leaf": ["signIn.idle", "signIn.loading", "..."]
+    },
+    "stateGraph": {
+      "signIn.idle": [
+        { "event": "SUBMIT", "target": "signIn.loading", "guarded": false, "actionCount": 1 }
+      ]
+    },
+    "visualTree": {
+      "signIn.idle": { "$description": "..." }
+    },
+    "assertions": [
+      { "id": "auth-submit-exists", "type": "element-present", "testId": "auth-submit" }
+    ],
+    "conformance": {
+      "leafInitial": true,
+      "unresolvedRefs": 0,
+      "unresolvedTokenAliases": 0,
+      "issueCount": 0
+    }
+  },
+  "issues": [],
+  "trace": []
+}
+```
+
+#### Inspect Failure Output
+
+For invalid or unreadable specs, `views` is `null`:
+
+```json
+{
+  "file": "tests/fixtures/bad-initial.uispec.json",
+  "ok": false,
+  "views": null,
+  "issues": [{ "code": "INVALID_MACHINE_INITIAL", "message": "...", "path": "$machine.initial", "phase": "state-paths" }],
+  "trace": []
+}
+```
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `views.resolvedInitial` | `string` | The leaf state path the machine starts in |
+| `views.stateIndex.all` | `string[]` | All state paths (compound + leaf), sorted |
+| `views.stateIndex.leaf` | `string[]` | Leaf-only state paths, sorted |
+| `views.stateGraph` | `Record<string, Array>` | Per-state transition summaries with event, target, guarded, actionCount |
+| `views.visualTree` | `Record<string, VisualSpec>` | Per-state resolved visual specs |
+| `views.assertions` | `Assertion[]` | Extracted testId verification expectations |
+| `views.conformance` | `object` | Conformance summary: leafInitial, unresolvedRefs, unresolvedTokenAliases, issueCount |
+
+### Validation Output
+
+The `validate` command now returns the same `trace` field as `compile`, giving agents a single mental model for both commands:
+
+```json
+{"file":"tests/fixtures/bad-initial.uispec.json","ok":false,"issues":[{"code":"INVALID_MACHINE_INITIAL","message":"Machine initial \"missing\" does not resolve to a state","path":"$machine.initial","phase":"state-paths"}],"trace":[{"phase":"state-paths","kind":"initial","path":"$machine.initial","input":"missing","status":"error","code":"INVALID_MACHINE_INITIAL","detail":"Machine initial \"missing\" does not resolve to a state"}]}
+```
+
 ## Per-Language Runtime
 
 Consuming the compiled format requires ~50 lines total:

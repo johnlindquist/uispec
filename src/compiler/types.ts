@@ -3,6 +3,7 @@ export type Json = Scalar | Json[] | { [key: string]: Json };
 
 export type Expr =
   | Scalar
+  | ["param", string]
   | ["var", string]
   | ["get", Expr, string]
   | ["+", Expr, Expr]
@@ -144,4 +145,59 @@ export interface CompiledUISpec {
   eventSchema: Record<string, EventSpec>;
   states: Record<string, CompiledState>;
   assertions: Assertion[];
+}
+
+// ── Unified diagnostics ──
+
+export type CompilerIssueCode =
+  | "UNDECLARED_CONTEXT_VAR"
+  | "UNDECLARED_EVENT"
+  | "UNDECLARED_TARGET"
+  | "UNSUPPORTED_EXPR_OP"
+  | "INVALID_ASSIGN_PATH"
+  | "UNKNOWN_TOKEN_REFERENCE"
+  | "UNKNOWN_ELEMENT_REFERENCE"
+  | "INVALID_MACHINE_INITIAL"
+  | "INVALID_COMPOUND_INITIAL"
+  | "READ_FAILED";
+
+export type CompilerTracePhase =
+  | "resolve"
+  | "state-paths"
+  | "validate"
+  | "compile"
+  | "cli";
+
+export type CompilerTraceKind =
+  | "token"
+  | "ref"
+  | "initial"
+  | "target"
+  | "io"
+  | "summary";
+
+export interface CompilerIssue {
+  code: CompilerIssueCode;
+  message: string;
+  path: string;
+  phase: "resolve" | "state-paths" | "validate" | "compile" | "cli";
+}
+
+export interface CompilerTraceEntry {
+  phase: CompilerTracePhase;
+  kind: CompilerTraceKind;
+  path: string;
+  input: string;
+  output?: string;
+  status?: "ok" | "error";
+  code?: CompilerIssueCode;
+  detail?: string;
+  attempts?: string[];
+}
+
+export interface CompileResult {
+  ok: boolean;
+  compiled: CompiledUISpec | null;
+  issues: CompilerIssue[];
+  trace: CompilerTraceEntry[];
 }

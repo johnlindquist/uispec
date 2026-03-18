@@ -1,27 +1,23 @@
 import type {
   ActionSpec,
+  CompilerIssue,
+  CompilerTraceEntry,
   EffectSpec,
   Expr,
   StateNode,
   UISpecDocument,
 } from "./types";
-
-export type IssueCode =
-  | "UNDECLARED_CONTEXT_VAR"
-  | "UNDECLARED_EVENT"
-  | "UNDECLARED_TARGET"
-  | "UNSUPPORTED_EXPR_OP"
-  | "INVALID_ASSIGN_PATH";
-
-export interface ValidationIssue {
-  code: IssueCode;
-  message: string;
-  path: string;
-}
+import {
+  buildStateIndex,
+  resolveLeafInitial,
+  resolveTargetPath,
+  type StateIndex,
+} from "./state-paths";
 
 export interface ValidationResult {
   ok: boolean;
-  issues: ValidationIssue[];
+  issues: CompilerIssue[];
+  trace: CompilerTraceEntry[];
 }
 
 const SUPPORTED_OPS = new Set([
@@ -55,7 +51,7 @@ const SUPPORTED_OPS = new Set([
 function walkExpr(
   expr: Expr,
   path: string,
-  issues: ValidationIssue[],
+  issues: CompilerIssue[],
   contextKeys: Set<string>
 ): void {
   if (expr === null) return;
@@ -74,6 +70,7 @@ function walkExpr(
       code: "UNSUPPORTED_EXPR_OP",
       message: `Unsupported expression operator: ${op}`,
       path,
+      phase: "validate",
     });
     return;
   }
@@ -87,6 +84,7 @@ function walkExpr(
           code: "UNDECLARED_CONTEXT_VAR",
           message: `Context variable not declared: ${key}`,
           path,
+          phase: "validate",
         });
       }
     }
@@ -97,41 +95,10 @@ function walkExpr(
   }
 }
 
-function collectStatePaths(
-  states: Record<string, StateNode>,
-  prefix = "",
-  out = new Set<string>()
-): Set<string> {
-  for (const [key, node] of Object.entries(states)) {
-    const path = prefix ? `${prefix}.${key}` : key;
-    out.add(path);
-    if (node.states && Object.keys(node.states).length > 0) {
-      collectStatePaths(node.states, path, out);
-    }
-  }
-  return out;
-}
-
-function collectLeafPaths(
-  states: Record<string, StateNode>,
-  prefix = "",
-  out = new Set<string>()
-): Set<string> {
-  for (const [key, node] of Object.entries(states)) {
-    const path = prefix ? `${prefix}.${key}` : key;
-    if (!node.states || Object.keys(node.states).length === 0) {
-      out.add(path);
-    } else {
-      collectLeafPaths(node.states, path, out);
-    }
-  }
-  return out;
-}
-
 function validateAction(
   action: ActionSpec,
   path: string,
-  issues: ValidationIssue[],
+  issues: CompilerIssue[],
   eventKeys: Set<string>,
   contextKeys: Set<string>
 ): void {
@@ -141,6 +108,7 @@ function validateAction(
         code: "INVALID_ASSIGN_PATH",
         message: `assign path must start with context.: ${action.path ?? "(missing)"}`,
         path,
+        phase: "validate",
       });
     }
     if (action.value !== undefined) {
@@ -153,6 +121,7 @@ function validateAction(
       code: "UNDECLARED_EVENT",
       message: `Event not declared in $events: ${action.event}`,
       path,
+      phase: "validate",
     });
   }
 }
@@ -160,7 +129,7 @@ function validateAction(
 function validateEntryExit(
   items: Array<ActionSpec | EffectSpec> | undefined,
   path: string,
-  issues: ValidationIssue[],
+  issues: CompilerIssue[],
   eventKeys: Set<string>,
   contextKeys: Set<string>
 ): void {
@@ -183,61 +152,38 @@ function validateEntryExit(
 }
 
 /**
- * Resolve a transition target against the set of all known state paths.
- * Statecharts allow relative targets: within `signIn.states.idle`, a target
- * of `"loading"` means sibling `signIn.loading`. We check:
- *   1. Exact match (absolute path).
- *   2. Relative to the parent compound state (sibling path).
- *   3. Relative to each ancestor compound state (walking up).
+ * Convert a schema-style path like "$machine.states.signIn.states.idle"
+ * to a logical state path like "signIn.idle" for StateIndex lookups.
  */
-function resolveTarget(
-  target: string,
-  nodePath: string,
-  allPaths: Set<string>
-): boolean {
-  if (allPaths.has(target)) return true;
-  // nodePath is like "$machine.states.signIn.states.idle" — extract the
-  // logical state path by stripping the "$machine.states." prefix and
-  // ".states." separators.
-  const logicalPath = nodePath
+function schemaPathToLogicalPath(schemaPath: string): string {
+  return schemaPath
     .replace(/^\$machine\.states\./, "")
     .replace(/\.states\./g, ".");
-  // Walk up parent paths and try prepending
-  const parts = logicalPath.split(".");
-  for (let i = parts.length - 1; i >= 1; i--) {
-    const parentPath = parts.slice(0, i).join(".");
-    const resolved = `${parentPath}.${target}`;
-    if (allPaths.has(resolved)) return true;
-  }
-  return false;
 }
 
 function validateNode(
   node: StateNode,
   path: string,
-  issues: ValidationIssue[],
-  allPaths: Set<string>,
+  issues: CompilerIssue[],
+  index: StateIndex,
   eventKeys: Set<string>,
   contextKeys: Set<string>
 ): void {
+  const logicalPath = schemaPathToLogicalPath(path);
+
   for (const [event, transition] of Object.entries(node.on ?? {})) {
     if (event !== "" && !eventKeys.has(event)) {
       issues.push({
         code: "UNDECLARED_EVENT",
         message: `Transition uses undeclared event: ${event}`,
         path: `${path}.on.${event}`,
+        phase: "validate",
       });
     }
 
     const target =
       typeof transition === "string" ? transition : transition.target;
-    if (!resolveTarget(target, path, allPaths)) {
-      issues.push({
-        code: "UNDECLARED_TARGET",
-        message: `Transition target does not exist: ${target}`,
-        path: `${path}.on.${event}`,
-      });
-    }
+    resolveTargetPath(logicalPath, target, index, issues, `${path}.on.${event}`);
 
     if (typeof transition !== "string") {
       if (transition.guard) {
@@ -265,13 +211,7 @@ function validateNode(
       const transition = node.always[i]!;
       const target =
         typeof transition === "string" ? transition : transition.target;
-      if (!resolveTarget(target, path, allPaths)) {
-        issues.push({
-          code: "UNDECLARED_TARGET",
-          message: `Transition target does not exist: ${target}`,
-          path: `${path}.always[${i}]`,
-        });
-      }
+      resolveTargetPath(logicalPath, target, index, issues, `${path}.always[${i}]`);
       if (typeof transition !== "string") {
         if (transition.guard) {
           walkExpr(
@@ -302,25 +242,34 @@ function validateNode(
       child,
       `${path}.states.${childKey}`,
       issues,
-      allPaths,
+      index,
       eventKeys,
       contextKeys
     );
   }
 }
 
-export function validateSpec(document: UISpecDocument): ValidationResult {
-  const issues: ValidationIssue[] = [];
-  const allPaths = collectStatePaths(document.$machine.states);
+export function validateSpec(
+  document: UISpecDocument,
+  options: { trace?: boolean } = {}
+): ValidationResult {
+  const issues: CompilerIssue[] = [];
+  const trace: CompilerTraceEntry[] = [];
   const eventKeys = new Set(Object.keys(document.$events ?? {}));
   const contextKeys = new Set(Object.keys(document.$context ?? {}));
+
+  // Build StateIndex for target resolution (shared engine with compiler)
+  const index = buildStateIndex(document.$machine.states, issues, trace);
+
+  // Check machine initial
+  resolveLeafInitial(document.$machine.initial, index, issues, "$machine.initial", trace);
 
   for (const [key, node] of Object.entries(document.$machine.states)) {
     validateNode(
       node,
       `$machine.states.${key}`,
       issues,
-      allPaths,
+      index,
       eventKeys,
       contextKeys
     );
@@ -329,5 +278,6 @@ export function validateSpec(document: UISpecDocument): ValidationResult {
   return {
     ok: issues.length === 0,
     issues,
+    trace: options.trace ? trace : [],
   };
 }

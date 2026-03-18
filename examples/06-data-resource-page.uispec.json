@@ -100,12 +100,12 @@
       "children": [
         {
           "type": "text",
-          "binding": { "content": ["var", "context.label"] },
+          "binding": { "content": ["param", "label"] },
           "style": { "fontSize": "{font.size.sm}", "fontWeight": "{font.weight.medium}", "color": "{color.text.secondary}" }
         },
         {
           "type": "input",
-          "binding": { "name": ["var", "context.name"] },
+          "binding": { "name": ["param", "name"] },
           "onChange": [
             { "kind": "emit", "event": "FIELD_CHANGED" }
           ],

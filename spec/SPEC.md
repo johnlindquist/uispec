@@ -333,16 +333,58 @@ Platform-agnostic layout types:
 
 ## Element Types
 
-| Type | Description |
-|------|-------------|
-| `icon` | Named icon with size and color |
-| `text` | Styled text content (may be i18n key) |
-| `button` | Interactive element with hover/press/focus states |
-| `group` | Layout container with children |
-| `badge` | Small status indicator |
-| `shape` | Primitive shape (circle, rectangle) |
-| `bar` | Data-driven bar (e.g., waveform level) |
-| `input` | Text input field |
+| Type | Category | Description |
+|------|----------|-------------|
+| `group` | container | Generic layout container with children |
+| `layer` | container | Z-axis stacking container (equivalent to CSS `position: relative` / SwiftUI `ZStack`) |
+| `grid` | container | Grid layout container |
+| `stack-h` | container | Horizontal stack layout container |
+| `stack-v` | container | Vertical stack layout container |
+| `text` | leaf | Styled text content (may be i18n key) |
+| `input` | leaf | Text input field |
+| `button` | leaf | Interactive element with hover/press/focus states |
+| `icon` | leaf | Named icon with size and color |
+| `shape` | leaf | Primitive shape (circle, rectangle) |
+| `badge` | leaf | Small status indicator |
+| `bar` | leaf | Data-driven bar (e.g., waveform level) |
+
+### Container vs Leaf Elements
+
+Elements are classified into two categories that determine whether they may declare `children`:
+
+- **Container-capable elements:** `group`, `layer`, `grid`, `stack-h`, `stack-v`
+- **Leaf control elements:** `input`, `button`, `text`, `icon`, `shape`, `badge`, `bar`
+
+A container-capable element MAY declare a `children` array containing other elements. A leaf control element MUST NOT declare `children` unless the schema explicitly marks it as composite.
+
+This distinction is normative: two independent renderers MUST classify the same element tree the same way. When a labeled input or a text-with-link is needed, wrap the elements in a `group` container rather than adding `children` to a leaf control.
+
+**Correct pattern — labeled input field:**
+
+```json
+{
+  "type": "group",
+  "name": "email-field",
+  "layout": "stack-v",
+  "gap": 4,
+  "children": [
+    { "type": "text", "content": "Email" },
+    { "type": "input", "name": "email", "binding": { "inputType": "email" } }
+  ]
+}
+```
+
+**Incorrect pattern — leaf control as container:**
+
+```json
+{
+  "type": "input",
+  "children": [
+    { "type": "text", "content": "Email" },
+    { "type": "input", "name": "email" }
+  ]
+}
+```
 
 Elements with `repeat: N` are rendered N times. When combined with `dynamic` properties, each instance receives an `index` variable.
 

@@ -1,5 +1,5 @@
 import { describe, expect, it } from "bun:test";
-import { validateSpec, type ValidationResult } from "../src/compiler/validate";
+import { validateSpec } from "../src/compiler/validate";
 import type { UISpecDocument } from "../src/compiler/types";
 
 function minimalDoc(overrides: Partial<UISpecDocument> = {}): UISpecDocument {
@@ -176,7 +176,7 @@ describe("validateSpec", () => {
       expect(result.issues).toContainEqual(
         expect.objectContaining({
           code: "UNDECLARED_TARGET",
-          message: "Transition target does not exist: nonexistent",
+          phase: "state-paths",
         })
       );
     });
@@ -344,7 +344,7 @@ describe("validateSpec", () => {
       expect(result.issues).toContainEqual(
         expect.objectContaining({
           code: "UNDECLARED_TARGET",
-          message: "Transition target does not exist: nowhere",
+          phase: "state-paths",
         })
       );
     });

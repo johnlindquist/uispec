@@ -92,23 +92,23 @@
 
   "$elements": {
     "text-input": {
-      "$description": "Styled text input with label, placeholder, and error state",
-      "type": "input",
+      "$description": "Styled text input with label, placeholder, and error state. Uses group container to wrap label + input.",
+      "type": "group",
       "params": ["name", "label", "placeholder", "inputType"],
       "layout": "stack-v",
       "gap": "{spacing.xs}",
       "children": [
         {
           "type": "text",
-          "binding": { "content": ["var", "context.label"] },
+          "binding": { "content": ["param", "label"] },
           "style": { "fontSize": "{font.size.sm}", "fontWeight": "{font.weight.medium}", "color": "{color.text.secondary}" }
         },
         {
           "type": "input",
           "binding": {
-            "name": ["var", "context.name"],
-            "inputType": ["var", "context.inputType"],
-            "placeholder": ["var", "context.placeholder"]
+            "name": ["param", "name"],
+            "inputType": ["param", "inputType"],
+            "placeholder": ["param", "placeholder"]
           },
           "onChange": [
             { "kind": "emit", "event": "FIELD_CHANGED" }
@@ -418,15 +418,18 @@
                     ],
                     "testId": "auth-oauth-google"
                   },
-                  { "type": "text", "content": "auth.noAccount", "style": { "fontSize": "{font.size.sm}", "color": "{color.text.muted}", "textAlign": "center" },
-                    "children": [{
-                      "type": "text", "content": "auth.signUpLink",
-                      "style": { "color": "{color.accent}" },
-                      "onPress": [
-                        { "kind": "emit", "event": "GO_TO_SIGNUP" }
-                      ],
-                      "testId": "auth-signup-link"
-                    }]
+                  { "type": "group", "name": "signup-prompt", "layout": "stack-h", "align": "center", "justify": "center", "gap": "{spacing.xs}",
+                    "children": [
+                      { "type": "text", "content": "auth.noAccount", "style": { "fontSize": "{font.size.sm}", "color": "{color.text.muted}" } },
+                      {
+                        "type": "text", "content": "auth.signUpLink",
+                        "style": { "fontSize": "{font.size.sm}", "color": "{color.accent}" },
+                        "onPress": [
+                          { "kind": "emit", "event": "GO_TO_SIGNUP" }
+                        ],
+                        "testId": "auth-signup-link"
+                      }
+                    ]
                   }
                 ]
               }

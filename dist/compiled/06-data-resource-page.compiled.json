@@ -144,10 +144,10 @@
             "minHeight": "fill"
           },
           "padding": {
-            "horizontal": "{spacing.xl}",
-            "vertical": "{spacing.lg}"
+            "horizontal": 32,
+            "vertical": 24
           },
-          "background": "{color.bg}"
+          "background": "#ffffff"
         },
         "animation": "fade-in",
         "slots": {
@@ -156,7 +156,7 @@
               "type": "group",
               "name": "skeleton-container",
               "layout": "stack-v",
-              "gap": "{spacing.md}",
+              "gap": 16,
               "testId": "loading-skeleton",
               "aria": {
                 "role": "status",
@@ -165,16 +165,76 @@
               },
               "children": [
                 {
-                  "$ref": "skeleton-row"
+                  "$description": "A placeholder skeleton row for loading state",
+                  "type": "shape",
+                  "shape": "rectangle",
+                  "size": {
+                    "width": "fill",
+                    "height": {
+                      "value": 20,
+                      "unit": "px"
+                    }
+                  },
+                  "fill": "#f3f4f6",
+                  "cornerRadius": 4,
+                  "animation": "skeleton-pulse",
+                  "aria": {
+                    "hidden": true
+                  }
                 },
                 {
-                  "$ref": "skeleton-row"
+                  "$description": "A placeholder skeleton row for loading state",
+                  "type": "shape",
+                  "shape": "rectangle",
+                  "size": {
+                    "width": "fill",
+                    "height": {
+                      "value": 20,
+                      "unit": "px"
+                    }
+                  },
+                  "fill": "#f3f4f6",
+                  "cornerRadius": 4,
+                  "animation": "skeleton-pulse",
+                  "aria": {
+                    "hidden": true
+                  }
                 },
                 {
-                  "$ref": "skeleton-row"
+                  "$description": "A placeholder skeleton row for loading state",
+                  "type": "shape",
+                  "shape": "rectangle",
+                  "size": {
+                    "width": "fill",
+                    "height": {
+                      "value": 20,
+                      "unit": "px"
+                    }
+                  },
+                  "fill": "#f3f4f6",
+                  "cornerRadius": 4,
+                  "animation": "skeleton-pulse",
+                  "aria": {
+                    "hidden": true
+                  }
                 },
                 {
-                  "$ref": "skeleton-row"
+                  "$description": "A placeholder skeleton row for loading state",
+                  "type": "shape",
+                  "shape": "rectangle",
+                  "size": {
+                    "width": "fill",
+                    "height": {
+                      "value": 20,
+                      "unit": "px"
+                    }
+                  },
+                  "fill": "#f3f4f6",
+                  "cornerRadius": 4,
+                  "animation": "skeleton-pulse",
+                  "aria": {
+                    "hidden": true
+                  }
                 }
               ]
             }
@@ -184,7 +244,7 @@
       "transitions": [
         {
           "event": "LOAD_OK",
-          "target": "ready",
+          "target": "ready.viewing",
           "guard": null,
           "actions": [
             {
@@ -275,10 +335,10 @@
             "minHeight": "fill"
           },
           "padding": {
-            "horizontal": "{spacing.xl}",
-            "vertical": "{spacing.lg}"
+            "horizontal": 32,
+            "vertical": 24
           },
-          "background": "{color.bg}"
+          "background": "#ffffff"
         },
         "animation": "fade-in",
         "slots": {
@@ -287,7 +347,7 @@
               "type": "group",
               "name": "resource-display",
               "layout": "stack-v",
-              "gap": "{spacing.lg}",
+              "gap": 24,
               "testId": "resource-display",
               "children": [
                 {
@@ -300,9 +360,9 @@
                     ]
                   },
                   "style": {
-                    "fontSize": "{font.size.xl}",
-                    "fontWeight": "{font.weight.bold}",
-                    "color": "{color.text.primary}"
+                    "fontSize": 24,
+                    "fontWeight": 700,
+                    "color": "#111827"
                   },
                   "testId": "resource-name",
                   "aria": {
@@ -320,8 +380,8 @@
                     ]
                   },
                   "style": {
-                    "fontSize": "{font.size.base}",
-                    "color": "{color.text.secondary}"
+                    "fontSize": 14,
+                    "color": "#6b7280"
                   },
                   "testId": "resource-email"
                 },
@@ -336,12 +396,12 @@
                     }
                   ],
                   "style": {
-                    "background": "{color.accent}",
-                    "color": "{color.bg}",
-                    "cornerRadius": "{radius.sm}",
+                    "background": "#2563eb",
+                    "color": "#ffffff",
+                    "cornerRadius": 4,
                     "padding": {
-                      "horizontal": "{spacing.md}",
-                      "vertical": "{spacing.sm}"
+                      "horizontal": 16,
+                      "vertical": 8
                     }
                   },
                   "testId": "resource-edit-btn",
@@ -357,7 +417,7 @@
       "transitions": [
         {
           "event": "EDIT",
-          "target": "editing",
+          "target": "ready.editing",
           "guard": null,
           "actions": [
             {
@@ -391,10 +451,10 @@
             "minHeight": "fill"
           },
           "padding": {
-            "horizontal": "{spacing.xl}",
-            "vertical": "{spacing.lg}"
+            "horizontal": 32,
+            "vertical": 24
           },
-          "background": "{color.bg}"
+          "background": "#ffffff"
         },
         "animation": "fade-in",
         "slots": {
@@ -403,7 +463,7 @@
               "type": "group",
               "name": "edit-form",
               "layout": "stack-v",
-              "gap": "{spacing.md}",
+              "gap": 16,
               "testId": "resource-edit-form",
               "aria": {
                 "role": "form",
@@ -411,7 +471,54 @@
               },
               "children": [
                 {
-                  "$ref": "field-group",
+                  "$description": "Labeled form field",
+                  "type": "group",
+                  "layout": "stack-v",
+                  "gap": 4,
+                  "children": [
+                    {
+                      "type": "text",
+                      "binding": {
+                        "content": "Name"
+                      },
+                      "style": {
+                        "fontSize": 13,
+                        "fontWeight": 500,
+                        "color": "#6b7280"
+                      }
+                    },
+                    {
+                      "type": "input",
+                      "binding": {
+                        "name": "draftName"
+                      },
+                      "onChange": [
+                        {
+                          "kind": "emit",
+                          "event": "FIELD_CHANGED"
+                        }
+                      ],
+                      "style": {
+                        "height": {
+                          "value": 36,
+                          "unit": "px"
+                        },
+                        "padding": {
+                          "horizontal": 8
+                        },
+                        "fontSize": 14,
+                        "color": "#111827",
+                        "background": "#ffffff",
+                        "borderWidth": {
+                          "value": 1,
+                          "unit": "px"
+                        },
+                        "borderColor": "#e5e7eb",
+                        "cornerRadius": 4
+                      },
+                      "testId": "field-input"
+                    }
+                  ],
                   "name": "draftName",
                   "label": "Name",
                   "testId": "edit-name",
@@ -420,7 +527,54 @@
                   }
                 },
                 {
-                  "$ref": "field-group",
+                  "$description": "Labeled form field",
+                  "type": "group",
+                  "layout": "stack-v",
+                  "gap": 4,
+                  "children": [
+                    {
+                      "type": "text",
+                      "binding": {
+                        "content": "Email"
+                      },
+                      "style": {
+                        "fontSize": 13,
+                        "fontWeight": 500,
+                        "color": "#6b7280"
+                      }
+                    },
+                    {
+                      "type": "input",
+                      "binding": {
+                        "name": "draftEmail"
+                      },
+                      "onChange": [
+                        {
+                          "kind": "emit",
+                          "event": "FIELD_CHANGED"
+                        }
+                      ],
+                      "style": {
+                        "height": {
+                          "value": 36,
+                          "unit": "px"
+                        },
+                        "padding": {
+                          "horizontal": 8
+                        },
+                        "fontSize": 14,
+                        "color": "#111827",
+                        "background": "#ffffff",
+                        "borderWidth": {
+                          "value": 1,
+                          "unit": "px"
+                        },
+                        "borderColor": "#e5e7eb",
+                        "cornerRadius": 4
+                      },
+                      "testId": "field-input"
+                    }
+                  ],
                   "name": "draftEmail",
                   "label": "Email",
                   "testId": "edit-email",
@@ -432,7 +586,7 @@
                   "type": "group",
                   "name": "form-actions",
                   "layout": "stack-h",
-                  "gap": "{spacing.sm}",
+                  "gap": 8,
                   "children": [
                     {
                       "type": "button",
@@ -453,12 +607,12 @@
                         false
                       ],
                       "style": {
-                        "background": "{color.accent}",
-                        "color": "{color.bg}",
-                        "cornerRadius": "{radius.sm}",
+                        "background": "#2563eb",
+                        "color": "#ffffff",
+                        "cornerRadius": 4,
                         "padding": {
-                          "horizontal": "{spacing.md}",
-                          "vertical": "{spacing.sm}"
+                          "horizontal": 16,
+                          "vertical": 8
                         }
                       },
                       "testId": "resource-save-btn",
@@ -486,16 +640,16 @@
                       ],
                       "style": {
                         "background": "transparent",
-                        "color": "{color.text.secondary}",
+                        "color": "#6b7280",
                         "borderWidth": {
                           "value": 1,
                           "unit": "px"
                         },
-                        "borderColor": "{color.stroke}",
-                        "cornerRadius": "{radius.sm}",
+                        "borderColor": "#e5e7eb",
+                        "cornerRadius": 4,
                         "padding": {
-                          "horizontal": "{spacing.md}",
-                          "vertical": "{spacing.sm}"
+                          "horizontal": 16,
+                          "vertical": 8
                         }
                       },
                       "testId": "resource-cancel-btn",
@@ -513,7 +667,7 @@
       "transitions": [
         {
           "event": "FIELD_CHANGED",
-          "target": "editing",
+          "target": "ready.editing",
           "guard": null,
           "actions": [
             {
@@ -525,7 +679,7 @@
         },
         {
           "event": "SAVE",
-          "target": "saving",
+          "target": "ready.saving",
           "guard": null,
           "actions": [
             {
@@ -547,7 +701,7 @@
         },
         {
           "event": "CANCEL_EDIT",
-          "target": "viewing",
+          "target": "ready.viewing",
           "guard": null,
           "actions": [
             {
@@ -586,17 +740,17 @@
             "minHeight": "fill"
           },
           "padding": {
-            "horizontal": "{spacing.xl}",
-            "vertical": "{spacing.lg}"
+            "horizontal": 32,
+            "vertical": 24
           },
-          "background": "{color.bg}"
+          "background": "#ffffff"
         },
         "animation": "fade-in"
       },
       "transitions": [
         {
           "event": "SAVE_OK",
-          "target": "viewing",
+          "target": "ready.viewing",
           "guard": null,
           "actions": [
             {
@@ -636,7 +790,7 @@
         },
         {
           "event": "SAVE_ERROR",
-          "target": "saveError",
+          "target": "ready.saveError",
           "guard": null,
           "actions": [
             {
@@ -688,10 +842,10 @@
             "minHeight": "fill"
           },
           "padding": {
-            "horizontal": "{spacing.xl}",
-            "vertical": "{spacing.lg}"
+            "horizontal": 32,
+            "vertical": 24
           },
-          "background": "{color.bg}"
+          "background": "#ffffff"
         },
         "animation": "fade-in",
         "slots": {
@@ -700,7 +854,7 @@
               "type": "group",
               "name": "save-error-container",
               "layout": "stack-v",
-              "gap": "{spacing.md}",
+              "gap": 16,
               "testId": "save-error-container",
               "children": [
                 {
@@ -708,13 +862,13 @@
                   "name": "error-banner",
                   "layout": "stack-h",
                   "align": "center",
-                  "gap": "{spacing.sm}",
+                  "gap": 8,
                   "padding": {
-                    "horizontal": "{spacing.md}",
-                    "vertical": "{spacing.sm}"
+                    "horizontal": 16,
+                    "vertical": 8
                   },
-                  "background": "{color.errorBg}",
-                  "cornerRadius": "{radius.sm}",
+                  "background": "#fef2f2",
+                  "cornerRadius": 4,
                   "testId": "save-error-banner",
                   "aria": {
                     "role": "alert"
@@ -727,7 +881,7 @@
                         "value": 16,
                         "unit": "px"
                       },
-                      "color": "{color.error}"
+                      "color": "#dc2626"
                     },
                     {
                       "type": "text",
@@ -738,8 +892,8 @@
                         ]
                       },
                       "style": {
-                        "fontSize": "{font.size.sm}",
-                        "color": "{color.error}"
+                        "fontSize": 13,
+                        "color": "#dc2626"
                       }
                     }
                   ]
@@ -755,12 +909,12 @@
                     }
                   ],
                   "style": {
-                    "background": "{color.accent}",
-                    "color": "{color.bg}",
-                    "cornerRadius": "{radius.sm}",
+                    "background": "#2563eb",
+                    "color": "#ffffff",
+                    "cornerRadius": 4,
                     "padding": {
-                      "horizontal": "{spacing.md}",
-                      "vertical": "{spacing.sm}"
+                      "horizontal": 16,
+                      "vertical": 8
                     }
                   },
                   "testId": "save-retry-btn",
@@ -776,7 +930,7 @@
       "transitions": [
         {
           "event": "SAVE",
-          "target": "saving",
+          "target": "ready.saving",
           "guard": null,
           "actions": [
             {
@@ -793,7 +947,7 @@
         },
         {
           "event": "CANCEL_EDIT",
-          "target": "viewing",
+          "target": "ready.viewing",
           "guard": null,
           "actions": [
             {
@@ -824,10 +978,10 @@
             "minHeight": "fill"
           },
           "padding": {
-            "horizontal": "{spacing.xl}",
-            "vertical": "{spacing.lg}"
+            "horizontal": 32,
+            "vertical": 24
           },
-          "background": "{color.bg}"
+          "background": "#ffffff"
         },
         "animation": "fade-in",
         "slots": {
@@ -837,9 +991,9 @@
               "name": "empty-state",
               "layout": "stack-v",
               "align": "center",
-              "gap": "{spacing.lg}",
+              "gap": 24,
               "padding": {
-                "vertical": "{spacing.xl}"
+                "vertical": 32
               },
               "testId": "empty-state",
               "aria": {
@@ -853,15 +1007,15 @@
                     "value": 64,
                     "unit": "px"
                   },
-                  "color": "{color.text.muted}"
+                  "color": "#9ca3af"
                 },
                 {
                   "type": "text",
                   "content": "No resources found",
                   "style": {
-                    "fontSize": "{font.size.lg}",
-                    "fontWeight": "{font.weight.medium}",
-                    "color": "{color.text.primary}"
+                    "fontSize": 18,
+                    "fontWeight": 500,
+                    "color": "#111827"
                   },
                   "testId": "empty-title"
                 },
@@ -869,8 +1023,8 @@
                   "type": "text",
                   "content": "Create your first resource to get started.",
                   "style": {
-                    "fontSize": "{font.size.base}",
-                    "color": "{color.text.secondary}"
+                    "fontSize": 14,
+                    "color": "#6b7280"
                   },
                   "testId": "empty-description"
                 },
@@ -885,12 +1039,12 @@
                     }
                   ],
                   "style": {
-                    "background": "{color.accent}",
-                    "color": "{color.bg}",
-                    "cornerRadius": "{radius.sm}",
+                    "background": "#2563eb",
+                    "color": "#ffffff",
+                    "cornerRadius": 4,
                     "padding": {
-                      "horizontal": "{spacing.lg}",
-                      "vertical": "{spacing.sm}"
+                      "horizontal": 24,
+                      "vertical": 8
                     }
                   },
                   "testId": "empty-create-btn",
@@ -937,10 +1091,10 @@
             "minHeight": "fill"
           },
           "padding": {
-            "horizontal": "{spacing.xl}",
-            "vertical": "{spacing.lg}"
+            "horizontal": 32,
+            "vertical": 24
           },
-          "background": "{color.bg}"
+          "background": "#ffffff"
         },
         "animation": "fade-in",
         "slots": {
@@ -950,9 +1104,9 @@
               "name": "error-state",
               "layout": "stack-v",
               "align": "center",
-              "gap": "{spacing.lg}",
+              "gap": 24,
               "padding": {
-                "vertical": "{spacing.xl}"
+                "vertical": 32
               },
               "testId": "error-state",
               "aria": {
@@ -966,15 +1120,15 @@
                     "value": 48,
                     "unit": "px"
                   },
-                  "color": "{color.error}"
+                  "color": "#dc2626"
                 },
                 {
                   "type": "text",
                   "content": "Failed to load resource",
                   "style": {
-                    "fontSize": "{font.size.lg}",
-                    "fontWeight": "{font.weight.medium}",
-                    "color": "{color.text.primary}"
+                    "fontSize": 18,
+                    "fontWeight": 500,
+                    "color": "#111827"
                   },
                   "testId": "error-title"
                 },
@@ -987,8 +1141,8 @@
                     ]
                   },
                   "style": {
-                    "fontSize": "{font.size.base}",
-                    "color": "{color.text.secondary}"
+                    "fontSize": 14,
+                    "color": "#6b7280"
                   },
                   "testId": "error-message"
                 },
@@ -1003,12 +1157,12 @@
                     }
                   ],
                   "style": {
-                    "background": "{color.accent}",
-                    "color": "{color.bg}",
-                    "cornerRadius": "{radius.sm}",
+                    "background": "#2563eb",
+                    "color": "#ffffff",
+                    "cornerRadius": 4,
                     "padding": {
-                      "horizontal": "{spacing.lg}",
-                      "vertical": "{spacing.sm}"
+                      "horizontal": 24,
+                      "vertical": 8
                     }
                   },
                   "testId": "error-retry-btn",

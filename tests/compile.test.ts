@@ -19,20 +19,28 @@ function minimalDoc(overrides: Partial<UISpecDocument> = {}): UISpecDocument {
   };
 }
 
+function compileOk(doc: UISpecDocument): CompiledUISpec {
+  const result = compile(doc);
+  if (!result.ok || !result.compiled) {
+    throw new Error(`Expected compile to succeed, got issues: ${JSON.stringify(result.issues)}`);
+  }
+  return result.compiled;
+}
+
 describe("compile", () => {
   it("emits $format and $version", () => {
-    const result = compile(minimalDoc());
+    const result = compileOk(minimalDoc());
     expect(result.$format).toBe("uispec-compiled");
     expect(result.$version).toBe("0.2");
   });
 
   it("emits initial state", () => {
-    const result = compile(minimalDoc());
+    const result = compileOk(minimalDoc());
     expect(result.initial).toBe("idle");
   });
 
   it("emits contextSchema from $context", () => {
-    const result = compile(
+    const result = compileOk(
       minimalDoc({
         $context: {
           email: { type: "string", default: "" },
@@ -47,7 +55,7 @@ describe("compile", () => {
   });
 
   it("emits eventSchema from $events", () => {
-    const result = compile(
+    const result = compileOk(
       minimalDoc({
         $events: {
           SUBMIT: { source: "user", payload: {} },
@@ -63,14 +71,14 @@ describe("compile", () => {
     const doc = minimalDoc();
     delete doc.$context;
     delete doc.$events;
-    const result = compile(doc);
+    const result = compileOk(doc);
     expect(result.contextSchema).toEqual({});
     expect(result.eventSchema).toEqual({});
   });
 
   describe("state compilation", () => {
     it("compiles leaf states with visual", () => {
-      const result = compile(
+      const result = compileOk(
         minimalDoc({
           $machine: {
             id: "test",
@@ -94,7 +102,7 @@ describe("compile", () => {
     });
 
     it("preserves transitions with guards and actions", () => {
-      const result = compile(
+      const result = compileOk(
         minimalDoc({
           $context: { submitting: { type: "boolean", default: false } },
           $events: { SUBMIT: { source: "user" } },
@@ -137,7 +145,7 @@ describe("compile", () => {
     });
 
     it("normalizes string transitions to full form", () => {
-      const result = compile(
+      const result = compileOk(
         minimalDoc({
           $events: { GO: { source: "user" } },
           $machine: {
@@ -156,7 +164,7 @@ describe("compile", () => {
     });
 
     it("preserves entry and exit actions", () => {
-      const result = compile(
+      const result = compileOk(
         minimalDoc({
           $machine: {
             id: "test",
@@ -185,7 +193,7 @@ describe("compile", () => {
     });
 
     it("compiles always (transient) transitions with null event", () => {
-      const result = compile(
+      const result = compileOk(
         minimalDoc({
           $machine: {
             id: "test",
@@ -218,7 +226,7 @@ describe("compile", () => {
 
   describe("nested state flattening", () => {
     it("flattens nested states to dot-separated keys", () => {
-      const result = compile(
+      const result = compileOk(
         minimalDoc({
           $machine: {
             id: "test",
@@ -242,7 +250,7 @@ describe("compile", () => {
     });
 
     it("inherits parent visual into child", () => {
-      const result = compile(
+      const result = compileOk(
         minimalDoc({
           $machine: {
             id: "test",
@@ -270,7 +278,7 @@ describe("compile", () => {
     });
 
     it("child slots override parent slots", () => {
-      const result = compile(
+      const result = compileOk(
         minimalDoc({
           $machine: {
             id: "test",
@@ -300,7 +308,7 @@ describe("compile", () => {
     });
 
     it("inherits parent entry/exit into children", () => {
-      const result = compile(
+      const result = compileOk(
         minimalDoc({
           $machine: {
             id: "test",
@@ -349,7 +357,7 @@ describe("compile", () => {
     });
 
     it("deeply nested states flatten correctly", () => {
-      const result = compile(
+      const result = compileOk(
         minimalDoc({
           $machine: {
             id: "test",
@@ -378,7 +386,7 @@ describe("compile", () => {
 
   describe("machine-level visual inheritance", () => {
     it("inherits $machine.$visual into top-level states", () => {
-      const result = compile(
+      const result = compileOk(
         minimalDoc({
           $machine: {
             id: "test",
@@ -460,7 +468,7 @@ describe("compile", () => {
         },
       };
 
-      const result = compile(doc);
+      const result = compileOk(doc);
 
       expect(result.$format).toBe("uispec-compiled");
       expect(result.$version).toBe("0.2");
@@ -486,7 +494,7 @@ describe("compile", () => {
 
   describe("invoke preservation", () => {
     it("preserves invoke array on leaf states", () => {
-      const result = compile(
+      const result = compileOk(
         minimalDoc({
           $machine: {
             id: "test",
@@ -507,14 +515,14 @@ describe("compile", () => {
     });
 
     it("defaults invoke to empty array when not defined", () => {
-      const result = compile(minimalDoc());
+      const result = compileOk(minimalDoc());
       expect(result.states.idle.invoke).toEqual([]);
     });
   });
 
   describe("assertions extraction", () => {
     it("extracts testId from visual slots into assertions", () => {
-      const result = compile(
+      const result = compileOk(
         minimalDoc({
           $machine: {
             id: "test",
@@ -543,7 +551,7 @@ describe("compile", () => {
     });
 
     it("returns empty assertions when no testIds exist", () => {
-      const result = compile(minimalDoc());
+      const result = compileOk(minimalDoc());
       expect(result.assertions).toEqual([]);
     });
   });
