@@ -1,10 +1,14 @@
 # UISpec
 
-**A JSON format for AI agents to define complete application interfaces.**
+**A JSON format that is readable and writable by both humans and AI agents — and directly executable by machines.**
 
-State machines are excellent documentation — they describe application behavior in a way that is both executable code and a human-readable spec. UISpec extends this idea to the visual layer. Each state in the machine also declares exactly what the UI looks like: layout, styling, typography, animation, and interaction states.
+Most UI specifications are either human-friendly (Figma, prose docs) or machine-friendly (code, ASTs). You write a design spec for humans, then translate it to code for machines. The spec and the code drift apart. Nobody trusts either one.
 
-The result is a single file that an AI agent can read to understand an entire UI, or write to define one from scratch — without ambiguity, without cross-referencing CSS files, without inferring visual intent from JSX conditionals.
+UISpec is both at once. A human reads the `$description` fields and understands intent. An agent reads the structured JSON and generates pixel-accurate implementations. A compiler validates it, flattens it, and produces a runtime artifact that any renderer can execute — React, SwiftUI, Compose, Flutter, or a custom engine.
+
+**One artifact. Readable by humans. Writable by agents. Executable by machines.**
+
+You describe what your UI looks like and how it behaves in a single file. That file is the spec, the documentation, and the source of truth for rendering — all at once. No translation step. No drift.
 
 ## Why This Exists
 
@@ -18,6 +22,85 @@ Today, when an AI agent needs to understand or generate a UI component, it must 
 To answer "what does the error state look like?", the agent has to read three files and mentally reconstruct the picture. To generate a new state, it has to modify three files in sync.
 
 UISpec collapses all of this into one artifact. One file. One source of truth. The state machine says what happens. The visual spec on each state says what it looks like. The tokens say what colors and spacing are available. An agent reads one file and knows everything.
+
+### Concrete Example: A Login Form
+
+In a typical React codebase, a login form with loading and error states spans 3+ files:
+
+```tsx
+// LoginForm.tsx — 80 lines of JSX with conditional rendering
+// useLogin.ts — 40 lines of state management
+// login.module.css — 60 lines of styles
+```
+
+In UISpec, the same component is **one file** where every state is explicit:
+
+```json
+{
+  "$machine": {
+    "id": "login",
+    "initial": "idle",
+    "states": {
+      "idle": {
+        "on": { "SUBMIT": { "target": "loading", "guard": ["!=", ["var", "context.email"], ""] } },
+        "$visual": {
+          "$description": "Login form ready for input",
+          "slots": {
+            "form": [
+              { "type": "input", "name": "email", "testId": "email-input" },
+              { "type": "input", "name": "password", "testId": "password-input" },
+              { "type": "button", "content": "Sign In", "testId": "submit-btn",
+                "enabledWhen": ["!=", ["var", "context.email"], ""],
+                "onPress": [{ "kind": "emit", "event": "SUBMIT" }] }
+            ]
+          }
+        }
+      },
+      "loading": {
+        "entry": [{ "kind": "http", "request": "signIn" }],
+        "on": { "HTTP_OK": "success", "HTTP_ERROR": "error" },
+        "$visual": {
+          "$description": "Spinner replaces submit button, inputs disabled",
+          "slots": {
+            "form": [
+              { "type": "input", "name": "email", "enabledWhen": false },
+              { "type": "input", "name": "password", "enabledWhen": false },
+              { "type": "icon", "name": "spinner", "icon": "Loader" }
+            ]
+          }
+        }
+      },
+      "error": {
+        "on": { "SUBMIT": "loading", "INPUT_CHANGED": "idle" },
+        "$visual": {
+          "$description": "Error banner above form, fields re-enabled",
+          "slots": {
+            "error": [{ "type": "text", "content": ["var", "context.error"], "color": "#ee5555", "testId": "error-msg" }],
+            "form": [
+              { "type": "input", "name": "email", "testId": "email-input" },
+              { "type": "button", "content": "Try Again", "testId": "submit-btn" }
+            ]
+          }
+        }
+      },
+      "success": {
+        "entry": [{ "kind": "navigate", "to": "/dashboard" }],
+        "$visual": { "$description": "Redirect to dashboard — transient state" }
+      }
+    }
+  }
+}
+```
+
+An agent reads this and immediately knows: there are 4 states, the submit button is disabled when email is empty, the error state shows a red banner with the error message, and success navigates to `/dashboard`. No guessing. No file hopping.
+
+### What You Get
+
+- **Human + agent read/write.** A designer reads `$description` fields and reviews the spec in a PR. An agent reads the structured JSON to generate or modify the UI. Both work on the same file. No translation layer, no "spec vs implementation" divergence.
+- **Machine executable.** The compiler validates, resolves tokens, flattens states, and outputs a runtime artifact. A renderer consumes it directly — no interpretation, no guessing. Two independent renderers given the same compiled spec MUST produce the same UI.
+- **Cross-platform from one source.** The same spec renders to React, SwiftUI, Compose, or Flutter. Layout primitives (`stack-h`, `stack-v`, `grid`) map to each platform's native equivalent.
+- **Built-in test contracts.** Every `testId` generates an assertion in the compiled output. CI can verify that the rendered UI matches the spec without writing manual tests.
+- **Atomic state changes.** Adding a new state means adding one block with transitions AND visuals. Nothing else to update. No "forgot to add the CSS" bugs. An agent can add a feature by adding a state — the visual and behavior are defined together.
 
 ## Format Overview
 
@@ -109,6 +192,35 @@ Each example targets different edge cases:
 | [05-media-player](examples/05-media-player.uispec.json) | Parallel states (playback + volume + display mode), continuous values (seek position, volume), buffering stalls, picture-in-picture, error recovery |
 | [06-data-resource-page](examples/06-data-resource-page.uispec.json) | Route-level loading, data fetch on entry, success/empty/error branches, retry, form edit, optimistic save, rollback on failure, toast on success, focus management, test IDs, aria metadata |
 
+## Quick Start
+
+```bash
+# Validate a spec (checks for structural and semantic errors)
+bun run src/compiler/cli.ts validate examples/02-auth-flow.uispec.json
+
+# Compile to flat, fully-resolved runtime format
+bun run src/compiler/cli.ts compile examples/02-auth-flow.uispec.json
+# → writes dist/compiled/02-auth-flow.compiled.json
+
+# Inspect the compiled state graph without writing files
+bun run src/compiler/cli.ts inspect examples/02-auth-flow.uispec.json
+
+# Run all tests
+bun test
+```
+
+The compiler outputs structured JSON so agents can parse results programmatically:
+
+```json
+{"file":"examples/02-auth-flow.uispec.json","ok":true,"states":17,"assertions":21,"leafInitial":true}
+```
+
+When validation fails, you get actionable issue codes:
+
+```json
+{"ok":false,"issues":[{"code":"UNDECLARED_CONTEXT_VAR","message":"Expression references undeclared context variable \"email\"","path":"$machine.states.idle.$visual"}]}
+```
+
 ## For AI Agents
 
 An agent working with UISpec can:
@@ -131,13 +243,31 @@ uispec/
 ├── spec/
 │   ├── SPEC.md           Format specification
 │   └── COMPILER.md       Compiler reference + per-language runtimes
-└── examples/
-    ├── 01-recording-overlay.uispec.json
-    ├── 02-auth-flow.uispec.json
-    ├── 03-toast-notifications.uispec.json
-    ├── 04-form-validation.uispec.json
-    ├── 05-media-player.uispec.json
-    └── 06-data-resource-page.uispec.json
+├── schema/
+│   └── uispec.schema.json   JSON Schema for validation
+├── src/compiler/
+│   ├── cli.ts            CLI entry point (validate, compile, inspect)
+│   ├── compile.ts        Five-phase compiler orchestration
+│   ├── resolve.ts        Token and $ref resolution
+│   ├── state-paths.ts    State hierarchy flattening
+│   ├── validate.ts       Runtime semantics validation
+│   ├── diagnostics.ts    Structured issue codes
+│   └── types.ts          Shared types
+├── skills/
+│   └── SKILL.md          Agent skill for guided spec authoring
+├── examples/
+│   ├── 01-recording-overlay.uispec.json
+│   ├── 02-auth-flow.uispec.json
+│   ├── 03-toast-notifications.uispec.json
+│   ├── 04-form-validation.uispec.json
+│   ├── 05-media-player.uispec.json
+│   └── 06-data-resource-page.uispec.json
+└── tests/
+    ├── compile.test.ts             Core compilation tests
+    ├── validate.test.ts            Validation tests
+    ├── compiler.cli.test.ts        CLI integration tests
+    ├── compiler.conformance.test.ts  Output conformance tests
+    └── compiler.failures.test.ts   Diagnostic issue tests
 ```
 
 ## Runtime Semantics (v0.2)
