@@ -219,5 +219,5 @@ export function resolveDocument(
     issues,
     trace,
     "$"
-  ) as UXSpecDocument;
+  ) as unknown as UXSpecDocument;
 }

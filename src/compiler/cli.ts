@@ -326,7 +326,7 @@ async function main(): Promise<void> {
     return;
   }
 
-  console.error("Usage: bun run src/compiler/cli.ts <validate|compile|inspect> [--trace] [file...]");
+  console.error("Usage: uxspec <validate|compile|inspect> [--trace] [file...]");
   process.exitCode = 1;
 }
 

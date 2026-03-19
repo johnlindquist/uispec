@@ -67,10 +67,10 @@ Read `references/runtime-semantics.md` for expression syntax and action/effect k
 ### Phase 5 — Generate and Verify
 
 1. Write the spec to `examples/<name>.uxspec.json`
-2. Validate: `bun run src/compiler/cli.ts validate examples/<name>.uxspec.json`
+2. Validate: `npx uxspec validate examples/<name>.uxspec.json`
 3. If validation fails, fix reported issues (the compiler returns structured issue codes)
-4. Compile: `bun run src/compiler/cli.ts compile examples/<name>.uxspec.json`
-5. Inspect: `bun run src/compiler/cli.ts inspect examples/<name>.uxspec.json`
+4. Compile: `npx uxspec compile examples/<name>.uxspec.json`
+5. Inspect: `npx uxspec inspect examples/<name>.uxspec.json`
 6. Report to the user:
    - Number of states and assertions
    - Whether initial resolves to a leaf state

@@ -122,9 +122,9 @@ A complete, minimal spec for a simple counter component. Use as a starting templ
 ## Compile and Verify
 
 ```bash
-bun run src/compiler/cli.ts validate examples/counter.uxspec.json
-bun run src/compiler/cli.ts compile examples/counter.uxspec.json
-bun run src/compiler/cli.ts inspect examples/counter.uxspec.json
+npx uxspec validate examples/counter.uxspec.json
+npx uxspec compile examples/counter.uxspec.json
+npx uxspec inspect examples/counter.uxspec.json
 ```
 
 Expected output:

@@ -61,7 +61,7 @@ function walkExpr(
     typeof expr === "boolean"
   )
     return;
-  if (!Array.isArray(expr) || expr.length === 0) return;
+  if (!Array.isArray(expr) || (expr as unknown[]).length === 0) return;
 
   const [op, ...args] = expr as [string, ...Expr[]];
 
