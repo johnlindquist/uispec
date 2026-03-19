@@ -1,7 +1,7 @@
 {
   "name": "uxspec",
-  "version": "0.2.2",
-  "description": "UXSpec — unified state machine + visual specification for AI agents",
+  "version": "0.2.3",
+  "description": "UXSpec — a contract between Human, Agent, and Machine",
   "type": "module",
   "main": "./dist/compile.js",
   "types": "./dist/compile.d.ts",

@@ -29,6 +29,21 @@
       "type": "object",
       "additionalProperties": { "$ref": "#/$defs/effectSpec" }
     },
+    "$imports": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "object",
+        "required": ["from"],
+        "properties": {
+          "from": { "type": "string" },
+          "tokens": { "type": "boolean" },
+          "elements": { "type": "boolean" },
+          "animations": { "type": "boolean" },
+          "machine": { "type": "boolean" }
+        },
+        "additionalProperties": false
+      }
+    },
     "$machine": { "$ref": "#/$defs/machine" }
   },
   "$defs": {
@@ -138,9 +153,25 @@
       },
       "additionalProperties": true
     },
+    "machineInvoke": {
+      "type": "object",
+      "required": ["kind", "src", "id"],
+      "properties": {
+        "kind": { "const": "machine" },
+        "src": { "type": "string" },
+        "id": { "type": "string" },
+        "input": { "type": "object" },
+        "onDone": {
+          "type": "object",
+          "additionalProperties": { "type": "string" }
+        }
+      },
+      "additionalProperties": false
+    },
     "stateNode": {
       "type": "object",
       "properties": {
+        "type": { "enum": ["final"] },
         "initial": { "type": "string" },
         "on": {
           "type": "object",
@@ -170,7 +201,12 @@
         },
         "invoke": {
           "type": "array",
-          "items": { "type": "object" }
+          "items": {
+            "oneOf": [
+              { "$ref": "#/$defs/machineInvoke" },
+              { "type": "object" }
+            ]
+          }
         },
         "states": {
           "type": "object",

@@ -1,0 +1,63 @@
+{
+  "$schema": "https://raw.githubusercontent.com/johnlindquist/uxspec/main/schema/uxspec.schema.json",
+  "$description": "App shell — imports shared design system and invokes the settings module as a child machine.",
+
+  "$imports": {
+    "ds": {
+      "from": "./design-system.uxspec.json",
+      "tokens": true,
+      "elements": true
+    },
+    "settings": {
+      "from": "./settings.uxspec.json",
+      "machine": true
+    }
+  },
+
+  "$events": {
+    "OPEN_SETTINGS": { "source": "user", "payload": {} },
+    "GO_HOME":       { "source": "user", "payload": {} }
+  },
+
+  "$machine": {
+    "id": "app",
+    "initial": "home",
+    "states": {
+      "home": {
+        "$visual": {
+          "$description": "Main app home screen with a Settings button.",
+          "container": {
+            "padding": "{ds:space.xl}",
+            "background": "{ds:color.neutral.50}"
+          },
+          "slots": {
+            "content": [
+              { "$ref": "ds:heading", "text": "Welcome", "testId": "home-title" },
+              { "$ref": "ds:paragraph", "text": "Your composable app is running.", "testId": "home-subtitle" },
+              { "$ref": "ds:primaryButton", "label": "Open Settings", "testId": "open-settings-btn",
+                "onPress": [{ "kind": "emit", "event": "OPEN_SETTINGS" }] }
+            ]
+          }
+        },
+        "on": {
+          "OPEN_SETTINGS": "settingsFlow"
+        }
+      },
+      "settingsFlow": {
+        "$visual": {
+          "$description": "Delegates to the settings module machine."
+        },
+        "invoke": [
+          {
+            "kind": "machine",
+            "src": "settings",
+            "id": "settingsFlow",
+            "onDone": {
+              "done": "home"
+            }
+          }
+        ]
+      }
+    }
+  }
+}

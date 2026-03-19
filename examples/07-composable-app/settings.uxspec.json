@@ -1,0 +1,103 @@
+{
+  "$schema": "https://raw.githubusercontent.com/johnlindquist/uxspec/main/schema/uxspec.schema.json",
+  "$description": "Settings module — profile editing with save/cancel flow. Imports design system tokens and elements.",
+
+  "$imports": {
+    "ds": {
+      "from": "./design-system.uxspec.json",
+      "tokens": true,
+      "elements": true
+    }
+  },
+
+  "$context": {
+    "displayName": { "type": "string", "default": "", "$description": "Current display name" },
+    "email":       { "type": "string", "default": "", "$description": "Current email address" },
+    "dirty":       { "type": "boolean", "default": false, "$description": "Whether changes have been made" },
+    "saving":      { "type": "boolean", "default": false, "$description": "Whether a save is in progress" },
+    "error":       { "type": "string", "default": "", "$description": "Last save error message" }
+  },
+
+  "$events": {
+    "EDIT":    { "source": "user", "payload": {} },
+    "CHANGE":  { "source": "user", "payload": {} },
+    "SAVE":    { "source": "user", "payload": {} },
+    "CANCEL":  { "source": "user", "payload": {} },
+    "SUCCESS": { "source": "network", "payload": {} },
+    "FAILURE": { "source": "network", "payload": {} }
+  },
+
+  "$machine": {
+    "id": "settings",
+    "initial": "viewing",
+    "states": {
+      "viewing": {
+        "$visual": {
+          "$description": "Read-only profile view with Edit button.",
+          "container": {
+            "padding": "{ds:space.lg}",
+            "background": "{ds:color.neutral.50}"
+          },
+          "slots": {
+            "content": [
+              { "$ref": "ds:heading", "text": "Settings", "testId": "settings-title" },
+              { "$ref": "ds:paragraph", "text": "Your profile information", "testId": "settings-subtitle" },
+              { "$ref": "ds:primaryButton", "label": "Edit Profile", "testId": "edit-btn",
+                "onPress": [{ "kind": "emit", "event": "EDIT" }] }
+            ]
+          }
+        },
+        "on": {
+          "EDIT": "editing"
+        }
+      },
+      "editing": {
+        "$visual": {
+          "$description": "Editable form with Save and Cancel buttons.",
+          "container": {
+            "padding": "{ds:space.lg}",
+            "background": "{ds:color.neutral.100}"
+          },
+          "slots": {
+            "content": [
+              { "$ref": "ds:heading", "text": "Edit Profile", "testId": "edit-title" },
+              { "$ref": "ds:textInput", "name": "displayName", "label": "Display Name", "placeholder": "Enter name",
+                "testId": "name-input",
+                "onChange": [{ "kind": "assign", "path": "context.dirty", "value": true }] },
+              { "$ref": "ds:textInput", "name": "email", "label": "Email", "placeholder": "Enter email",
+                "testId": "email-input",
+                "onChange": [{ "kind": "assign", "path": "context.dirty", "value": true }] },
+              { "$ref": "ds:primaryButton", "label": "Save", "testId": "save-btn",
+                "enabledWhen": ["==", ["var", "context.dirty"], true],
+                "onPress": [{ "kind": "emit", "event": "SAVE" }] },
+              { "$ref": "ds:dangerButton", "label": "Cancel", "testId": "cancel-btn",
+                "onPress": [{ "kind": "emit", "event": "CANCEL" }] }
+            ]
+          }
+        },
+        "on": {
+          "SAVE": "saving",
+          "CANCEL": "done"
+        }
+      },
+      "saving": {
+        "$visual": {
+          "$description": "Saving indicator while request is in flight."
+        },
+        "entry": [
+          { "kind": "assign", "path": "context.saving", "value": true }
+        ],
+        "exit": [
+          { "kind": "assign", "path": "context.saving", "value": false }
+        ],
+        "on": {
+          "SUCCESS": "done",
+          "FAILURE": "editing"
+        }
+      },
+      "done": {
+        "type": "final"
+      }
+    }
+  }
+}

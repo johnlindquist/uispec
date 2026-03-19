@@ -4,6 +4,7 @@ import { makeIssue, traceError, traceOk } from "./diagnostics";
 export interface StateIndex {
   all: Set<string>;
   leaf: Set<string>;
+  final: Set<string>;
   initialLeafByState: Map<string, string>;
 }
 
@@ -24,6 +25,7 @@ function walk(
 
     if (!node.states || Object.keys(node.states).length === 0) {
       index.leaf.add(path);
+      if (node.type === "final") index.final.add(path);
       index.initialLeafByState.set(path, path);
       continue;
     }
@@ -89,6 +91,7 @@ export function buildStateIndex(
   const index: StateIndex = {
     all: new Set<string>(),
     leaf: new Set<string>(),
+    final: new Set<string>(),
     initialLeafByState: new Map<string, string>(),
   };
   walk(states, "", index, issues, trace);

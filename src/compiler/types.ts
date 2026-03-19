@@ -86,6 +86,7 @@ export interface VisualSpec {
 }
 
 export interface StateNode {
+  type?: "final";
   initial?: string;
   on?: Record<string, string | TransitionSpec>;
   always?: Array<string | TransitionSpec>;
@@ -96,9 +97,40 @@ export interface StateNode {
   $visual?: VisualSpec;
 }
 
+export interface ImportSpec {
+  from: string;
+  tokens?: boolean;
+  elements?: boolean;
+  animations?: boolean;
+  machine?: boolean;
+}
+
+export interface MachineInvokeSpec {
+  kind: "machine";
+  src: string;
+  id: string;
+  input?: Record<string, Expr>;
+  onDone?: Record<string, string>;
+}
+
+export interface ResolvedImportNamespace {
+  alias: string;
+  sourcePath: string;
+  tokens?: Record<string, Json>;
+  elements?: Record<string, Json>;
+  animations?: Record<string, Json>;
+  machineId?: string;
+  machineDocument?: UXSpecDocument;
+}
+
+export interface ResolvedImports {
+  namespaces: Map<string, ResolvedImportNamespace>;
+}
+
 export interface UXSpecDocument {
   $schema: string;
   $description: string;
+  $imports?: Record<string, ImportSpec>;
   $tokens?: Record<string, Json>;
   $animations?: Record<string, Json>;
   $elements?: Record<string, Json>;
@@ -122,6 +154,7 @@ export interface CompiledTransition {
 }
 
 export interface CompiledState {
+  type?: "final";
   path: string;
   visual: VisualSpec;
   transitions: CompiledTransition[];
@@ -145,6 +178,14 @@ export interface CompiledUXSpec {
   eventSchema: Record<string, EventSpec>;
   states: Record<string, CompiledState>;
   assertions: Assertion[];
+  dependencies?: Record<string, { from: string; kind: "machine" }>;
+}
+
+export interface BundledUXSpec {
+  $format: "uxspec-bundled";
+  $version: "0.2";
+  entry: string;
+  modules: Record<string, CompiledUXSpec>;
 }
 
 // ── Unified diagnostics ──
@@ -159,14 +200,30 @@ export type CompilerIssueCode =
   | "UNKNOWN_ELEMENT_REFERENCE"
   | "INVALID_MACHINE_INITIAL"
   | "INVALID_COMPOUND_INITIAL"
-  | "READ_FAILED";
+  | "READ_FAILED"
+  | "IMPORT_NOT_FOUND"
+  | "IMPORT_READ_FAILED"
+  | "IMPORT_PARSE_FAILED"
+  | "IMPORT_CYCLE"
+  | "IMPORT_ALIAS_CONFLICT"
+  | "INVALID_IMPORT_SPEC"
+  | "TOKEN_REFERENCE_CYCLE"
+  | "ELEMENT_REFERENCE_CYCLE"
+  | "UNKNOWN_IMPORTED_TOKEN_REFERENCE"
+  | "UNKNOWN_IMPORTED_ELEMENT_REFERENCE"
+  | "UNKNOWN_IMPORTED_MACHINE"
+  | "CROSS_MODULE_TARGET_FORBIDDEN"
+  | "INVALID_MACHINE_INVOKE"
+  | "INVALID_INVOKE_INPUT"
+  | "UNKNOWN_FINAL_STATE";
 
 export type CompilerTracePhase =
   | "resolve"
   | "state-paths"
   | "validate"
   | "compile"
-  | "cli";
+  | "cli"
+  | "import";
 
 export type CompilerTraceKind =
   | "token"
@@ -174,13 +231,16 @@ export type CompilerTraceKind =
   | "initial"
   | "target"
   | "io"
-  | "summary";
+  | "summary"
+  | "import"
+  | "invoke"
+  | "namespace";
 
 export interface CompilerIssue {
   code: CompilerIssueCode;
   message: string;
   path: string;
-  phase: "resolve" | "state-paths" | "validate" | "compile" | "cli";
+  phase: "resolve" | "state-paths" | "validate" | "compile" | "cli" | "import";
 }
 
 export interface CompilerTraceEntry {

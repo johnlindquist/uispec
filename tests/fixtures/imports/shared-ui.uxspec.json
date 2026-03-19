@@ -1,0 +1,32 @@
+{
+  "$schema": "https://raw.githubusercontent.com/johnlindquist/uxspec/main/schema/uxspec.schema.json",
+  "$description": "Shared tokens, animations, and UI atoms.",
+  "$tokens": {
+    "color": {
+      "brand": {
+        "primary": { "$type": "color", "$value": "#2563eb" },
+        "surface": { "$type": "color", "$value": "#eff6ff" }
+      }
+    },
+    "space": {
+      "md": { "$type": "dimension", "$value": { "value": 16, "unit": "px" } }
+    }
+  },
+  "$elements": {
+    "primaryButton": {
+      "type": "button",
+      "params": ["label"],
+      "content": { "$bind": "label" },
+      "background": "{color.brand.primary}",
+      "padding": "{space.md}",
+      "testId": "primary-btn"
+    }
+  },
+  "$machine": {
+    "id": "shared-ui",
+    "initial": "idle",
+    "states": {
+      "idle": {}
+    }
+  }
+}

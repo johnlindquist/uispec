@@ -1,0 +1,62 @@
+{
+  "$schema": "https://raw.githubusercontent.com/johnlindquist/uxspec/main/schema/uxspec.schema.json",
+  "$description": "App shell that imports shared UI and invokes auth machine.",
+  "$imports": {
+    "ui": {
+      "from": "./shared-ui.uxspec.json",
+      "tokens": true,
+      "elements": true
+    },
+    "auth": {
+      "from": "./auth-machine.uxspec.json",
+      "machine": true
+    }
+  },
+  "$events": {
+    "BEGIN_AUTH": { "source": "user" }
+  },
+  "$machine": {
+    "id": "app",
+    "initial": "landing",
+    "states": {
+      "landing": {
+        "$visual": {
+          "container": {
+            "background": "{ui:color.brand.surface}",
+            "padding": "{ui:space.md}"
+          },
+          "slots": {
+            "content": [
+              {
+                "$ref": "ui:primaryButton",
+                "label": "Continue",
+                "testId": "begin-auth"
+              }
+            ]
+          }
+        },
+        "on": {
+          "BEGIN_AUTH": "authFlow"
+        }
+      },
+      "authFlow": {
+        "invoke": [
+          {
+            "kind": "machine",
+            "src": "auth",
+            "id": "authFlow",
+            "onDone": {
+              "success": "dashboard",
+              "cancelled": "landing"
+            }
+          }
+        ]
+      },
+      "dashboard": {
+        "$visual": {
+          "$description": "Signed-in dashboard."
+        }
+      }
+    }
+  }
+}

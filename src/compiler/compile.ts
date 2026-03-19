@@ -8,6 +8,8 @@ import type {
   CompilerIssue,
   CompilerTraceEntry,
   EffectSpec,
+  Json,
+  ResolvedImports,
   StateNode,
   UXSpecDocument,
   VisualSpec,
@@ -165,7 +167,7 @@ function compileNode(
   );
 
   if (!node.states || Object.keys(node.states).length === 0) {
-    out[path] = {
+    const state: CompiledState = {
       path,
       visual,
       transitions: [...eventTransitions, ...alwaysTransitions],
@@ -173,6 +175,8 @@ function compileNode(
       exit,
       invoke,
     };
+    if (node.type === "final") state.type = "final";
+    out[path] = state;
     return;
   }
 
@@ -194,12 +198,12 @@ function compileNode(
 
 export function compile(
   document: UXSpecDocument,
-  options: { trace?: boolean } = {}
+  options: { trace?: boolean; imports?: ResolvedImports } = {}
 ): CompileResult {
   const issues: CompilerIssue[] = [];
   const trace: CompilerTraceEntry[] = [];
 
-  const resolved = resolveDocument(document, issues, trace);
+  const resolved = resolveDocument(document, issues, trace, options.imports);
 
   const index = buildStateIndex(resolved.$machine.states, issues, trace);
 
@@ -263,6 +267,57 @@ export function compile(
     collectTestIds(state.visual, assertions, seen);
   }
 
+  // Collect machine invoke dependencies and validate them
+  const dependencies: Record<string, { from: string; kind: "machine" }> = {};
+  for (const [statePath, state] of Object.entries(states)) {
+    for (const inv of state.invoke) {
+      if (inv.kind === "machine" && typeof inv.src === "string") {
+        const src = inv.src as string;
+        const ns = options.imports?.namespaces.get(src);
+        if (!ns || !ns.machineDocument) {
+          issues.push({
+            code: "UNKNOWN_IMPORTED_MACHINE",
+            message: `Machine invoke references unknown import: "${src}"`,
+            path: `$machine.states.${statePath.replace(/\./g, ".states.")}.invoke`,
+            phase: "compile",
+          });
+        } else {
+          const id = (inv.id as string) ?? src;
+          dependencies[id] = {
+            from: ns.sourcePath,
+            kind: "machine",
+          };
+
+          // Validate onDone targets are valid local states
+          const onDone = inv.onDone as Record<string, Json> | undefined;
+          if (onDone && typeof onDone === "object") {
+            for (const [finalState, target] of Object.entries(onDone)) {
+              if (typeof target === "string" && finalState !== "*") {
+                resolveTargetPath(
+                  statePath,
+                  target as string,
+                  index,
+                  issues,
+                  `$machine.states.${statePath.replace(/\./g, ".states.")}.invoke.onDone.${finalState}`,
+                  trace
+                );
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+
+  if (issues.length > 0) {
+    return {
+      ok: false,
+      compiled: null,
+      issues,
+      trace: options.trace ? trace : [],
+    };
+  }
+
   const compiled: CompiledUXSpec = {
     $format: "uxspec-compiled",
     $version: "0.2",
@@ -272,6 +327,10 @@ export function compile(
     states,
     assertions,
   };
+
+  if (Object.keys(dependencies).length > 0) {
+    compiled.dependencies = dependencies;
+  }
 
   return {
     ok: true,

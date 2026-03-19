@@ -1,10 +1,12 @@
 import { mkdir, readdir, readFile, writeFile } from "node:fs/promises";
 import path from "node:path";
+import { bundle } from "./bundler";
 import { compile } from "./compile";
 import { makeIssue, traceError } from "./diagnostics";
+import { resolveImports } from "./import-resolver";
 import { buildStateIndex } from "./state-paths";
 import { validateSpec } from "./validate";
-import type { CompilerIssue, CompilerTraceEntry, UXSpecDocument } from "./types";
+import type { CompilerIssue, CompilerTraceEntry, ResolvedImports, UXSpecDocument } from "./types";
 
 const cwd = process.cwd();
 
@@ -80,7 +82,28 @@ async function runValidate(files: string[], enableTrace: boolean): Promise<numbe
 
     try {
       const document = await readDocument(file);
-      const result = validateSpec(document, { trace: enableTrace });
+
+      // Resolve imports if present
+      let imports: ResolvedImports | undefined;
+      if (document.$imports && Object.keys(document.$imports).length > 0) {
+        const importIssues: CompilerIssue[] = [];
+        const importTrace: CompilerTraceEntry[] = [];
+        imports = await resolveImports(document, path.resolve(file), importIssues, importTrace);
+        if (importIssues.length > 0) {
+          hasErrors = true;
+          console.log(
+            JSON.stringify({
+              file: relativeFile,
+              ok: false,
+              issues: importIssues,
+              trace: enableTrace ? importTrace : [],
+            })
+          );
+          continue;
+        }
+      }
+
+      const result = validateSpec(document, { trace: enableTrace, imports });
       console.log(JSON.stringify({ file: relativeFile, ...result }));
       if (!result.ok) hasErrors = true;
     } catch (error) {
@@ -108,7 +131,7 @@ function countCompiledSmells(node: unknown): {
 
   const visit = (value: unknown): void => {
     if (typeof value === "string") {
-      if (/^\{[A-Za-z0-9_.-]+\}$/.test(value)) {
+      if (/^\{(?:[A-Za-z0-9_-]+:)?[A-Za-z0-9_.-]+\}$/.test(value)) {
         unresolvedTokenAliases++;
       }
       return;
@@ -155,7 +178,27 @@ async function runCompile(files: string[], enableTrace: boolean): Promise<number
       continue;
     }
 
-    const result = compile(document, { trace: enableTrace });
+    // Resolve imports if present
+    let imports: ResolvedImports | undefined;
+    if (document.$imports && Object.keys(document.$imports).length > 0) {
+      const importIssues: CompilerIssue[] = [];
+      const importTrace: CompilerTraceEntry[] = [];
+      imports = await resolveImports(document, path.resolve(file), importIssues, importTrace);
+      if (importIssues.length > 0) {
+        hasErrors = true;
+        console.log(
+          JSON.stringify({
+            file: relativeFile,
+            ok: false,
+            issues: importIssues,
+            trace: enableTrace ? importTrace : [],
+          })
+        );
+        continue;
+      }
+    }
+
+    const result = compile(document, { trace: enableTrace, imports });
 
     if (!result.ok) {
       hasErrors = true;
@@ -192,6 +235,7 @@ async function runCompile(files: string[], enableTrace: boolean): Promise<number
         assertions: compiled.assertions.length,
         unresolvedRefs: smells.unresolvedRefs,
         unresolvedTokenAliases: smells.unresolvedTokenAliases,
+        dependencies: Object.keys(compiled.dependencies ?? {}).length,
         leafInitial,
         trace: result.trace,
       })
@@ -233,7 +277,28 @@ async function runInspect(files: string[], enableTrace: boolean): Promise<number
       continue;
     }
 
-    const result = compile(document, { trace: enableTrace });
+    // Resolve imports if present
+    let inspectImports: ResolvedImports | undefined;
+    if (document.$imports && Object.keys(document.$imports).length > 0) {
+      const importIssues: CompilerIssue[] = [];
+      const importTrace: CompilerTraceEntry[] = [];
+      inspectImports = await resolveImports(document, path.resolve(file), importIssues, importTrace);
+      if (importIssues.length > 0) {
+        hasErrors = true;
+        console.log(
+          JSON.stringify({
+            file: relativeFile,
+            ok: false,
+            views: null,
+            issues: importIssues,
+            trace: enableTrace ? importTrace : [],
+          })
+        );
+        continue;
+      }
+    }
+
+    const result = compile(document, { trace: enableTrace, imports: inspectImports });
     if (!result.ok || !result.compiled) {
       hasErrors = true;
       console.log(
@@ -305,11 +370,58 @@ async function runInspect(files: string[], enableTrace: boolean): Promise<number
   return hasErrors ? 1 : 0;
 }
 
+async function runBundle(files: string[], enableTrace: boolean): Promise<number> {
+  if (files.length === 0) {
+    console.error("Bundle mode requires at least one entry file.");
+    return 1;
+  }
+
+  let hasErrors = false;
+
+  for (const file of files) {
+    const relativeFile = path.relative(cwd, file);
+
+    const result = await bundle(file, { trace: enableTrace });
+
+    if (!result.ok || !result.bundled) {
+      hasErrors = true;
+      console.log(
+        JSON.stringify({
+          file: relativeFile,
+          ok: false,
+          issues: result.issues,
+          trace: result.trace,
+        })
+      );
+      continue;
+    }
+
+    const fileName = path.basename(file, ".uxspec.json");
+    const outputPath = path.join(cwd, "dist", "compiled", `${fileName}.bundled.json`);
+    await mkdir(path.dirname(outputPath), { recursive: true });
+    await writeFile(outputPath, `${JSON.stringify(result.bundled, null, 2)}\n`, "utf8");
+
+    console.log(
+      JSON.stringify({
+        file: relativeFile,
+        ok: true,
+        output: path.relative(cwd, outputPath),
+        entry: result.bundled.entry,
+        modules: Object.keys(result.bundled.modules).length,
+        trace: result.trace,
+      })
+    );
+  }
+
+  return hasErrors ? 1 : 0;
+}
+
 async function main(): Promise<void> {
   const args = process.argv.slice(2);
   const command = args[0];
   const enableTrace = args.includes("--trace");
-  const files = args.slice(1).filter((a) => a !== "--trace");
+  const enableBundle = args.includes("--bundle");
+  const files = args.slice(1).filter((a) => a !== "--trace" && a !== "--bundle");
 
   if (command === "validate") {
     process.exitCode = await runValidate(files, enableTrace);
@@ -317,7 +429,11 @@ async function main(): Promise<void> {
   }
 
   if (command === "compile") {
-    process.exitCode = await runCompile(files, enableTrace);
+    if (enableBundle) {
+      process.exitCode = await runBundle(files, enableTrace);
+    } else {
+      process.exitCode = await runCompile(files, enableTrace);
+    }
     return;
   }
 
@@ -326,7 +442,7 @@ async function main(): Promise<void> {
     return;
   }
 
-  console.error("Usage: uxspec <validate|compile|inspect> [--trace] [file...]");
+  console.error("Usage: uxspec <validate|compile|inspect> [--trace] [--bundle] [file...]");
   process.exitCode = 1;
 }
 

@@ -4,6 +4,7 @@ import type {
   CompilerTraceEntry,
   EffectSpec,
   Expr,
+  ResolvedImports,
   StateNode,
   UXSpecDocument,
 } from "./types";
@@ -251,7 +252,7 @@ function validateNode(
 
 export function validateSpec(
   document: UXSpecDocument,
-  options: { trace?: boolean } = {}
+  options: { trace?: boolean; imports?: ResolvedImports } = {}
 ): ValidationResult {
   const issues: CompilerIssue[] = [];
   const trace: CompilerTraceEntry[] = [];

@@ -4,26 +4,33 @@
 
 # UXSpec
 
-**One file. Human-readable. Agent-writable. Machine-executable.**
+**A contract between Human, Agent, and Machine.**
 
-UXSpec is a JSON format that describes what your UI looks like *and* how it behaves — in a single artifact that compiles to any language or framework.
+UXSpec is a JSON format where humans describe intent, agents generate structure, and machines compile to any framework — all in a single file.
 
 ```
-  state ─────┐
-  visuals ───┤
-  tokens ────┼──→ .uxspec.json ──→ React, SwiftUI,
-  tests ─────┘                     Flutter, Compose, ...
+  Human ──────┐
+  Agent ──────┼──→ .uxspec.json ──→ React, SwiftUI,
+  Machine ────┘                     Slint, Compose, ...
 ```
 
 ---
 
-## The Problem
+## Why a Contract?
 
-Today, a single UI component lives across **3+ files** — state logic in hooks, layout in JSX, styles in CSS. To answer "what does the error state look like?", an agent reads three files and reconstructs the picture. To add a state, it modifies three files in sync.
+A UI component today is scattered across **3+ files** — state logic, layout, styles. No single artifact captures the full picture. Humans can't review it at a glance. Agents can't modify it without juggling files. Machines can't verify it without running the app.
 
-## The Fix
+UXSpec is the **single source of truth** that all three parties agree on:
 
-UXSpec collapses state + visuals + tokens + tests into **one file**:
+**Humans** write the intent. `$description` fields are natural language — review a spec in a PR like a design doc. Define tokens, name states, describe what each state looks like.
+
+**Agents** produce the structure. Structured JSON with a schema. An agent generates or modifies specs without ambiguity. No guessing file boundaries or reconciling drift.
+
+**Machines** enforce the contract. The compiler validates, resolves tokens, flattens states, and outputs a runtime artifact. Any renderer — React, SwiftUI, Compose, Slint — consumes it directly. Every `testId` becomes a verifiable assertion.
+
+---
+
+## One File, Everything
 
 ```json
 {
@@ -61,17 +68,73 @@ UXSpec collapses state + visuals + tokens + tests into **one file**:
 
 ---
 
-## Key Properties
+## Format at a Glance
 
-**Humans read it.** `$description` fields are natural language — review a spec in a PR like you'd review a design doc.
+A `.uxspec.json` file has up to nine sections:
 
-**Agents write it.** Structured JSON with a schema. An agent generates or modifies specs without ambiguity. Another agent (or code generator) produces a pixel-accurate implementation from the spec alone.
+| Section | Purpose |
+|---------|---------|
+| `$imports` | Share tokens, elements, and machines across files |
+| `$tokens` | Design vocabulary — colors, spacing, typography, timing ([W3C Design Tokens](https://www.w3.org/community/reports/design-tokens/CG-FINAL-format-20251028/)) |
+| `$animations` | Named keyframe definitions |
+| `$elements` | Reusable component templates with parameters |
+| `$context` | Typed runtime state — form values, flags, errors |
+| `$events` | Typed event catalog — user, network, timer, system |
+| `$actions` / `$effects` | Pure mutations vs. side effects |
+| `$machine` | Statechart where every state carries a `$visual` |
 
-**Machines execute it.** The compiler validates, resolves tokens, flattens states, and outputs a runtime artifact. Any renderer consumes it directly — React, SwiftUI, Compose, Flutter, or a custom engine.
+Every `$visual` includes: `$description`, `slots` (rendered elements), `container` (layout), `keyboard` (keybindings), `onEnter` (focus/animations), and `autoDismiss`.
 
-**Any language. Any framework.** JSON is parseable everywhere. No TypeScript, no CSS, no framework lock-in. The compiled format needs ~30 lines to consume in any language.
+---
 
-**Tests are built in.** Every `testId` becomes an assertion in the compiled output. CI verifies rendered UI matches the spec — no manual test authoring.
+## Composability
+
+Large apps can split specs by module. `$imports` lets files share tokens, elements, and machines through explicit namespace aliases.
+
+```json
+{
+  "$imports": {
+    "ds": {
+      "from": "./design-system.uxspec.json",
+      "tokens": true,
+      "elements": true
+    },
+    "settings": {
+      "from": "./settings.uxspec.json",
+      "machine": true
+    }
+  }
+}
+```
+
+**Qualified references** — imported names use an `alias:` prefix so there's zero ambiguity:
+
+```json
+"{ds:color.brand.500}"
+{ "$ref": "ds:primaryButton" }
+```
+
+**Machine composition** — one module invokes another via `invoke.kind = "machine"`. The child runs to a `type: "final"` state, then the parent transitions via `onDone`:
+
+```json
+"settingsFlow": {
+  "invoke": [{
+    "kind": "machine",
+    "src": "settings",
+    "id": "settingsFlow",
+    "onDone": { "done": "home" }
+  }]
+}
+```
+
+**Bundle mode** — compile everything into a single deployment artifact:
+
+```bash
+bun run src/compiler/cli.ts compile --bundle examples/07-composable-app/app.uxspec.json
+# → {"ok":true,"entry":"app","modules":2}
+```
+
+See [examples/07-composable-app/](examples/07-composable-app/) for a full worked example.
 
 ---
 
@@ -85,31 +148,12 @@ The [`skills/`](skills/) directory contains an agent skill that **guides spec au
 4. Add runtime semantics
 5. Compile and verify
 
-Point your agent at `skills/SKILL.md` and it walks through the entire workflow — from idea to compiled, validated spec. The skill references format docs and a minimal template so the agent stays on-schema.
+Point your agent at `skills/SKILL.md` and it walks through the entire workflow — from idea to compiled, validated spec.
 
 ```bash
-# Example: an agent uses the skill to scaffold a new spec
 bun run src/compiler/cli.ts compile examples/03-toast-notifications.uxspec.json
 # → {"ok":true,"states":8,"assertions":12,"leafInitial":true}
 ```
-
----
-
-## Format at a Glance
-
-A `.uxspec.json` file has up to eight sections:
-
-| Section | Purpose |
-|---------|---------|
-| `$tokens` | Design vocabulary — colors, spacing, typography, timing ([W3C Design Tokens](https://www.w3.org/community/reports/design-tokens/CG-FINAL-format-20251028/)) |
-| `$animations` | Named keyframe definitions |
-| `$elements` | Reusable component templates with parameters |
-| `$context` | Typed runtime state — form values, flags, errors |
-| `$events` | Typed event catalog — user, network, timer, system |
-| `$actions` / `$effects` | Pure mutations vs. side effects |
-| `$machine` | Statechart where every state carries a `$visual` |
-
-Every `$visual` includes: `$description`, `slots` (rendered elements), `container` (layout), `keyboard` (keybindings), `onEnter` (focus/animations), and `autoDismiss`.
 
 ---
 
@@ -123,6 +167,7 @@ Every `$visual` includes: `$description`, `slots` (rendered elements), `containe
 | [Form Validation](examples/04-form-validation.uxspec.json) | Per-field validation, async debounce, password strength, cross-field rules |
 | [Media Player](examples/05-media-player.uxspec.json) | Parallel states, continuous values, buffering, picture-in-picture |
 | [Data Resource Page](examples/06-data-resource-page.uxspec.json) | Route-level loading, optimistic save, rollback, toast on success |
+| [Composable App](examples/07-composable-app/) | `$imports`, shared design system, machine invoke, final states, bundle mode |
 
 ---
 
@@ -134,6 +179,12 @@ bun run src/compiler/cli.ts validate examples/02-auth-flow.uxspec.json
 
 # Compile → dist/compiled/02-auth-flow.compiled.json
 bun run src/compiler/cli.ts compile examples/02-auth-flow.uxspec.json
+
+# Compile with imports → resolves cross-file tokens, elements, machine invokes
+bun run src/compiler/cli.ts compile examples/07-composable-app/app.uxspec.json
+
+# Bundle → single JSON with all modules
+bun run src/compiler/cli.ts compile --bundle examples/07-composable-app/app.uxspec.json
 
 # Inspect (no file output)
 bun run src/compiler/cli.ts inspect examples/02-auth-flow.uxspec.json

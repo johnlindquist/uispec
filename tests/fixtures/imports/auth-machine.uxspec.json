@@ -1,0 +1,55 @@
+{
+  "$schema": "https://raw.githubusercontent.com/johnlindquist/uxspec/main/schema/uxspec.schema.json",
+  "$description": "Auth machine with final states.",
+  "$imports": {
+    "ui": {
+      "from": "./shared-ui.uxspec.json",
+      "tokens": true,
+      "elements": true
+    }
+  },
+  "$events": {
+    "SUBMIT": { "source": "user" },
+    "SUCCESS": { "source": "network" },
+    "CANCEL": { "source": "user" }
+  },
+  "$machine": {
+    "id": "auth",
+    "initial": "signIn",
+    "states": {
+      "signIn": {
+        "$visual": {
+          "container": {
+            "background": "{ui:color.brand.surface}",
+            "padding": "{ui:space.md}"
+          },
+          "slots": {
+            "content": [
+              {
+                "$ref": "ui:primaryButton",
+                "label": "Sign in",
+                "testId": "auth-submit"
+              }
+            ]
+          }
+        },
+        "on": {
+          "SUBMIT": "loading",
+          "CANCEL": "cancelled"
+        }
+      },
+      "loading": {
+        "on": {
+          "SUCCESS": "success",
+          "CANCEL": "cancelled"
+        }
+      },
+      "success": {
+        "type": "final"
+      },
+      "cancelled": {
+        "type": "final"
+      }
+    }
+  }
+}
