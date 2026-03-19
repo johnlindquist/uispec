@@ -5,15 +5,12 @@
 UXSpec is a JSON format that describes what your UI looks like *and* how it behaves — in a single artifact that compiles to any language or framework.
 
 ```
-              ┌─────────────┐
-              │  .uxspec.json │
-              │               │
-              │  state machine │──→  React
-              │  + visuals     │──→  SwiftUI
-              │  + tokens      │──→  Flutter
-              │  + tests       │──→  Compose
-              │               │──→  anything
-              └─────────────┘
+  .uxspec.json ──→ React
+                ──→ SwiftUI
+  state machine ──→ Flutter
+  + visuals     ──→ Compose
+  + tokens      ──→ anything
+  + tests
 ```
 
 ---
