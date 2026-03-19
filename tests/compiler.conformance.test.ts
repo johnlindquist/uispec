@@ -1,6 +1,6 @@
 import { describe, expect, it } from "bun:test";
 import { compile } from "../src/compiler/compile";
-import type { UISpecDocument, CompiledUISpec } from "../src/compiler/types";
+import type { UXSpecDocument, CompiledUXSpec } from "../src/compiler/types";
 
 function hasAliasLikeString(node: unknown): boolean {
   if (typeof node === "string") {
@@ -13,7 +13,7 @@ function hasAliasLikeString(node: unknown): boolean {
   return false;
 }
 
-const doc: UISpecDocument = {
+const doc: UXSpecDocument = {
   $schema: "schema",
   $description: "compiler conformance",
   $tokens: {
@@ -63,7 +63,7 @@ const doc: UISpecDocument = {
   },
 };
 
-function compileOk(document: UISpecDocument): CompiledUISpec {
+function compileOk(document: UXSpecDocument): CompiledUXSpec {
   const result = compile(document);
   if (!result.ok || !result.compiled) {
     throw new Error(`Expected compile to succeed, got issues: ${JSON.stringify(result.issues)}`);

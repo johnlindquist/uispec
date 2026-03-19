@@ -1,12 +1,12 @@
-# UISpec Compiler Reference
+# UXSpec Compiler Reference
 
 ## Overview
 
-The compiler transforms the authoring format (`.uispec.json`) into the compiled format (`.compiled.json`). It is a JSON → JSON transform with five phases.
+The compiler transforms the authoring format (`.uxspec.json`) into the compiled format (`.compiled.json`). It is a JSON → JSON transform with five phases.
 
 ```
                     compile
-.uispec.json  ──────────────►  .compiled.json
+.uxspec.json  ──────────────►  .compiled.json
 (authoring)         │           (runtime)
                     │
           ┌─────────┴──────────┐
@@ -141,9 +141,9 @@ This enables:
 
 ```json
 {
-  "$format": "uispec-compiled",
+  "$format": "uxspec-compiled",
   "$version": "0.2",
-  "$source": "component.uispec.json",
+  "$source": "component.uxspec.json",
 
   "initial": "signIn.idle",
 
@@ -227,13 +227,13 @@ This enables:
 ### CLI Success Example
 
 ```json
-{"file":"examples/02-auth-flow.uispec.json","ok":true,"output":"dist/compiled/02-auth-flow.compiled.json","states":17,"assertions":21,"unresolvedRefs":0,"unresolvedTokenAliases":0,"leafInitial":true,"trace":[]}
+{"file":"examples/02-auth-flow.uxspec.json","ok":true,"output":"dist/compiled/02-auth-flow.compiled.json","states":17,"assertions":21,"unresolvedRefs":0,"unresolvedTokenAliases":0,"leafInitial":true,"trace":[]}
 ```
 
 ### CLI Failure Example
 
 ```json
-{"file":"tests/fixtures/bad-initial.uispec.json","ok":false,"issues":[{"code":"INVALID_MACHINE_INITIAL","message":"Machine initial \"missing\" does not resolve to a state","path":"$machine.initial","phase":"state-paths"}],"trace":[]}
+{"file":"tests/fixtures/bad-initial.uxspec.json","ok":false,"issues":[{"code":"INVALID_MACHINE_INITIAL","message":"Machine initial \"missing\" does not resolve to a state","path":"$machine.initial","phase":"state-paths"}],"trace":[]}
 ```
 
 ### Issue Codes
@@ -293,7 +293,7 @@ bun run src/compiler/cli.ts inspect [--trace] [file...]
 
 ```json
 {
-  "file": "examples/02-auth-flow.uispec.json",
+  "file": "examples/02-auth-flow.uxspec.json",
   "ok": true,
   "views": {
     "resolvedInitial": "signIn.idle",
@@ -330,7 +330,7 @@ For invalid or unreadable specs, `views` is `null`:
 
 ```json
 {
-  "file": "tests/fixtures/bad-initial.uispec.json",
+  "file": "tests/fixtures/bad-initial.uxspec.json",
   "ok": false,
   "views": null,
   "issues": [{ "code": "INVALID_MACHINE_INITIAL", "message": "...", "path": "$machine.initial", "phase": "state-paths" }],
@@ -353,7 +353,7 @@ For invalid or unreadable specs, `views` is `null`:
 The `validate` command now returns the same `trace` field as `compile`, giving agents a single mental model for both commands:
 
 ```json
-{"file":"tests/fixtures/bad-initial.uispec.json","ok":false,"issues":[{"code":"INVALID_MACHINE_INITIAL","message":"Machine initial \"missing\" does not resolve to a state","path":"$machine.initial","phase":"state-paths"}],"trace":[{"phase":"state-paths","kind":"initial","path":"$machine.initial","input":"missing","status":"error","code":"INVALID_MACHINE_INITIAL","detail":"Machine initial \"missing\" does not resolve to a state"}]}
+{"file":"tests/fixtures/bad-initial.uxspec.json","ok":false,"issues":[{"code":"INVALID_MACHINE_INITIAL","message":"Machine initial \"missing\" does not resolve to a state","path":"$machine.initial","phase":"state-paths"}],"trace":[{"phase":"state-paths","kind":"initial","path":"$machine.initial","input":"missing","status":"error","code":"INVALID_MACHINE_INITIAL","detail":"Machine initial \"missing\" does not resolve to a state"}]}
 ```
 
 ## Per-Language Runtime

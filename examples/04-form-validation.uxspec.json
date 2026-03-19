@@ -1,5 +1,5 @@
 {
-  "$schema": "https://uispec.dev/0.1/schema.json",
+  "$schema": "https://uxspec.dev/0.1/schema.json",
   "$description": "Contact form with real-time validation. Demonstrates per-field error states, cross-field validation (password confirmation), async validation (email uniqueness check), character counters, conditional field visibility, and submission lifecycle. Edge cases: debounced async validation, field-level vs form-level errors, pristine/dirty/touched tracking.",
 
   "$tokens": {

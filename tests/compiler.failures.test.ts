@@ -4,7 +4,7 @@ import { compile } from "../src/compiler/compile";
 describe("compiler failure diagnostics", () => {
   it("returns INVALID_MACHINE_INITIAL instead of throwing", () => {
     const result = compile({
-      $schema: "https://uispec.dev/0.2/schema.json",
+      $schema: "https://uxspec.dev/0.2/schema.json",
       $description: "bad initial",
       $machine: {
         id: "test",
@@ -26,7 +26,7 @@ describe("compiler failure diagnostics", () => {
 
   it("returns UNKNOWN_ELEMENT_REFERENCE instead of throwing", () => {
     const result = compile({
-      $schema: "https://uispec.dev/0.2/schema.json",
+      $schema: "https://uxspec.dev/0.2/schema.json",
       $description: "bad ref",
       $elements: {},
       $machine: {
@@ -55,7 +55,7 @@ describe("compiler failure diagnostics", () => {
 
   it("returns UNKNOWN_TOKEN_REFERENCE instead of throwing", () => {
     const result = compile({
-      $schema: "https://uispec.dev/0.2/schema.json",
+      $schema: "https://uxspec.dev/0.2/schema.json",
       $description: "bad token",
       $tokens: {},
       $machine: {
@@ -82,7 +82,7 @@ describe("compiler failure diagnostics", () => {
 
   it("returns INVALID_COMPOUND_INITIAL for bad compound state initial", () => {
     const result = compile({
-      $schema: "https://uispec.dev/0.2/schema.json",
+      $schema: "https://uxspec.dev/0.2/schema.json",
       $description: "bad compound initial",
       $machine: {
         id: "test",
@@ -109,7 +109,7 @@ describe("compiler failure diagnostics", () => {
 
   it("returns UNDECLARED_TARGET for bad transition target", () => {
     const result = compile({
-      $schema: "https://uispec.dev/0.2/schema.json",
+      $schema: "https://uxspec.dev/0.2/schema.json",
       $description: "bad target",
       $events: { GO: { source: "user" } },
       $machine: {
@@ -135,7 +135,7 @@ describe("compiler failure diagnostics", () => {
   it("includes trace entries when trace option is enabled", () => {
     const result = compile(
       {
-        $schema: "https://uispec.dev/0.2/schema.json",
+        $schema: "https://uxspec.dev/0.2/schema.json",
         $description: "trace test",
         $tokens: {
           color: { accent: { $type: "color", $value: "#ff0000" } },
@@ -158,7 +158,7 @@ describe("compiler failure diagnostics", () => {
 
   it("returns empty trace when trace option is disabled", () => {
     const result = compile({
-      $schema: "https://uispec.dev/0.2/schema.json",
+      $schema: "https://uxspec.dev/0.2/schema.json",
       $description: "no trace",
       $machine: {
         id: "test",
@@ -174,7 +174,7 @@ describe("compiler failure diagnostics", () => {
   it("emits failure trace for invalid machine initial", () => {
     const result = compile(
       {
-        $schema: "https://uispec.dev/0.2/schema.json",
+        $schema: "https://uxspec.dev/0.2/schema.json",
         $description: "bad initial",
         $machine: {
           id: "test",
@@ -201,7 +201,7 @@ describe("compiler failure diagnostics", () => {
   it("emits failure trace for unresolved target", () => {
     const result = compile(
       {
-        $schema: "https://uispec.dev/0.2/schema.json",
+        $schema: "https://uxspec.dev/0.2/schema.json",
         $description: "bad target",
         $events: { GO: { source: "user" } },
         $machine: {
@@ -230,7 +230,7 @@ describe("compiler failure diagnostics", () => {
   it("includes attempts array in target failure trace", () => {
     const result = compile(
       {
-        $schema: "https://uispec.dev/0.2/schema.json",
+        $schema: "https://uxspec.dev/0.2/schema.json",
         $description: "bad target with attempts",
         $events: { GO: { source: "user" } },
         $machine: {
@@ -256,7 +256,7 @@ describe("compiler failure diagnostics", () => {
   it("emits success trace entries with status ok", () => {
     const result = compile(
       {
-        $schema: "https://uispec.dev/0.2/schema.json",
+        $schema: "https://uxspec.dev/0.2/schema.json",
         $description: "good trace",
         $events: { GO: { source: "user" } },
         $machine: {
@@ -280,7 +280,7 @@ describe("compiler failure diagnostics", () => {
   it("never throws for any combination of authoring errors", () => {
     // This should NOT throw - it should return structured issues
     const result = compile({
-      $schema: "https://uispec.dev/0.2/schema.json",
+      $schema: "https://uxspec.dev/0.2/schema.json",
       $description: "everything wrong",
       $tokens: {},
       $elements: {},

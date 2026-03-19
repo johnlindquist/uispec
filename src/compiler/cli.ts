@@ -4,24 +4,24 @@ import { compile } from "./compile";
 import { makeIssue, traceError } from "./diagnostics";
 import { buildStateIndex } from "./state-paths";
 import { validateSpec } from "./validate";
-import type { CompilerIssue, CompilerTraceEntry, UISpecDocument } from "./types";
+import type { CompilerIssue, CompilerTraceEntry, UXSpecDocument } from "./types";
 
 const cwd = process.cwd();
 
-function isUISpecFile(file: string): boolean {
-  return file.endsWith(".uispec.json");
+function isUXSpecFile(file: string): boolean {
+  return file.endsWith(".uxspec.json");
 }
 
-async function readDocument(filePath: string): Promise<UISpecDocument> {
+async function readDocument(filePath: string): Promise<UXSpecDocument> {
   const raw = await readFile(filePath, "utf8");
-  return JSON.parse(raw) as UISpecDocument;
+  return JSON.parse(raw) as UXSpecDocument;
 }
 
 async function listExampleSpecs(): Promise<string[]> {
   const examplesDir = path.join(cwd, "examples");
   const files = await readdir(examplesDir);
   return files
-    .filter(isUISpecFile)
+    .filter(isUXSpecFile)
     .sort()
     .map((file) => path.join(examplesDir, file));
 }
@@ -33,7 +33,7 @@ async function listV02ExampleSpecs(): Promise<string[]> {
   for (const file of files) {
     try {
       const document = await readDocument(file);
-      if (document.$schema === "https://uispec.dev/0.2/schema.json") {
+      if (document.$schema === "https://uxspec.dev/0.2/schema.json") {
         matching.push(file);
       }
     } catch {
@@ -45,7 +45,7 @@ async function listV02ExampleSpecs(): Promise<string[]> {
 }
 
 function getCompileOutputPath(inputPath: string): string {
-  const fileName = path.basename(inputPath, ".uispec.json");
+  const fileName = path.basename(inputPath, ".uxspec.json");
   return path.join(cwd, "dist", "compiled", `${fileName}.compiled.json`);
 }
 
@@ -139,7 +139,7 @@ async function runCompile(files: string[], enableTrace: boolean): Promise<number
   for (const file of targets) {
     const relativeFile = path.relative(cwd, file);
 
-    let document: UISpecDocument;
+    let document: UXSpecDocument;
     try {
       document = await readDocument(file);
     } catch (error) {
@@ -216,7 +216,7 @@ async function runInspect(files: string[], enableTrace: boolean): Promise<number
   for (const file of targets) {
     const relativeFile = path.relative(cwd, file);
 
-    let document: UISpecDocument;
+    let document: UXSpecDocument;
     try {
       document = await readDocument(file);
     } catch (error) {

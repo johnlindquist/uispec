@@ -1,4 +1,4 @@
-# UISpec Format Reference
+# UXSpec Format Reference
 
 ## Token Syntax (W3C Design Tokens)
 

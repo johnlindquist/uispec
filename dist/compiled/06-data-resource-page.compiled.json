@@ -1,5 +1,5 @@
 {
-  "$format": "uispec-compiled",
+  "$format": "uxspec-compiled",
   "$version": "0.2",
   "initial": "loading",
   "contextSchema": {
@@ -1321,5 +1321,5 @@
       "testId": "error-retry-btn"
     }
   ],
-  "$source": "examples/06-data-resource-page.uispec.json"
+  "$source": "examples/06-data-resource-page.uxspec.json"
 }

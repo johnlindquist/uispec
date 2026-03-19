@@ -5,7 +5,7 @@ import type {
   EffectSpec,
   Expr,
   StateNode,
-  UISpecDocument,
+  UXSpecDocument,
 } from "./types";
 import {
   buildStateIndex,
@@ -250,7 +250,7 @@ function validateNode(
 }
 
 export function validateSpec(
-  document: UISpecDocument,
+  document: UXSpecDocument,
   options: { trace?: boolean } = {}
 ): ValidationResult {
   const issues: CompilerIssue[] = [];

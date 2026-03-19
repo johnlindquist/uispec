@@ -1,10 +1,10 @@
 import { describe, expect, it } from "bun:test";
 import { compile } from "../src/compiler/compile";
-import type { UISpecDocument, CompiledUISpec } from "../src/compiler/types";
+import type { UXSpecDocument, CompiledUXSpec } from "../src/compiler/types";
 
-function minimalDoc(overrides: Partial<UISpecDocument> = {}): UISpecDocument {
+function minimalDoc(overrides: Partial<UXSpecDocument> = {}): UXSpecDocument {
   return {
-    $schema: "https://uispec.dev/0.2/schema.json",
+    $schema: "https://uxspec.dev/0.2/schema.json",
     $description: "test",
     $context: {},
     $events: {},
@@ -19,7 +19,7 @@ function minimalDoc(overrides: Partial<UISpecDocument> = {}): UISpecDocument {
   };
 }
 
-function compileOk(doc: UISpecDocument): CompiledUISpec {
+function compileOk(doc: UXSpecDocument): CompiledUXSpec {
   const result = compile(doc);
   if (!result.ok || !result.compiled) {
     throw new Error(`Expected compile to succeed, got issues: ${JSON.stringify(result.issues)}`);
@@ -30,7 +30,7 @@ function compileOk(doc: UISpecDocument): CompiledUISpec {
 describe("compile", () => {
   it("emits $format and $version", () => {
     const result = compileOk(minimalDoc());
-    expect(result.$format).toBe("uispec-compiled");
+    expect(result.$format).toBe("uxspec-compiled");
     expect(result.$version).toBe("0.2");
   });
 
@@ -432,8 +432,8 @@ describe("compile", () => {
 
   describe("full integration", () => {
     it("compiles the submit flow example from the research context", () => {
-      const doc: UISpecDocument = {
-        $schema: "https://uispec.dev/0.2/schema.json",
+      const doc: UXSpecDocument = {
+        $schema: "https://uxspec.dev/0.2/schema.json",
         $description: "submit flow",
         $context: {
           submitting: { type: "boolean", default: false },
@@ -470,7 +470,7 @@ describe("compile", () => {
 
       const result = compileOk(doc);
 
-      expect(result.$format).toBe("uispec-compiled");
+      expect(result.$format).toBe("uxspec-compiled");
       expect(result.$version).toBe("0.2");
       expect(result.initial).toBe("idle");
       expect(result.contextSchema).toEqual({

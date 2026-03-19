@@ -1,5 +1,5 @@
 {
-  "$schema": "https://uispec.dev/0.2/schema.json",
+  "$schema": "https://uxspec.dev/0.2/schema.json",
   "$description": "Authentication flow — multi-page with conditional routing. Demonstrates guards (via context), form inputs, error states, loading substates, and page-level layout transitions. Edge cases: OAuth redirect, email verification pending, rate limiting.",
 
   "$tokens": {

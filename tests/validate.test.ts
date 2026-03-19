@@ -1,10 +1,10 @@
 import { describe, expect, it } from "bun:test";
 import { validateSpec } from "../src/compiler/validate";
-import type { UISpecDocument } from "../src/compiler/types";
+import type { UXSpecDocument } from "../src/compiler/types";
 
-function minimalDoc(overrides: Partial<UISpecDocument> = {}): UISpecDocument {
+function minimalDoc(overrides: Partial<UXSpecDocument> = {}): UXSpecDocument {
   return {
-    $schema: "https://uispec.dev/0.2/schema.json",
+    $schema: "https://uxspec.dev/0.2/schema.json",
     $description: "test",
     $context: {},
     $events: {},
@@ -353,7 +353,7 @@ describe("validateSpec", () => {
   describe("combined failure case", () => {
     it("reports multiple issues for a malformed spec", () => {
       const result = validateSpec({
-        $schema: "https://uispec.dev/0.2/schema.json",
+        $schema: "https://uxspec.dev/0.2/schema.json",
         $description: "bad example",
         $context: {},
         $events: {},

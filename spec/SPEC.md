@@ -1,16 +1,16 @@
-# UISpec Format Specification v0.2
+# UXSpec Format Specification v0.2
 
 ## Purpose
 
-UISpec is a language-agnostic JSON format that unifies **state machine definitions** and **complete visual specifications** into a single file. Its primary motivation is to give AI agents a format they can read, write, and reason about to define full application interfaces — behavior, layout, styling, animation, and interaction — without ambiguity.
+UXSpec is a language-agnostic JSON format that unifies **state machine definitions** and **complete visual specifications** into a single file. Its primary motivation is to give AI agents a format they can read, write, and reason about to define full application interfaces — behavior, layout, styling, animation, and interaction — without ambiguity.
 
-State machines are excellent at describing application behavior in a way that is both executable code and human-readable documentation. UISpec extends this idea to the visual layer: every state in the machine also declares exactly what the UI looks like, down to pixel values, colors, typography, and interaction states.
+State machines are excellent at describing application behavior in a way that is both executable code and human-readable documentation. UXSpec extends this idea to the visual layer: every state in the machine also declares exactly what the UI looks like, down to pixel values, colors, typography, and interaction states.
 
 ## Design Principles
 
-1. **AI-agent-first.** The format is optimized for machine consumption. An agent should be able to generate a complete, pixel-accurate UI from a `.uispec.json` file without any other context.
+1. **AI-agent-first.** The format is optimized for machine consumption. An agent should be able to generate a complete, pixel-accurate UI from a `.uxspec.json` file without any other context.
 
-2. **Human-readable second.** Natural language `$description` fields on every state and element make the file scannable by humans. A designer can review a PR containing a `.uispec.json` change and understand both behavioral and visual impact.
+2. **Human-readable second.** Natural language `$description` fields on every state and element make the file scannable by humans. A designer can review a PR containing a `.uxspec.json` change and understand both behavioral and visual impact.
 
 3. **Language-agnostic.** JSON is parseable by every programming language. Layout primitives (`stack-h`, `stack-v`, `grid`) map to any UI framework. No TypeScript, no CSS, no framework-specific concepts in the format itself.
 
@@ -20,8 +20,8 @@ State machines are excellent at describing application behavior in a way that is
 
 ## File Format
 
-- Extension: `.uispec.json`
-- Media type: `application/uispec+json`
+- Extension: `.uxspec.json`
+- Media type: `application/uxspec+json`
 - Encoding: UTF-8
 - All `$`-prefixed properties are reserved
 
@@ -29,7 +29,7 @@ State machines are excellent at describing application behavior in a way that is
 
 ```json
 {
-  "$schema": "https://uispec.dev/0.2/schema.json",
+  "$schema": "https://uxspec.dev/0.2/schema.json",
   "$description": "Human-readable description of this component",
 
   "$tokens": { },

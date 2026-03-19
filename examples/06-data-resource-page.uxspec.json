@@ -1,6 +1,6 @@
 {
-  "$schema": "https://uispec.dev/0.2/schema.json",
-  "$description": "Resource page with fetch, empty state, edit form, optimistic save, rollback, toast, retry, focus management, test IDs, and aria metadata. Proves UISpec can model real app-level concerns end-to-end.",
+  "$schema": "https://uxspec.dev/0.2/schema.json",
+  "$description": "Resource page with fetch, empty state, edit form, optimistic save, rollback, toast, retry, focus management, test IDs, and aria metadata. Proves UXSpec can model real app-level concerns end-to-end.",
 
   "$tokens": {
     "color": {

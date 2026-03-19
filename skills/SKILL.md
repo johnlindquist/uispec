@@ -1,15 +1,15 @@
 ---
-name: uispec
-description: Walk through building a UISpec (.uispec.json) file — gathering requirements, designing the state machine, defining visuals, then compiling and verifying the output.
+name: uxspec
+description: Walk through building a UXSpec (.uxspec.json) file — gathering requirements, designing the state machine, defining visuals, then compiling and verifying the output.
 ---
 
-# UISpec Builder
+# UXSpec Builder
 
-Interactive workflow for creating UISpec files — the JSON format that unifies state machines and visual specifications for AI agents.
+Interactive workflow for creating UXSpec files — the JSON format that unifies state machines and visual specifications for AI agents.
 
 ## Trigger
 
-Use when the user wants to create, build, or scaffold a `.uispec.json` file, or asks "help me write a uispec".
+Use when the user wants to create, build, or scaffold a `.uxspec.json` file, or asks "help me write a uxspec".
 
 ## Workflow
 
@@ -66,11 +66,11 @@ Read `references/runtime-semantics.md` for expression syntax and action/effect k
 
 ### Phase 5 — Generate and Verify
 
-1. Write the spec to `examples/<name>.uispec.json`
-2. Validate: `bun run src/compiler/cli.ts validate examples/<name>.uispec.json`
+1. Write the spec to `examples/<name>.uxspec.json`
+2. Validate: `bun run src/compiler/cli.ts validate examples/<name>.uxspec.json`
 3. If validation fails, fix reported issues (the compiler returns structured issue codes)
-4. Compile: `bun run src/compiler/cli.ts compile examples/<name>.uispec.json`
-5. Inspect: `bun run src/compiler/cli.ts inspect examples/<name>.uispec.json`
+4. Compile: `bun run src/compiler/cli.ts compile examples/<name>.uxspec.json`
+5. Inspect: `bun run src/compiler/cli.ts inspect examples/<name>.uxspec.json`
 6. Report to the user:
    - Number of states and assertions
    - Whether initial resolves to a leaf state
@@ -95,8 +95,8 @@ If the compiler reports issues, map codes to fixes:
 
 ## Key Rules
 
-- File extension: `.uispec.json`
-- Schema: `https://uispec.dev/0.2/schema.json`
+- File extension: `.uxspec.json`
+- Schema: `https://uxspec.dev/0.2/schema.json`
 - Required top-level: `$schema`, `$description`, `$machine`
 - `$machine` requires: `id`, `initial`, `states`
 - Leaf elements (`text`, `button`, `input`, `icon`, `shape`, `badge`, `bar`) MUST NOT have `children`

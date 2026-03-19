@@ -1,7 +1,7 @@
 {
-  "$format": "uispec-compiled",
+  "$format": "uxspec-compiled",
   "$version": "0.2",
-  "initial": "editing",
+  "initial": "editing.pristine",
   "contextSchema": {},
   "eventSchema": {},
   "states": {
@@ -17,7 +17,7 @@
             "width": "fill",
             "height": "fill"
           },
-          "background": "{color.bg}"
+          "background": "#000000"
         },
         "slots": {
           "content": [
@@ -26,7 +26,7 @@
               "name": "form-card",
               "layout": "stack-v",
               "align": "stretch",
-              "gap": "{spacing.lg}",
+              "gap": 16,
               "size": {
                 "width": {
                   "value": 480,
@@ -34,35 +34,169 @@
                 }
               },
               "padding": {
-                "value": "{spacing.xl}"
+                "value": 24
               },
-              "background": "{color.card}",
-              "cornerRadius": "{radius.lg}",
+              "background": "#111111",
+              "cornerRadius": 12,
               "borderWidth": {
                 "value": 1,
                 "unit": "px"
               },
-              "borderColor": "{color.stroke}",
+              "borderColor": "rgba(255, 255, 255, 0.1)",
               "children": [
                 {
                   "type": "text",
                   "content": "form.title",
                   "style": {
-                    "fontSize": "{font.size.xl}",
-                    "fontWeight": "{font.weight.medium}",
-                    "color": "{color.text.primary}"
+                    "fontSize": 20,
+                    "fontWeight": 500,
+                    "color": "#ededed"
                   }
                 },
                 {
                   "type": "text",
                   "content": "form.subtitle",
                   "style": {
-                    "fontSize": "{font.size.sm}",
-                    "color": "{color.text.secondary}"
+                    "fontSize": 13,
+                    "color": "#888888"
                   }
                 },
                 {
-                  "$ref": "field",
+                  "$description": "Form field with label, input, helper text, error message, and character counter. Tracks pristine/dirty/touched states via context.",
+                  "type": "group",
+                  "layout": "stack-v",
+                  "gap": 4,
+                  "children": [
+                    {
+                      "type": "group",
+                      "layout": "stack-h",
+                      "justify": "space-between",
+                      "align": "center",
+                      "children": [
+                        {
+                          "type": "text",
+                          "bind": "label",
+                          "style": {
+                            "fontSize": 13,
+                            "fontWeight": 500,
+                            "color": "#ededed"
+                          }
+                        },
+                        {
+                          "$description": "Character counter — only shown when maxLength is set",
+                          "type": "text",
+                          "name": "char-counter",
+                          "conditional": "params.maxLength != null",
+                          "dynamic": [
+                            {
+                              "property": "content",
+                              "expr": [
+                                "var",
+                                "charCountDisplay"
+                              ]
+                            },
+                            {
+                              "property": "color",
+                              "expr": [
+                                "if",
+                                [
+                                  "var",
+                                  "overLimit"
+                                ],
+                                "#ee5555",
+                                "#666666"
+                              ]
+                            }
+                          ],
+                          "style": {
+                            "fontSize": 11,
+                            "fontVariantNumeric": "tabular-nums"
+                          }
+                        }
+                      ]
+                    },
+                    {
+                      "type": "input",
+                      "bind": "name",
+                      "inputType": "text",
+                      "placeholder": "form.namePlaceholder",
+                      "style": {
+                        "height": {
+                          "value": 40,
+                          "unit": "px"
+                        },
+                        "padding": {
+                          "horizontal": 12
+                        },
+                        "fontSize": 14,
+                        "color": "#ededed",
+                        "background": "#0a0a0a",
+                        "borderWidth": {
+                          "value": 1,
+                          "unit": "px"
+                        },
+                        "borderColor": "rgba(255, 255, 255, 0.1)",
+                        "cornerRadius": 6
+                      },
+                      "interactions": {
+                        "focus": {
+                          "borderColor": "#0070f3"
+                        }
+                      },
+                      "stateStyles": {
+                        "error": {
+                          "borderColor": "#ee5555",
+                          "background": "rgba(238, 85, 85, 0.08)"
+                        },
+                        "success": {
+                          "borderColor": "#52c41a",
+                          "background": "rgba(82, 196, 26, 0.08)"
+                        }
+                      }
+                    },
+                    {
+                      "$description": "Helper text — shown when field has no error",
+                      "type": "text",
+                      "bind": "helperText",
+                      "conditional": "fieldState == 'pristine' || fieldState == 'valid'",
+                      "style": {
+                        "fontSize": 11,
+                        "color": "#666666"
+                      }
+                    },
+                    {
+                      "$description": "Error text — shown when field has error",
+                      "type": "text",
+                      "name": "field-error",
+                      "conditional": "fieldState == 'error'",
+                      "dynamic": [
+                        {
+                          "property": "content",
+                          "expr": [
+                            "var",
+                            "errorMessage"
+                          ]
+                        }
+                      ],
+                      "style": {
+                        "fontSize": 11,
+                        "color": "#ee5555"
+                      }
+                    },
+                    {
+                      "$description": "Async validation spinner — shown while checking server",
+                      "type": "icon",
+                      "icon": "Loader2",
+                      "name": "async-spinner",
+                      "conditional": "fieldState == 'validating'",
+                      "size": {
+                        "value": 12,
+                        "unit": "px"
+                      },
+                      "color": "#666666",
+                      "animation": "spinner"
+                    }
+                  ],
                   "name": "fullName",
                   "label": "form.name",
                   "placeholder": "form.namePlaceholder",
@@ -70,7 +204,141 @@
                   "required": true
                 },
                 {
-                  "$ref": "field",
+                  "$description": "Form field with label, input, helper text, error message, and character counter. Tracks pristine/dirty/touched states via context.",
+                  "type": "group",
+                  "layout": "stack-v",
+                  "gap": 4,
+                  "children": [
+                    {
+                      "type": "group",
+                      "layout": "stack-h",
+                      "justify": "space-between",
+                      "align": "center",
+                      "children": [
+                        {
+                          "type": "text",
+                          "bind": "label",
+                          "style": {
+                            "fontSize": 13,
+                            "fontWeight": 500,
+                            "color": "#ededed"
+                          }
+                        },
+                        {
+                          "$description": "Character counter — only shown when maxLength is set",
+                          "type": "text",
+                          "name": "char-counter",
+                          "conditional": "params.maxLength != null",
+                          "dynamic": [
+                            {
+                              "property": "content",
+                              "expr": [
+                                "var",
+                                "charCountDisplay"
+                              ]
+                            },
+                            {
+                              "property": "color",
+                              "expr": [
+                                "if",
+                                [
+                                  "var",
+                                  "overLimit"
+                                ],
+                                "#ee5555",
+                                "#666666"
+                              ]
+                            }
+                          ],
+                          "style": {
+                            "fontSize": 11,
+                            "fontVariantNumeric": "tabular-nums"
+                          }
+                        }
+                      ]
+                    },
+                    {
+                      "type": "input",
+                      "bind": "name",
+                      "inputType": "email",
+                      "placeholder": "form.emailPlaceholder",
+                      "style": {
+                        "height": {
+                          "value": 40,
+                          "unit": "px"
+                        },
+                        "padding": {
+                          "horizontal": 12
+                        },
+                        "fontSize": 14,
+                        "color": "#ededed",
+                        "background": "#0a0a0a",
+                        "borderWidth": {
+                          "value": 1,
+                          "unit": "px"
+                        },
+                        "borderColor": "rgba(255, 255, 255, 0.1)",
+                        "cornerRadius": 6
+                      },
+                      "interactions": {
+                        "focus": {
+                          "borderColor": "#0070f3"
+                        }
+                      },
+                      "stateStyles": {
+                        "error": {
+                          "borderColor": "#ee5555",
+                          "background": "rgba(238, 85, 85, 0.08)"
+                        },
+                        "success": {
+                          "borderColor": "#52c41a",
+                          "background": "rgba(82, 196, 26, 0.08)"
+                        }
+                      }
+                    },
+                    {
+                      "$description": "Helper text — shown when field has no error",
+                      "type": "text",
+                      "bind": "helperText",
+                      "conditional": "fieldState == 'pristine' || fieldState == 'valid'",
+                      "style": {
+                        "fontSize": 11,
+                        "color": "#666666"
+                      }
+                    },
+                    {
+                      "$description": "Error text — shown when field has error",
+                      "type": "text",
+                      "name": "field-error",
+                      "conditional": "fieldState == 'error'",
+                      "dynamic": [
+                        {
+                          "property": "content",
+                          "expr": [
+                            "var",
+                            "errorMessage"
+                          ]
+                        }
+                      ],
+                      "style": {
+                        "fontSize": 11,
+                        "color": "#ee5555"
+                      }
+                    },
+                    {
+                      "$description": "Async validation spinner — shown while checking server",
+                      "type": "icon",
+                      "icon": "Loader2",
+                      "name": "async-spinner",
+                      "conditional": "fieldState == 'validating'",
+                      "size": {
+                        "value": 12,
+                        "unit": "px"
+                      },
+                      "color": "#666666",
+                      "animation": "spinner"
+                    }
+                  ],
                   "name": "email",
                   "label": "form.email",
                   "placeholder": "form.emailPlaceholder",
@@ -79,7 +347,141 @@
                   "helperText": "form.emailHelper"
                 },
                 {
-                  "$ref": "field",
+                  "$description": "Form field with label, input, helper text, error message, and character counter. Tracks pristine/dirty/touched states via context.",
+                  "type": "group",
+                  "layout": "stack-v",
+                  "gap": 4,
+                  "children": [
+                    {
+                      "type": "group",
+                      "layout": "stack-h",
+                      "justify": "space-between",
+                      "align": "center",
+                      "children": [
+                        {
+                          "type": "text",
+                          "bind": "label",
+                          "style": {
+                            "fontSize": 13,
+                            "fontWeight": 500,
+                            "color": "#ededed"
+                          }
+                        },
+                        {
+                          "$description": "Character counter — only shown when maxLength is set",
+                          "type": "text",
+                          "name": "char-counter",
+                          "conditional": "params.maxLength != null",
+                          "dynamic": [
+                            {
+                              "property": "content",
+                              "expr": [
+                                "var",
+                                "charCountDisplay"
+                              ]
+                            },
+                            {
+                              "property": "color",
+                              "expr": [
+                                "if",
+                                [
+                                  "var",
+                                  "overLimit"
+                                ],
+                                "#ee5555",
+                                "#666666"
+                              ]
+                            }
+                          ],
+                          "style": {
+                            "fontSize": 11,
+                            "fontVariantNumeric": "tabular-nums"
+                          }
+                        }
+                      ]
+                    },
+                    {
+                      "type": "input",
+                      "bind": "name",
+                      "inputType": "text",
+                      "placeholder": "form.subjectPlaceholder",
+                      "style": {
+                        "height": {
+                          "value": 40,
+                          "unit": "px"
+                        },
+                        "padding": {
+                          "horizontal": 12
+                        },
+                        "fontSize": 14,
+                        "color": "#ededed",
+                        "background": "#0a0a0a",
+                        "borderWidth": {
+                          "value": 1,
+                          "unit": "px"
+                        },
+                        "borderColor": "rgba(255, 255, 255, 0.1)",
+                        "cornerRadius": 6
+                      },
+                      "interactions": {
+                        "focus": {
+                          "borderColor": "#0070f3"
+                        }
+                      },
+                      "stateStyles": {
+                        "error": {
+                          "borderColor": "#ee5555",
+                          "background": "rgba(238, 85, 85, 0.08)"
+                        },
+                        "success": {
+                          "borderColor": "#52c41a",
+                          "background": "rgba(82, 196, 26, 0.08)"
+                        }
+                      }
+                    },
+                    {
+                      "$description": "Helper text — shown when field has no error",
+                      "type": "text",
+                      "bind": "helperText",
+                      "conditional": "fieldState == 'pristine' || fieldState == 'valid'",
+                      "style": {
+                        "fontSize": 11,
+                        "color": "#666666"
+                      }
+                    },
+                    {
+                      "$description": "Error text — shown when field has error",
+                      "type": "text",
+                      "name": "field-error",
+                      "conditional": "fieldState == 'error'",
+                      "dynamic": [
+                        {
+                          "property": "content",
+                          "expr": [
+                            "var",
+                            "errorMessage"
+                          ]
+                        }
+                      ],
+                      "style": {
+                        "fontSize": 11,
+                        "color": "#ee5555"
+                      }
+                    },
+                    {
+                      "$description": "Async validation spinner — shown while checking server",
+                      "type": "icon",
+                      "icon": "Loader2",
+                      "name": "async-spinner",
+                      "conditional": "fieldState == 'validating'",
+                      "size": {
+                        "value": 12,
+                        "unit": "px"
+                      },
+                      "color": "#666666",
+                      "animation": "spinner"
+                    }
+                  ],
                   "name": "subject",
                   "label": "form.subject",
                   "placeholder": "form.subjectPlaceholder",
@@ -88,10 +490,144 @@
                 {
                   "type": "group",
                   "layout": "stack-v",
-                  "gap": "{spacing.xs}",
+                  "gap": 4,
                   "children": [
                     {
-                      "$ref": "field",
+                      "$description": "Form field with label, input, helper text, error message, and character counter. Tracks pristine/dirty/touched states via context.",
+                      "type": "group",
+                      "layout": "stack-v",
+                      "gap": 4,
+                      "children": [
+                        {
+                          "type": "group",
+                          "layout": "stack-h",
+                          "justify": "space-between",
+                          "align": "center",
+                          "children": [
+                            {
+                              "type": "text",
+                              "bind": "label",
+                              "style": {
+                                "fontSize": 13,
+                                "fontWeight": 500,
+                                "color": "#ededed"
+                              }
+                            },
+                            {
+                              "$description": "Character counter — only shown when maxLength is set",
+                              "type": "text",
+                              "name": "char-counter",
+                              "conditional": "params.maxLength != null",
+                              "dynamic": [
+                                {
+                                  "property": "content",
+                                  "expr": [
+                                    "var",
+                                    "charCountDisplay"
+                                  ]
+                                },
+                                {
+                                  "property": "color",
+                                  "expr": [
+                                    "if",
+                                    [
+                                      "var",
+                                      "overLimit"
+                                    ],
+                                    "#ee5555",
+                                    "#666666"
+                                  ]
+                                }
+                              ],
+                              "style": {
+                                "fontSize": 11,
+                                "fontVariantNumeric": "tabular-nums"
+                              }
+                            }
+                          ]
+                        },
+                        {
+                          "type": "input",
+                          "bind": "name",
+                          "inputType": "textarea",
+                          "placeholder": "form.messagePlaceholder",
+                          "style": {
+                            "height": {
+                              "value": 40,
+                              "unit": "px"
+                            },
+                            "padding": {
+                              "horizontal": 12
+                            },
+                            "fontSize": 14,
+                            "color": "#ededed",
+                            "background": "#0a0a0a",
+                            "borderWidth": {
+                              "value": 1,
+                              "unit": "px"
+                            },
+                            "borderColor": "rgba(255, 255, 255, 0.1)",
+                            "cornerRadius": 6
+                          },
+                          "interactions": {
+                            "focus": {
+                              "borderColor": "#0070f3"
+                            }
+                          },
+                          "stateStyles": {
+                            "error": {
+                              "borderColor": "#ee5555",
+                              "background": "rgba(238, 85, 85, 0.08)"
+                            },
+                            "success": {
+                              "borderColor": "#52c41a",
+                              "background": "rgba(82, 196, 26, 0.08)"
+                            }
+                          }
+                        },
+                        {
+                          "$description": "Helper text — shown when field has no error",
+                          "type": "text",
+                          "bind": "helperText",
+                          "conditional": "fieldState == 'pristine' || fieldState == 'valid'",
+                          "style": {
+                            "fontSize": 11,
+                            "color": "#666666"
+                          }
+                        },
+                        {
+                          "$description": "Error text — shown when field has error",
+                          "type": "text",
+                          "name": "field-error",
+                          "conditional": "fieldState == 'error'",
+                          "dynamic": [
+                            {
+                              "property": "content",
+                              "expr": [
+                                "var",
+                                "errorMessage"
+                              ]
+                            }
+                          ],
+                          "style": {
+                            "fontSize": 11,
+                            "color": "#ee5555"
+                          }
+                        },
+                        {
+                          "$description": "Async validation spinner — shown while checking server",
+                          "type": "icon",
+                          "icon": "Loader2",
+                          "name": "async-spinner",
+                          "conditional": "fieldState == 'validating'",
+                          "size": {
+                            "value": 12,
+                            "unit": "px"
+                          },
+                          "color": "#666666",
+                          "animation": "spinner"
+                        }
+                      ],
                       "name": "message",
                       "label": "form.message",
                       "placeholder": "form.messagePlaceholder",
@@ -112,16 +648,16 @@
                       "unit": "px"
                     }
                   },
-                  "cornerRadius": "{radius.sm}",
+                  "cornerRadius": 6,
                   "style": {
-                    "background": "{color.accent}",
-                    "fontSize": "{font.size.base}",
-                    "fontWeight": "{font.weight.medium}",
-                    "color": "{color.text.primary}"
+                    "background": "#0070f3",
+                    "fontSize": 14,
+                    "fontWeight": 500,
+                    "color": "#ededed"
                   },
                   "interactions": {
                     "hover": {
-                      "background": "{color.accentHover}"
+                      "background": "#0060df"
                     },
                     "disabled": {
                       "opacity": 0.5
@@ -147,14 +683,20 @@
       },
       "transitions": [
         {
+          "event": "SUBMIT",
+          "target": "submitting",
+          "guard": null,
+          "actions": []
+        },
+        {
           "event": "FOCUS_FIELD",
-          "target": "dirty",
+          "target": "editing.dirty",
           "guard": null,
           "actions": []
         },
         {
           "event": "TYPE",
-          "target": "dirty",
+          "target": "editing.dirty",
           "guard": null,
           "actions": []
         }
@@ -175,7 +717,7 @@
             "width": "fill",
             "height": "fill"
           },
-          "background": "{color.bg}"
+          "background": "#000000"
         },
         "slots": {
           "content": [
@@ -184,7 +726,7 @@
               "name": "form-card",
               "layout": "stack-v",
               "align": "stretch",
-              "gap": "{spacing.lg}",
+              "gap": 16,
               "size": {
                 "width": {
                   "value": 480,
@@ -192,35 +734,169 @@
                 }
               },
               "padding": {
-                "value": "{spacing.xl}"
+                "value": 24
               },
-              "background": "{color.card}",
-              "cornerRadius": "{radius.lg}",
+              "background": "#111111",
+              "cornerRadius": 12,
               "borderWidth": {
                 "value": 1,
                 "unit": "px"
               },
-              "borderColor": "{color.stroke}",
+              "borderColor": "rgba(255, 255, 255, 0.1)",
               "children": [
                 {
                   "type": "text",
                   "content": "form.title",
                   "style": {
-                    "fontSize": "{font.size.xl}",
-                    "fontWeight": "{font.weight.medium}",
-                    "color": "{color.text.primary}"
+                    "fontSize": 20,
+                    "fontWeight": 500,
+                    "color": "#ededed"
                   }
                 },
                 {
                   "type": "text",
                   "content": "form.subtitle",
                   "style": {
-                    "fontSize": "{font.size.sm}",
-                    "color": "{color.text.secondary}"
+                    "fontSize": 13,
+                    "color": "#888888"
                   }
                 },
                 {
-                  "$ref": "field",
+                  "$description": "Form field with label, input, helper text, error message, and character counter. Tracks pristine/dirty/touched states via context.",
+                  "type": "group",
+                  "layout": "stack-v",
+                  "gap": 4,
+                  "children": [
+                    {
+                      "type": "group",
+                      "layout": "stack-h",
+                      "justify": "space-between",
+                      "align": "center",
+                      "children": [
+                        {
+                          "type": "text",
+                          "bind": "label",
+                          "style": {
+                            "fontSize": 13,
+                            "fontWeight": 500,
+                            "color": "#ededed"
+                          }
+                        },
+                        {
+                          "$description": "Character counter — only shown when maxLength is set",
+                          "type": "text",
+                          "name": "char-counter",
+                          "conditional": "params.maxLength != null",
+                          "dynamic": [
+                            {
+                              "property": "content",
+                              "expr": [
+                                "var",
+                                "charCountDisplay"
+                              ]
+                            },
+                            {
+                              "property": "color",
+                              "expr": [
+                                "if",
+                                [
+                                  "var",
+                                  "overLimit"
+                                ],
+                                "#ee5555",
+                                "#666666"
+                              ]
+                            }
+                          ],
+                          "style": {
+                            "fontSize": 11,
+                            "fontVariantNumeric": "tabular-nums"
+                          }
+                        }
+                      ]
+                    },
+                    {
+                      "type": "input",
+                      "bind": "name",
+                      "inputType": "text",
+                      "placeholder": "form.namePlaceholder",
+                      "style": {
+                        "height": {
+                          "value": 40,
+                          "unit": "px"
+                        },
+                        "padding": {
+                          "horizontal": 12
+                        },
+                        "fontSize": 14,
+                        "color": "#ededed",
+                        "background": "#0a0a0a",
+                        "borderWidth": {
+                          "value": 1,
+                          "unit": "px"
+                        },
+                        "borderColor": "rgba(255, 255, 255, 0.1)",
+                        "cornerRadius": 6
+                      },
+                      "interactions": {
+                        "focus": {
+                          "borderColor": "#0070f3"
+                        }
+                      },
+                      "stateStyles": {
+                        "error": {
+                          "borderColor": "#ee5555",
+                          "background": "rgba(238, 85, 85, 0.08)"
+                        },
+                        "success": {
+                          "borderColor": "#52c41a",
+                          "background": "rgba(82, 196, 26, 0.08)"
+                        }
+                      }
+                    },
+                    {
+                      "$description": "Helper text — shown when field has no error",
+                      "type": "text",
+                      "bind": "helperText",
+                      "conditional": "fieldState == 'pristine' || fieldState == 'valid'",
+                      "style": {
+                        "fontSize": 11,
+                        "color": "#666666"
+                      }
+                    },
+                    {
+                      "$description": "Error text — shown when field has error",
+                      "type": "text",
+                      "name": "field-error",
+                      "conditional": "fieldState == 'error'",
+                      "dynamic": [
+                        {
+                          "property": "content",
+                          "expr": [
+                            "var",
+                            "errorMessage"
+                          ]
+                        }
+                      ],
+                      "style": {
+                        "fontSize": 11,
+                        "color": "#ee5555"
+                      }
+                    },
+                    {
+                      "$description": "Async validation spinner — shown while checking server",
+                      "type": "icon",
+                      "icon": "Loader2",
+                      "name": "async-spinner",
+                      "conditional": "fieldState == 'validating'",
+                      "size": {
+                        "value": 12,
+                        "unit": "px"
+                      },
+                      "color": "#666666",
+                      "animation": "spinner"
+                    }
+                  ],
                   "name": "fullName",
                   "label": "form.name",
                   "placeholder": "form.namePlaceholder",
@@ -228,7 +904,141 @@
                   "required": true
                 },
                 {
-                  "$ref": "field",
+                  "$description": "Form field with label, input, helper text, error message, and character counter. Tracks pristine/dirty/touched states via context.",
+                  "type": "group",
+                  "layout": "stack-v",
+                  "gap": 4,
+                  "children": [
+                    {
+                      "type": "group",
+                      "layout": "stack-h",
+                      "justify": "space-between",
+                      "align": "center",
+                      "children": [
+                        {
+                          "type": "text",
+                          "bind": "label",
+                          "style": {
+                            "fontSize": 13,
+                            "fontWeight": 500,
+                            "color": "#ededed"
+                          }
+                        },
+                        {
+                          "$description": "Character counter — only shown when maxLength is set",
+                          "type": "text",
+                          "name": "char-counter",
+                          "conditional": "params.maxLength != null",
+                          "dynamic": [
+                            {
+                              "property": "content",
+                              "expr": [
+                                "var",
+                                "charCountDisplay"
+                              ]
+                            },
+                            {
+                              "property": "color",
+                              "expr": [
+                                "if",
+                                [
+                                  "var",
+                                  "overLimit"
+                                ],
+                                "#ee5555",
+                                "#666666"
+                              ]
+                            }
+                          ],
+                          "style": {
+                            "fontSize": 11,
+                            "fontVariantNumeric": "tabular-nums"
+                          }
+                        }
+                      ]
+                    },
+                    {
+                      "type": "input",
+                      "bind": "name",
+                      "inputType": "email",
+                      "placeholder": "form.emailPlaceholder",
+                      "style": {
+                        "height": {
+                          "value": 40,
+                          "unit": "px"
+                        },
+                        "padding": {
+                          "horizontal": 12
+                        },
+                        "fontSize": 14,
+                        "color": "#ededed",
+                        "background": "#0a0a0a",
+                        "borderWidth": {
+                          "value": 1,
+                          "unit": "px"
+                        },
+                        "borderColor": "rgba(255, 255, 255, 0.1)",
+                        "cornerRadius": 6
+                      },
+                      "interactions": {
+                        "focus": {
+                          "borderColor": "#0070f3"
+                        }
+                      },
+                      "stateStyles": {
+                        "error": {
+                          "borderColor": "#ee5555",
+                          "background": "rgba(238, 85, 85, 0.08)"
+                        },
+                        "success": {
+                          "borderColor": "#52c41a",
+                          "background": "rgba(82, 196, 26, 0.08)"
+                        }
+                      }
+                    },
+                    {
+                      "$description": "Helper text — shown when field has no error",
+                      "type": "text",
+                      "bind": "helperText",
+                      "conditional": "fieldState == 'pristine' || fieldState == 'valid'",
+                      "style": {
+                        "fontSize": 11,
+                        "color": "#666666"
+                      }
+                    },
+                    {
+                      "$description": "Error text — shown when field has error",
+                      "type": "text",
+                      "name": "field-error",
+                      "conditional": "fieldState == 'error'",
+                      "dynamic": [
+                        {
+                          "property": "content",
+                          "expr": [
+                            "var",
+                            "errorMessage"
+                          ]
+                        }
+                      ],
+                      "style": {
+                        "fontSize": 11,
+                        "color": "#ee5555"
+                      }
+                    },
+                    {
+                      "$description": "Async validation spinner — shown while checking server",
+                      "type": "icon",
+                      "icon": "Loader2",
+                      "name": "async-spinner",
+                      "conditional": "fieldState == 'validating'",
+                      "size": {
+                        "value": 12,
+                        "unit": "px"
+                      },
+                      "color": "#666666",
+                      "animation": "spinner"
+                    }
+                  ],
                   "name": "email",
                   "label": "form.email",
                   "placeholder": "form.emailPlaceholder",
@@ -237,7 +1047,141 @@
                   "helperText": "form.emailHelper"
                 },
                 {
-                  "$ref": "field",
+                  "$description": "Form field with label, input, helper text, error message, and character counter. Tracks pristine/dirty/touched states via context.",
+                  "type": "group",
+                  "layout": "stack-v",
+                  "gap": 4,
+                  "children": [
+                    {
+                      "type": "group",
+                      "layout": "stack-h",
+                      "justify": "space-between",
+                      "align": "center",
+                      "children": [
+                        {
+                          "type": "text",
+                          "bind": "label",
+                          "style": {
+                            "fontSize": 13,
+                            "fontWeight": 500,
+                            "color": "#ededed"
+                          }
+                        },
+                        {
+                          "$description": "Character counter — only shown when maxLength is set",
+                          "type": "text",
+                          "name": "char-counter",
+                          "conditional": "params.maxLength != null",
+                          "dynamic": [
+                            {
+                              "property": "content",
+                              "expr": [
+                                "var",
+                                "charCountDisplay"
+                              ]
+                            },
+                            {
+                              "property": "color",
+                              "expr": [
+                                "if",
+                                [
+                                  "var",
+                                  "overLimit"
+                                ],
+                                "#ee5555",
+                                "#666666"
+                              ]
+                            }
+                          ],
+                          "style": {
+                            "fontSize": 11,
+                            "fontVariantNumeric": "tabular-nums"
+                          }
+                        }
+                      ]
+                    },
+                    {
+                      "type": "input",
+                      "bind": "name",
+                      "inputType": "text",
+                      "placeholder": "form.subjectPlaceholder",
+                      "style": {
+                        "height": {
+                          "value": 40,
+                          "unit": "px"
+                        },
+                        "padding": {
+                          "horizontal": 12
+                        },
+                        "fontSize": 14,
+                        "color": "#ededed",
+                        "background": "#0a0a0a",
+                        "borderWidth": {
+                          "value": 1,
+                          "unit": "px"
+                        },
+                        "borderColor": "rgba(255, 255, 255, 0.1)",
+                        "cornerRadius": 6
+                      },
+                      "interactions": {
+                        "focus": {
+                          "borderColor": "#0070f3"
+                        }
+                      },
+                      "stateStyles": {
+                        "error": {
+                          "borderColor": "#ee5555",
+                          "background": "rgba(238, 85, 85, 0.08)"
+                        },
+                        "success": {
+                          "borderColor": "#52c41a",
+                          "background": "rgba(82, 196, 26, 0.08)"
+                        }
+                      }
+                    },
+                    {
+                      "$description": "Helper text — shown when field has no error",
+                      "type": "text",
+                      "bind": "helperText",
+                      "conditional": "fieldState == 'pristine' || fieldState == 'valid'",
+                      "style": {
+                        "fontSize": 11,
+                        "color": "#666666"
+                      }
+                    },
+                    {
+                      "$description": "Error text — shown when field has error",
+                      "type": "text",
+                      "name": "field-error",
+                      "conditional": "fieldState == 'error'",
+                      "dynamic": [
+                        {
+                          "property": "content",
+                          "expr": [
+                            "var",
+                            "errorMessage"
+                          ]
+                        }
+                      ],
+                      "style": {
+                        "fontSize": 11,
+                        "color": "#ee5555"
+                      }
+                    },
+                    {
+                      "$description": "Async validation spinner — shown while checking server",
+                      "type": "icon",
+                      "icon": "Loader2",
+                      "name": "async-spinner",
+                      "conditional": "fieldState == 'validating'",
+                      "size": {
+                        "value": 12,
+                        "unit": "px"
+                      },
+                      "color": "#666666",
+                      "animation": "spinner"
+                    }
+                  ],
                   "name": "subject",
                   "label": "form.subject",
                   "placeholder": "form.subjectPlaceholder",
@@ -246,10 +1190,144 @@
                 {
                   "type": "group",
                   "layout": "stack-v",
-                  "gap": "{spacing.xs}",
+                  "gap": 4,
                   "children": [
                     {
-                      "$ref": "field",
+                      "$description": "Form field with label, input, helper text, error message, and character counter. Tracks pristine/dirty/touched states via context.",
+                      "type": "group",
+                      "layout": "stack-v",
+                      "gap": 4,
+                      "children": [
+                        {
+                          "type": "group",
+                          "layout": "stack-h",
+                          "justify": "space-between",
+                          "align": "center",
+                          "children": [
+                            {
+                              "type": "text",
+                              "bind": "label",
+                              "style": {
+                                "fontSize": 13,
+                                "fontWeight": 500,
+                                "color": "#ededed"
+                              }
+                            },
+                            {
+                              "$description": "Character counter — only shown when maxLength is set",
+                              "type": "text",
+                              "name": "char-counter",
+                              "conditional": "params.maxLength != null",
+                              "dynamic": [
+                                {
+                                  "property": "content",
+                                  "expr": [
+                                    "var",
+                                    "charCountDisplay"
+                                  ]
+                                },
+                                {
+                                  "property": "color",
+                                  "expr": [
+                                    "if",
+                                    [
+                                      "var",
+                                      "overLimit"
+                                    ],
+                                    "#ee5555",
+                                    "#666666"
+                                  ]
+                                }
+                              ],
+                              "style": {
+                                "fontSize": 11,
+                                "fontVariantNumeric": "tabular-nums"
+                              }
+                            }
+                          ]
+                        },
+                        {
+                          "type": "input",
+                          "bind": "name",
+                          "inputType": "textarea",
+                          "placeholder": "form.messagePlaceholder",
+                          "style": {
+                            "height": {
+                              "value": 40,
+                              "unit": "px"
+                            },
+                            "padding": {
+                              "horizontal": 12
+                            },
+                            "fontSize": 14,
+                            "color": "#ededed",
+                            "background": "#0a0a0a",
+                            "borderWidth": {
+                              "value": 1,
+                              "unit": "px"
+                            },
+                            "borderColor": "rgba(255, 255, 255, 0.1)",
+                            "cornerRadius": 6
+                          },
+                          "interactions": {
+                            "focus": {
+                              "borderColor": "#0070f3"
+                            }
+                          },
+                          "stateStyles": {
+                            "error": {
+                              "borderColor": "#ee5555",
+                              "background": "rgba(238, 85, 85, 0.08)"
+                            },
+                            "success": {
+                              "borderColor": "#52c41a",
+                              "background": "rgba(82, 196, 26, 0.08)"
+                            }
+                          }
+                        },
+                        {
+                          "$description": "Helper text — shown when field has no error",
+                          "type": "text",
+                          "bind": "helperText",
+                          "conditional": "fieldState == 'pristine' || fieldState == 'valid'",
+                          "style": {
+                            "fontSize": 11,
+                            "color": "#666666"
+                          }
+                        },
+                        {
+                          "$description": "Error text — shown when field has error",
+                          "type": "text",
+                          "name": "field-error",
+                          "conditional": "fieldState == 'error'",
+                          "dynamic": [
+                            {
+                              "property": "content",
+                              "expr": [
+                                "var",
+                                "errorMessage"
+                              ]
+                            }
+                          ],
+                          "style": {
+                            "fontSize": 11,
+                            "color": "#ee5555"
+                          }
+                        },
+                        {
+                          "$description": "Async validation spinner — shown while checking server",
+                          "type": "icon",
+                          "icon": "Loader2",
+                          "name": "async-spinner",
+                          "conditional": "fieldState == 'validating'",
+                          "size": {
+                            "value": 12,
+                            "unit": "px"
+                          },
+                          "color": "#666666",
+                          "animation": "spinner"
+                        }
+                      ],
                       "name": "message",
                       "label": "form.message",
                       "placeholder": "form.messagePlaceholder",
@@ -270,16 +1348,16 @@
                       "unit": "px"
                     }
                   },
-                  "cornerRadius": "{radius.sm}",
+                  "cornerRadius": 6,
                   "style": {
-                    "background": "{color.accent}",
-                    "fontSize": "{font.size.base}",
-                    "fontWeight": "{font.weight.medium}",
-                    "color": "{color.text.primary}"
+                    "background": "#0070f3",
+                    "fontSize": 14,
+                    "fontWeight": 500,
+                    "color": "#ededed"
                   },
                   "interactions": {
                     "hover": {
-                      "background": "{color.accentHover}"
+                      "background": "#0060df"
                     },
                     "disabled": {
                       "opacity": 0.5
@@ -305,14 +1383,14 @@
       },
       "transitions": [
         {
-          "event": "BLUR_FIELD",
-          "target": "validating",
+          "event": "SUBMIT",
+          "target": "editing.validating",
           "guard": null,
           "actions": []
         },
         {
-          "event": "SUBMIT",
-          "target": "validating",
+          "event": "BLUR_FIELD",
+          "target": "editing.validating",
           "guard": null,
           "actions": []
         }
@@ -333,7 +1411,7 @@
             "width": "fill",
             "height": "fill"
           },
-          "background": "{color.bg}"
+          "background": "#000000"
         },
         "slots": {
           "content": [
@@ -342,7 +1420,7 @@
               "name": "form-card",
               "layout": "stack-v",
               "align": "stretch",
-              "gap": "{spacing.lg}",
+              "gap": 16,
               "size": {
                 "width": {
                   "value": 480,
@@ -350,35 +1428,169 @@
                 }
               },
               "padding": {
-                "value": "{spacing.xl}"
+                "value": 24
               },
-              "background": "{color.card}",
-              "cornerRadius": "{radius.lg}",
+              "background": "#111111",
+              "cornerRadius": 12,
               "borderWidth": {
                 "value": 1,
                 "unit": "px"
               },
-              "borderColor": "{color.stroke}",
+              "borderColor": "rgba(255, 255, 255, 0.1)",
               "children": [
                 {
                   "type": "text",
                   "content": "form.title",
                   "style": {
-                    "fontSize": "{font.size.xl}",
-                    "fontWeight": "{font.weight.medium}",
-                    "color": "{color.text.primary}"
+                    "fontSize": 20,
+                    "fontWeight": 500,
+                    "color": "#ededed"
                   }
                 },
                 {
                   "type": "text",
                   "content": "form.subtitle",
                   "style": {
-                    "fontSize": "{font.size.sm}",
-                    "color": "{color.text.secondary}"
+                    "fontSize": 13,
+                    "color": "#888888"
                   }
                 },
                 {
-                  "$ref": "field",
+                  "$description": "Form field with label, input, helper text, error message, and character counter. Tracks pristine/dirty/touched states via context.",
+                  "type": "group",
+                  "layout": "stack-v",
+                  "gap": 4,
+                  "children": [
+                    {
+                      "type": "group",
+                      "layout": "stack-h",
+                      "justify": "space-between",
+                      "align": "center",
+                      "children": [
+                        {
+                          "type": "text",
+                          "bind": "label",
+                          "style": {
+                            "fontSize": 13,
+                            "fontWeight": 500,
+                            "color": "#ededed"
+                          }
+                        },
+                        {
+                          "$description": "Character counter — only shown when maxLength is set",
+                          "type": "text",
+                          "name": "char-counter",
+                          "conditional": "params.maxLength != null",
+                          "dynamic": [
+                            {
+                              "property": "content",
+                              "expr": [
+                                "var",
+                                "charCountDisplay"
+                              ]
+                            },
+                            {
+                              "property": "color",
+                              "expr": [
+                                "if",
+                                [
+                                  "var",
+                                  "overLimit"
+                                ],
+                                "#ee5555",
+                                "#666666"
+                              ]
+                            }
+                          ],
+                          "style": {
+                            "fontSize": 11,
+                            "fontVariantNumeric": "tabular-nums"
+                          }
+                        }
+                      ]
+                    },
+                    {
+                      "type": "input",
+                      "bind": "name",
+                      "inputType": "text",
+                      "placeholder": "form.namePlaceholder",
+                      "style": {
+                        "height": {
+                          "value": 40,
+                          "unit": "px"
+                        },
+                        "padding": {
+                          "horizontal": 12
+                        },
+                        "fontSize": 14,
+                        "color": "#ededed",
+                        "background": "#0a0a0a",
+                        "borderWidth": {
+                          "value": 1,
+                          "unit": "px"
+                        },
+                        "borderColor": "rgba(255, 255, 255, 0.1)",
+                        "cornerRadius": 6
+                      },
+                      "interactions": {
+                        "focus": {
+                          "borderColor": "#0070f3"
+                        }
+                      },
+                      "stateStyles": {
+                        "error": {
+                          "borderColor": "#ee5555",
+                          "background": "rgba(238, 85, 85, 0.08)"
+                        },
+                        "success": {
+                          "borderColor": "#52c41a",
+                          "background": "rgba(82, 196, 26, 0.08)"
+                        }
+                      }
+                    },
+                    {
+                      "$description": "Helper text — shown when field has no error",
+                      "type": "text",
+                      "bind": "helperText",
+                      "conditional": "fieldState == 'pristine' || fieldState == 'valid'",
+                      "style": {
+                        "fontSize": 11,
+                        "color": "#666666"
+                      }
+                    },
+                    {
+                      "$description": "Error text — shown when field has error",
+                      "type": "text",
+                      "name": "field-error",
+                      "conditional": "fieldState == 'error'",
+                      "dynamic": [
+                        {
+                          "property": "content",
+                          "expr": [
+                            "var",
+                            "errorMessage"
+                          ]
+                        }
+                      ],
+                      "style": {
+                        "fontSize": 11,
+                        "color": "#ee5555"
+                      }
+                    },
+                    {
+                      "$description": "Async validation spinner — shown while checking server",
+                      "type": "icon",
+                      "icon": "Loader2",
+                      "name": "async-spinner",
+                      "conditional": "fieldState == 'validating'",
+                      "size": {
+                        "value": 12,
+                        "unit": "px"
+                      },
+                      "color": "#666666",
+                      "animation": "spinner"
+                    }
+                  ],
                   "name": "fullName",
                   "label": "form.name",
                   "placeholder": "form.namePlaceholder",
@@ -386,7 +1598,141 @@
                   "required": true
                 },
                 {
-                  "$ref": "field",
+                  "$description": "Form field with label, input, helper text, error message, and character counter. Tracks pristine/dirty/touched states via context.",
+                  "type": "group",
+                  "layout": "stack-v",
+                  "gap": 4,
+                  "children": [
+                    {
+                      "type": "group",
+                      "layout": "stack-h",
+                      "justify": "space-between",
+                      "align": "center",
+                      "children": [
+                        {
+                          "type": "text",
+                          "bind": "label",
+                          "style": {
+                            "fontSize": 13,
+                            "fontWeight": 500,
+                            "color": "#ededed"
+                          }
+                        },
+                        {
+                          "$description": "Character counter — only shown when maxLength is set",
+                          "type": "text",
+                          "name": "char-counter",
+                          "conditional": "params.maxLength != null",
+                          "dynamic": [
+                            {
+                              "property": "content",
+                              "expr": [
+                                "var",
+                                "charCountDisplay"
+                              ]
+                            },
+                            {
+                              "property": "color",
+                              "expr": [
+                                "if",
+                                [
+                                  "var",
+                                  "overLimit"
+                                ],
+                                "#ee5555",
+                                "#666666"
+                              ]
+                            }
+                          ],
+                          "style": {
+                            "fontSize": 11,
+                            "fontVariantNumeric": "tabular-nums"
+                          }
+                        }
+                      ]
+                    },
+                    {
+                      "type": "input",
+                      "bind": "name",
+                      "inputType": "email",
+                      "placeholder": "form.emailPlaceholder",
+                      "style": {
+                        "height": {
+                          "value": 40,
+                          "unit": "px"
+                        },
+                        "padding": {
+                          "horizontal": 12
+                        },
+                        "fontSize": 14,
+                        "color": "#ededed",
+                        "background": "#0a0a0a",
+                        "borderWidth": {
+                          "value": 1,
+                          "unit": "px"
+                        },
+                        "borderColor": "rgba(255, 255, 255, 0.1)",
+                        "cornerRadius": 6
+                      },
+                      "interactions": {
+                        "focus": {
+                          "borderColor": "#0070f3"
+                        }
+                      },
+                      "stateStyles": {
+                        "error": {
+                          "borderColor": "#ee5555",
+                          "background": "rgba(238, 85, 85, 0.08)"
+                        },
+                        "success": {
+                          "borderColor": "#52c41a",
+                          "background": "rgba(82, 196, 26, 0.08)"
+                        }
+                      }
+                    },
+                    {
+                      "$description": "Helper text — shown when field has no error",
+                      "type": "text",
+                      "bind": "helperText",
+                      "conditional": "fieldState == 'pristine' || fieldState == 'valid'",
+                      "style": {
+                        "fontSize": 11,
+                        "color": "#666666"
+                      }
+                    },
+                    {
+                      "$description": "Error text — shown when field has error",
+                      "type": "text",
+                      "name": "field-error",
+                      "conditional": "fieldState == 'error'",
+                      "dynamic": [
+                        {
+                          "property": "content",
+                          "expr": [
+                            "var",
+                            "errorMessage"
+                          ]
+                        }
+                      ],
+                      "style": {
+                        "fontSize": 11,
+                        "color": "#ee5555"
+                      }
+                    },
+                    {
+                      "$description": "Async validation spinner — shown while checking server",
+                      "type": "icon",
+                      "icon": "Loader2",
+                      "name": "async-spinner",
+                      "conditional": "fieldState == 'validating'",
+                      "size": {
+                        "value": 12,
+                        "unit": "px"
+                      },
+                      "color": "#666666",
+                      "animation": "spinner"
+                    }
+                  ],
                   "name": "email",
                   "label": "form.email",
                   "placeholder": "form.emailPlaceholder",
@@ -395,7 +1741,141 @@
                   "helperText": "form.emailHelper"
                 },
                 {
-                  "$ref": "field",
+                  "$description": "Form field with label, input, helper text, error message, and character counter. Tracks pristine/dirty/touched states via context.",
+                  "type": "group",
+                  "layout": "stack-v",
+                  "gap": 4,
+                  "children": [
+                    {
+                      "type": "group",
+                      "layout": "stack-h",
+                      "justify": "space-between",
+                      "align": "center",
+                      "children": [
+                        {
+                          "type": "text",
+                          "bind": "label",
+                          "style": {
+                            "fontSize": 13,
+                            "fontWeight": 500,
+                            "color": "#ededed"
+                          }
+                        },
+                        {
+                          "$description": "Character counter — only shown when maxLength is set",
+                          "type": "text",
+                          "name": "char-counter",
+                          "conditional": "params.maxLength != null",
+                          "dynamic": [
+                            {
+                              "property": "content",
+                              "expr": [
+                                "var",
+                                "charCountDisplay"
+                              ]
+                            },
+                            {
+                              "property": "color",
+                              "expr": [
+                                "if",
+                                [
+                                  "var",
+                                  "overLimit"
+                                ],
+                                "#ee5555",
+                                "#666666"
+                              ]
+                            }
+                          ],
+                          "style": {
+                            "fontSize": 11,
+                            "fontVariantNumeric": "tabular-nums"
+                          }
+                        }
+                      ]
+                    },
+                    {
+                      "type": "input",
+                      "bind": "name",
+                      "inputType": "text",
+                      "placeholder": "form.subjectPlaceholder",
+                      "style": {
+                        "height": {
+                          "value": 40,
+                          "unit": "px"
+                        },
+                        "padding": {
+                          "horizontal": 12
+                        },
+                        "fontSize": 14,
+                        "color": "#ededed",
+                        "background": "#0a0a0a",
+                        "borderWidth": {
+                          "value": 1,
+                          "unit": "px"
+                        },
+                        "borderColor": "rgba(255, 255, 255, 0.1)",
+                        "cornerRadius": 6
+                      },
+                      "interactions": {
+                        "focus": {
+                          "borderColor": "#0070f3"
+                        }
+                      },
+                      "stateStyles": {
+                        "error": {
+                          "borderColor": "#ee5555",
+                          "background": "rgba(238, 85, 85, 0.08)"
+                        },
+                        "success": {
+                          "borderColor": "#52c41a",
+                          "background": "rgba(82, 196, 26, 0.08)"
+                        }
+                      }
+                    },
+                    {
+                      "$description": "Helper text — shown when field has no error",
+                      "type": "text",
+                      "bind": "helperText",
+                      "conditional": "fieldState == 'pristine' || fieldState == 'valid'",
+                      "style": {
+                        "fontSize": 11,
+                        "color": "#666666"
+                      }
+                    },
+                    {
+                      "$description": "Error text — shown when field has error",
+                      "type": "text",
+                      "name": "field-error",
+                      "conditional": "fieldState == 'error'",
+                      "dynamic": [
+                        {
+                          "property": "content",
+                          "expr": [
+                            "var",
+                            "errorMessage"
+                          ]
+                        }
+                      ],
+                      "style": {
+                        "fontSize": 11,
+                        "color": "#ee5555"
+                      }
+                    },
+                    {
+                      "$description": "Async validation spinner — shown while checking server",
+                      "type": "icon",
+                      "icon": "Loader2",
+                      "name": "async-spinner",
+                      "conditional": "fieldState == 'validating'",
+                      "size": {
+                        "value": 12,
+                        "unit": "px"
+                      },
+                      "color": "#666666",
+                      "animation": "spinner"
+                    }
+                  ],
                   "name": "subject",
                   "label": "form.subject",
                   "placeholder": "form.subjectPlaceholder",
@@ -404,10 +1884,144 @@
                 {
                   "type": "group",
                   "layout": "stack-v",
-                  "gap": "{spacing.xs}",
+                  "gap": 4,
                   "children": [
                     {
-                      "$ref": "field",
+                      "$description": "Form field with label, input, helper text, error message, and character counter. Tracks pristine/dirty/touched states via context.",
+                      "type": "group",
+                      "layout": "stack-v",
+                      "gap": 4,
+                      "children": [
+                        {
+                          "type": "group",
+                          "layout": "stack-h",
+                          "justify": "space-between",
+                          "align": "center",
+                          "children": [
+                            {
+                              "type": "text",
+                              "bind": "label",
+                              "style": {
+                                "fontSize": 13,
+                                "fontWeight": 500,
+                                "color": "#ededed"
+                              }
+                            },
+                            {
+                              "$description": "Character counter — only shown when maxLength is set",
+                              "type": "text",
+                              "name": "char-counter",
+                              "conditional": "params.maxLength != null",
+                              "dynamic": [
+                                {
+                                  "property": "content",
+                                  "expr": [
+                                    "var",
+                                    "charCountDisplay"
+                                  ]
+                                },
+                                {
+                                  "property": "color",
+                                  "expr": [
+                                    "if",
+                                    [
+                                      "var",
+                                      "overLimit"
+                                    ],
+                                    "#ee5555",
+                                    "#666666"
+                                  ]
+                                }
+                              ],
+                              "style": {
+                                "fontSize": 11,
+                                "fontVariantNumeric": "tabular-nums"
+                              }
+                            }
+                          ]
+                        },
+                        {
+                          "type": "input",
+                          "bind": "name",
+                          "inputType": "textarea",
+                          "placeholder": "form.messagePlaceholder",
+                          "style": {
+                            "height": {
+                              "value": 40,
+                              "unit": "px"
+                            },
+                            "padding": {
+                              "horizontal": 12
+                            },
+                            "fontSize": 14,
+                            "color": "#ededed",
+                            "background": "#0a0a0a",
+                            "borderWidth": {
+                              "value": 1,
+                              "unit": "px"
+                            },
+                            "borderColor": "rgba(255, 255, 255, 0.1)",
+                            "cornerRadius": 6
+                          },
+                          "interactions": {
+                            "focus": {
+                              "borderColor": "#0070f3"
+                            }
+                          },
+                          "stateStyles": {
+                            "error": {
+                              "borderColor": "#ee5555",
+                              "background": "rgba(238, 85, 85, 0.08)"
+                            },
+                            "success": {
+                              "borderColor": "#52c41a",
+                              "background": "rgba(82, 196, 26, 0.08)"
+                            }
+                          }
+                        },
+                        {
+                          "$description": "Helper text — shown when field has no error",
+                          "type": "text",
+                          "bind": "helperText",
+                          "conditional": "fieldState == 'pristine' || fieldState == 'valid'",
+                          "style": {
+                            "fontSize": 11,
+                            "color": "#666666"
+                          }
+                        },
+                        {
+                          "$description": "Error text — shown when field has error",
+                          "type": "text",
+                          "name": "field-error",
+                          "conditional": "fieldState == 'error'",
+                          "dynamic": [
+                            {
+                              "property": "content",
+                              "expr": [
+                                "var",
+                                "errorMessage"
+                              ]
+                            }
+                          ],
+                          "style": {
+                            "fontSize": 11,
+                            "color": "#ee5555"
+                          }
+                        },
+                        {
+                          "$description": "Async validation spinner — shown while checking server",
+                          "type": "icon",
+                          "icon": "Loader2",
+                          "name": "async-spinner",
+                          "conditional": "fieldState == 'validating'",
+                          "size": {
+                            "value": 12,
+                            "unit": "px"
+                          },
+                          "color": "#666666",
+                          "animation": "spinner"
+                        }
+                      ],
                       "name": "message",
                       "label": "form.message",
                       "placeholder": "form.messagePlaceholder",
@@ -428,16 +2042,16 @@
                       "unit": "px"
                     }
                   },
-                  "cornerRadius": "{radius.sm}",
+                  "cornerRadius": 6,
                   "style": {
-                    "background": "{color.accent}",
-                    "fontSize": "{font.size.base}",
-                    "fontWeight": "{font.weight.medium}",
-                    "color": "{color.text.primary}"
+                    "background": "#0070f3",
+                    "fontSize": 14,
+                    "fontWeight": 500,
+                    "color": "#ededed"
                   },
                   "interactions": {
                     "hover": {
-                      "background": "{color.accentHover}"
+                      "background": "#0060df"
                     },
                     "disabled": {
                       "opacity": 0.5
@@ -463,20 +2077,26 @@
       },
       "transitions": [
         {
+          "event": "SUBMIT",
+          "target": "submitting",
+          "guard": null,
+          "actions": []
+        },
+        {
           "event": "ALL_VALID",
-          "target": "valid",
+          "target": "editing.valid",
           "guard": null,
           "actions": []
         },
         {
           "event": "HAS_ERRORS",
-          "target": "invalid",
+          "target": "editing.invalid",
           "guard": null,
           "actions": []
         },
         {
           "event": "TYPE",
-          "target": "dirty",
+          "target": "editing.dirty",
           "guard": null,
           "actions": []
         }
@@ -497,7 +2117,7 @@
             "width": "fill",
             "height": "fill"
           },
-          "background": "{color.bg}"
+          "background": "#000000"
         },
         "slots": {
           "content": [
@@ -506,7 +2126,7 @@
               "name": "form-card",
               "layout": "stack-v",
               "align": "stretch",
-              "gap": "{spacing.lg}",
+              "gap": 16,
               "size": {
                 "width": {
                   "value": 480,
@@ -514,35 +2134,169 @@
                 }
               },
               "padding": {
-                "value": "{spacing.xl}"
+                "value": 24
               },
-              "background": "{color.card}",
-              "cornerRadius": "{radius.lg}",
+              "background": "#111111",
+              "cornerRadius": 12,
               "borderWidth": {
                 "value": 1,
                 "unit": "px"
               },
-              "borderColor": "{color.stroke}",
+              "borderColor": "rgba(255, 255, 255, 0.1)",
               "children": [
                 {
                   "type": "text",
                   "content": "form.title",
                   "style": {
-                    "fontSize": "{font.size.xl}",
-                    "fontWeight": "{font.weight.medium}",
-                    "color": "{color.text.primary}"
+                    "fontSize": 20,
+                    "fontWeight": 500,
+                    "color": "#ededed"
                   }
                 },
                 {
                   "type": "text",
                   "content": "form.subtitle",
                   "style": {
-                    "fontSize": "{font.size.sm}",
-                    "color": "{color.text.secondary}"
+                    "fontSize": 13,
+                    "color": "#888888"
                   }
                 },
                 {
-                  "$ref": "field",
+                  "$description": "Form field with label, input, helper text, error message, and character counter. Tracks pristine/dirty/touched states via context.",
+                  "type": "group",
+                  "layout": "stack-v",
+                  "gap": 4,
+                  "children": [
+                    {
+                      "type": "group",
+                      "layout": "stack-h",
+                      "justify": "space-between",
+                      "align": "center",
+                      "children": [
+                        {
+                          "type": "text",
+                          "bind": "label",
+                          "style": {
+                            "fontSize": 13,
+                            "fontWeight": 500,
+                            "color": "#ededed"
+                          }
+                        },
+                        {
+                          "$description": "Character counter — only shown when maxLength is set",
+                          "type": "text",
+                          "name": "char-counter",
+                          "conditional": "params.maxLength != null",
+                          "dynamic": [
+                            {
+                              "property": "content",
+                              "expr": [
+                                "var",
+                                "charCountDisplay"
+                              ]
+                            },
+                            {
+                              "property": "color",
+                              "expr": [
+                                "if",
+                                [
+                                  "var",
+                                  "overLimit"
+                                ],
+                                "#ee5555",
+                                "#666666"
+                              ]
+                            }
+                          ],
+                          "style": {
+                            "fontSize": 11,
+                            "fontVariantNumeric": "tabular-nums"
+                          }
+                        }
+                      ]
+                    },
+                    {
+                      "type": "input",
+                      "bind": "name",
+                      "inputType": "text",
+                      "placeholder": "form.namePlaceholder",
+                      "style": {
+                        "height": {
+                          "value": 40,
+                          "unit": "px"
+                        },
+                        "padding": {
+                          "horizontal": 12
+                        },
+                        "fontSize": 14,
+                        "color": "#ededed",
+                        "background": "#0a0a0a",
+                        "borderWidth": {
+                          "value": 1,
+                          "unit": "px"
+                        },
+                        "borderColor": "rgba(255, 255, 255, 0.1)",
+                        "cornerRadius": 6
+                      },
+                      "interactions": {
+                        "focus": {
+                          "borderColor": "#0070f3"
+                        }
+                      },
+                      "stateStyles": {
+                        "error": {
+                          "borderColor": "#ee5555",
+                          "background": "rgba(238, 85, 85, 0.08)"
+                        },
+                        "success": {
+                          "borderColor": "#52c41a",
+                          "background": "rgba(82, 196, 26, 0.08)"
+                        }
+                      }
+                    },
+                    {
+                      "$description": "Helper text — shown when field has no error",
+                      "type": "text",
+                      "bind": "helperText",
+                      "conditional": "fieldState == 'pristine' || fieldState == 'valid'",
+                      "style": {
+                        "fontSize": 11,
+                        "color": "#666666"
+                      }
+                    },
+                    {
+                      "$description": "Error text — shown when field has error",
+                      "type": "text",
+                      "name": "field-error",
+                      "conditional": "fieldState == 'error'",
+                      "dynamic": [
+                        {
+                          "property": "content",
+                          "expr": [
+                            "var",
+                            "errorMessage"
+                          ]
+                        }
+                      ],
+                      "style": {
+                        "fontSize": 11,
+                        "color": "#ee5555"
+                      }
+                    },
+                    {
+                      "$description": "Async validation spinner — shown while checking server",
+                      "type": "icon",
+                      "icon": "Loader2",
+                      "name": "async-spinner",
+                      "conditional": "fieldState == 'validating'",
+                      "size": {
+                        "value": 12,
+                        "unit": "px"
+                      },
+                      "color": "#666666",
+                      "animation": "spinner"
+                    }
+                  ],
                   "name": "fullName",
                   "label": "form.name",
                   "placeholder": "form.namePlaceholder",
@@ -550,7 +2304,141 @@
                   "required": true
                 },
                 {
-                  "$ref": "field",
+                  "$description": "Form field with label, input, helper text, error message, and character counter. Tracks pristine/dirty/touched states via context.",
+                  "type": "group",
+                  "layout": "stack-v",
+                  "gap": 4,
+                  "children": [
+                    {
+                      "type": "group",
+                      "layout": "stack-h",
+                      "justify": "space-between",
+                      "align": "center",
+                      "children": [
+                        {
+                          "type": "text",
+                          "bind": "label",
+                          "style": {
+                            "fontSize": 13,
+                            "fontWeight": 500,
+                            "color": "#ededed"
+                          }
+                        },
+                        {
+                          "$description": "Character counter — only shown when maxLength is set",
+                          "type": "text",
+                          "name": "char-counter",
+                          "conditional": "params.maxLength != null",
+                          "dynamic": [
+                            {
+                              "property": "content",
+                              "expr": [
+                                "var",
+                                "charCountDisplay"
+                              ]
+                            },
+                            {
+                              "property": "color",
+                              "expr": [
+                                "if",
+                                [
+                                  "var",
+                                  "overLimit"
+                                ],
+                                "#ee5555",
+                                "#666666"
+                              ]
+                            }
+                          ],
+                          "style": {
+                            "fontSize": 11,
+                            "fontVariantNumeric": "tabular-nums"
+                          }
+                        }
+                      ]
+                    },
+                    {
+                      "type": "input",
+                      "bind": "name",
+                      "inputType": "email",
+                      "placeholder": "form.emailPlaceholder",
+                      "style": {
+                        "height": {
+                          "value": 40,
+                          "unit": "px"
+                        },
+                        "padding": {
+                          "horizontal": 12
+                        },
+                        "fontSize": 14,
+                        "color": "#ededed",
+                        "background": "#0a0a0a",
+                        "borderWidth": {
+                          "value": 1,
+                          "unit": "px"
+                        },
+                        "borderColor": "rgba(255, 255, 255, 0.1)",
+                        "cornerRadius": 6
+                      },
+                      "interactions": {
+                        "focus": {
+                          "borderColor": "#0070f3"
+                        }
+                      },
+                      "stateStyles": {
+                        "error": {
+                          "borderColor": "#ee5555",
+                          "background": "rgba(238, 85, 85, 0.08)"
+                        },
+                        "success": {
+                          "borderColor": "#52c41a",
+                          "background": "rgba(82, 196, 26, 0.08)"
+                        }
+                      }
+                    },
+                    {
+                      "$description": "Helper text — shown when field has no error",
+                      "type": "text",
+                      "bind": "helperText",
+                      "conditional": "fieldState == 'pristine' || fieldState == 'valid'",
+                      "style": {
+                        "fontSize": 11,
+                        "color": "#666666"
+                      }
+                    },
+                    {
+                      "$description": "Error text — shown when field has error",
+                      "type": "text",
+                      "name": "field-error",
+                      "conditional": "fieldState == 'error'",
+                      "dynamic": [
+                        {
+                          "property": "content",
+                          "expr": [
+                            "var",
+                            "errorMessage"
+                          ]
+                        }
+                      ],
+                      "style": {
+                        "fontSize": 11,
+                        "color": "#ee5555"
+                      }
+                    },
+                    {
+                      "$description": "Async validation spinner — shown while checking server",
+                      "type": "icon",
+                      "icon": "Loader2",
+                      "name": "async-spinner",
+                      "conditional": "fieldState == 'validating'",
+                      "size": {
+                        "value": 12,
+                        "unit": "px"
+                      },
+                      "color": "#666666",
+                      "animation": "spinner"
+                    }
+                  ],
                   "name": "email",
                   "label": "form.email",
                   "placeholder": "form.emailPlaceholder",
@@ -559,7 +2447,141 @@
                   "helperText": "form.emailHelper"
                 },
                 {
-                  "$ref": "field",
+                  "$description": "Form field with label, input, helper text, error message, and character counter. Tracks pristine/dirty/touched states via context.",
+                  "type": "group",
+                  "layout": "stack-v",
+                  "gap": 4,
+                  "children": [
+                    {
+                      "type": "group",
+                      "layout": "stack-h",
+                      "justify": "space-between",
+                      "align": "center",
+                      "children": [
+                        {
+                          "type": "text",
+                          "bind": "label",
+                          "style": {
+                            "fontSize": 13,
+                            "fontWeight": 500,
+                            "color": "#ededed"
+                          }
+                        },
+                        {
+                          "$description": "Character counter — only shown when maxLength is set",
+                          "type": "text",
+                          "name": "char-counter",
+                          "conditional": "params.maxLength != null",
+                          "dynamic": [
+                            {
+                              "property": "content",
+                              "expr": [
+                                "var",
+                                "charCountDisplay"
+                              ]
+                            },
+                            {
+                              "property": "color",
+                              "expr": [
+                                "if",
+                                [
+                                  "var",
+                                  "overLimit"
+                                ],
+                                "#ee5555",
+                                "#666666"
+                              ]
+                            }
+                          ],
+                          "style": {
+                            "fontSize": 11,
+                            "fontVariantNumeric": "tabular-nums"
+                          }
+                        }
+                      ]
+                    },
+                    {
+                      "type": "input",
+                      "bind": "name",
+                      "inputType": "text",
+                      "placeholder": "form.subjectPlaceholder",
+                      "style": {
+                        "height": {
+                          "value": 40,
+                          "unit": "px"
+                        },
+                        "padding": {
+                          "horizontal": 12
+                        },
+                        "fontSize": 14,
+                        "color": "#ededed",
+                        "background": "#0a0a0a",
+                        "borderWidth": {
+                          "value": 1,
+                          "unit": "px"
+                        },
+                        "borderColor": "rgba(255, 255, 255, 0.1)",
+                        "cornerRadius": 6
+                      },
+                      "interactions": {
+                        "focus": {
+                          "borderColor": "#0070f3"
+                        }
+                      },
+                      "stateStyles": {
+                        "error": {
+                          "borderColor": "#ee5555",
+                          "background": "rgba(238, 85, 85, 0.08)"
+                        },
+                        "success": {
+                          "borderColor": "#52c41a",
+                          "background": "rgba(82, 196, 26, 0.08)"
+                        }
+                      }
+                    },
+                    {
+                      "$description": "Helper text — shown when field has no error",
+                      "type": "text",
+                      "bind": "helperText",
+                      "conditional": "fieldState == 'pristine' || fieldState == 'valid'",
+                      "style": {
+                        "fontSize": 11,
+                        "color": "#666666"
+                      }
+                    },
+                    {
+                      "$description": "Error text — shown when field has error",
+                      "type": "text",
+                      "name": "field-error",
+                      "conditional": "fieldState == 'error'",
+                      "dynamic": [
+                        {
+                          "property": "content",
+                          "expr": [
+                            "var",
+                            "errorMessage"
+                          ]
+                        }
+                      ],
+                      "style": {
+                        "fontSize": 11,
+                        "color": "#ee5555"
+                      }
+                    },
+                    {
+                      "$description": "Async validation spinner — shown while checking server",
+                      "type": "icon",
+                      "icon": "Loader2",
+                      "name": "async-spinner",
+                      "conditional": "fieldState == 'validating'",
+                      "size": {
+                        "value": 12,
+                        "unit": "px"
+                      },
+                      "color": "#666666",
+                      "animation": "spinner"
+                    }
+                  ],
                   "name": "subject",
                   "label": "form.subject",
                   "placeholder": "form.subjectPlaceholder",
@@ -568,10 +2590,144 @@
                 {
                   "type": "group",
                   "layout": "stack-v",
-                  "gap": "{spacing.xs}",
+                  "gap": 4,
                   "children": [
                     {
-                      "$ref": "field",
+                      "$description": "Form field with label, input, helper text, error message, and character counter. Tracks pristine/dirty/touched states via context.",
+                      "type": "group",
+                      "layout": "stack-v",
+                      "gap": 4,
+                      "children": [
+                        {
+                          "type": "group",
+                          "layout": "stack-h",
+                          "justify": "space-between",
+                          "align": "center",
+                          "children": [
+                            {
+                              "type": "text",
+                              "bind": "label",
+                              "style": {
+                                "fontSize": 13,
+                                "fontWeight": 500,
+                                "color": "#ededed"
+                              }
+                            },
+                            {
+                              "$description": "Character counter — only shown when maxLength is set",
+                              "type": "text",
+                              "name": "char-counter",
+                              "conditional": "params.maxLength != null",
+                              "dynamic": [
+                                {
+                                  "property": "content",
+                                  "expr": [
+                                    "var",
+                                    "charCountDisplay"
+                                  ]
+                                },
+                                {
+                                  "property": "color",
+                                  "expr": [
+                                    "if",
+                                    [
+                                      "var",
+                                      "overLimit"
+                                    ],
+                                    "#ee5555",
+                                    "#666666"
+                                  ]
+                                }
+                              ],
+                              "style": {
+                                "fontSize": 11,
+                                "fontVariantNumeric": "tabular-nums"
+                              }
+                            }
+                          ]
+                        },
+                        {
+                          "type": "input",
+                          "bind": "name",
+                          "inputType": "textarea",
+                          "placeholder": "form.messagePlaceholder",
+                          "style": {
+                            "height": {
+                              "value": 40,
+                              "unit": "px"
+                            },
+                            "padding": {
+                              "horizontal": 12
+                            },
+                            "fontSize": 14,
+                            "color": "#ededed",
+                            "background": "#0a0a0a",
+                            "borderWidth": {
+                              "value": 1,
+                              "unit": "px"
+                            },
+                            "borderColor": "rgba(255, 255, 255, 0.1)",
+                            "cornerRadius": 6
+                          },
+                          "interactions": {
+                            "focus": {
+                              "borderColor": "#0070f3"
+                            }
+                          },
+                          "stateStyles": {
+                            "error": {
+                              "borderColor": "#ee5555",
+                              "background": "rgba(238, 85, 85, 0.08)"
+                            },
+                            "success": {
+                              "borderColor": "#52c41a",
+                              "background": "rgba(82, 196, 26, 0.08)"
+                            }
+                          }
+                        },
+                        {
+                          "$description": "Helper text — shown when field has no error",
+                          "type": "text",
+                          "bind": "helperText",
+                          "conditional": "fieldState == 'pristine' || fieldState == 'valid'",
+                          "style": {
+                            "fontSize": 11,
+                            "color": "#666666"
+                          }
+                        },
+                        {
+                          "$description": "Error text — shown when field has error",
+                          "type": "text",
+                          "name": "field-error",
+                          "conditional": "fieldState == 'error'",
+                          "dynamic": [
+                            {
+                              "property": "content",
+                              "expr": [
+                                "var",
+                                "errorMessage"
+                              ]
+                            }
+                          ],
+                          "style": {
+                            "fontSize": 11,
+                            "color": "#ee5555"
+                          }
+                        },
+                        {
+                          "$description": "Async validation spinner — shown while checking server",
+                          "type": "icon",
+                          "icon": "Loader2",
+                          "name": "async-spinner",
+                          "conditional": "fieldState == 'validating'",
+                          "size": {
+                            "value": 12,
+                            "unit": "px"
+                          },
+                          "color": "#666666",
+                          "animation": "spinner"
+                        }
+                      ],
                       "name": "message",
                       "label": "form.message",
                       "placeholder": "form.messagePlaceholder",
@@ -592,16 +2748,16 @@
                       "unit": "px"
                     }
                   },
-                  "cornerRadius": "{radius.sm}",
+                  "cornerRadius": 6,
                   "style": {
-                    "background": "{color.accent}",
-                    "fontSize": "{font.size.base}",
-                    "fontWeight": "{font.weight.medium}",
-                    "color": "{color.text.primary}"
+                    "background": "#0070f3",
+                    "fontSize": 14,
+                    "fontWeight": 500,
+                    "color": "#ededed"
                   },
                   "interactions": {
                     "hover": {
-                      "background": "{color.accentHover}"
+                      "background": "#0060df"
                     },
                     "disabled": {
                       "opacity": 0.5
@@ -627,14 +2783,14 @@
       },
       "transitions": [
         {
-          "event": "TYPE",
-          "target": "dirty",
+          "event": "SUBMIT",
+          "target": "submitting",
           "guard": null,
           "actions": []
         },
         {
-          "event": "SUBMIT",
-          "target": "submitting",
+          "event": "TYPE",
+          "target": "editing.dirty",
           "guard": null,
           "actions": []
         }
@@ -655,7 +2811,7 @@
             "width": "fill",
             "height": "fill"
           },
-          "background": "{color.bg}"
+          "background": "#000000"
         },
         "slots": {
           "content": [
@@ -664,7 +2820,7 @@
               "name": "form-card",
               "layout": "stack-v",
               "align": "stretch",
-              "gap": "{spacing.lg}",
+              "gap": 16,
               "size": {
                 "width": {
                   "value": 480,
@@ -672,35 +2828,169 @@
                 }
               },
               "padding": {
-                "value": "{spacing.xl}"
+                "value": 24
               },
-              "background": "{color.card}",
-              "cornerRadius": "{radius.lg}",
+              "background": "#111111",
+              "cornerRadius": 12,
               "borderWidth": {
                 "value": 1,
                 "unit": "px"
               },
-              "borderColor": "{color.stroke}",
+              "borderColor": "rgba(255, 255, 255, 0.1)",
               "children": [
                 {
                   "type": "text",
                   "content": "form.title",
                   "style": {
-                    "fontSize": "{font.size.xl}",
-                    "fontWeight": "{font.weight.medium}",
-                    "color": "{color.text.primary}"
+                    "fontSize": 20,
+                    "fontWeight": 500,
+                    "color": "#ededed"
                   }
                 },
                 {
                   "type": "text",
                   "content": "form.subtitle",
                   "style": {
-                    "fontSize": "{font.size.sm}",
-                    "color": "{color.text.secondary}"
+                    "fontSize": 13,
+                    "color": "#888888"
                   }
                 },
                 {
-                  "$ref": "field",
+                  "$description": "Form field with label, input, helper text, error message, and character counter. Tracks pristine/dirty/touched states via context.",
+                  "type": "group",
+                  "layout": "stack-v",
+                  "gap": 4,
+                  "children": [
+                    {
+                      "type": "group",
+                      "layout": "stack-h",
+                      "justify": "space-between",
+                      "align": "center",
+                      "children": [
+                        {
+                          "type": "text",
+                          "bind": "label",
+                          "style": {
+                            "fontSize": 13,
+                            "fontWeight": 500,
+                            "color": "#ededed"
+                          }
+                        },
+                        {
+                          "$description": "Character counter — only shown when maxLength is set",
+                          "type": "text",
+                          "name": "char-counter",
+                          "conditional": "params.maxLength != null",
+                          "dynamic": [
+                            {
+                              "property": "content",
+                              "expr": [
+                                "var",
+                                "charCountDisplay"
+                              ]
+                            },
+                            {
+                              "property": "color",
+                              "expr": [
+                                "if",
+                                [
+                                  "var",
+                                  "overLimit"
+                                ],
+                                "#ee5555",
+                                "#666666"
+                              ]
+                            }
+                          ],
+                          "style": {
+                            "fontSize": 11,
+                            "fontVariantNumeric": "tabular-nums"
+                          }
+                        }
+                      ]
+                    },
+                    {
+                      "type": "input",
+                      "bind": "name",
+                      "inputType": "text",
+                      "placeholder": "form.namePlaceholder",
+                      "style": {
+                        "height": {
+                          "value": 40,
+                          "unit": "px"
+                        },
+                        "padding": {
+                          "horizontal": 12
+                        },
+                        "fontSize": 14,
+                        "color": "#ededed",
+                        "background": "#0a0a0a",
+                        "borderWidth": {
+                          "value": 1,
+                          "unit": "px"
+                        },
+                        "borderColor": "rgba(255, 255, 255, 0.1)",
+                        "cornerRadius": 6
+                      },
+                      "interactions": {
+                        "focus": {
+                          "borderColor": "#0070f3"
+                        }
+                      },
+                      "stateStyles": {
+                        "error": {
+                          "borderColor": "#ee5555",
+                          "background": "rgba(238, 85, 85, 0.08)"
+                        },
+                        "success": {
+                          "borderColor": "#52c41a",
+                          "background": "rgba(82, 196, 26, 0.08)"
+                        }
+                      }
+                    },
+                    {
+                      "$description": "Helper text — shown when field has no error",
+                      "type": "text",
+                      "bind": "helperText",
+                      "conditional": "fieldState == 'pristine' || fieldState == 'valid'",
+                      "style": {
+                        "fontSize": 11,
+                        "color": "#666666"
+                      }
+                    },
+                    {
+                      "$description": "Error text — shown when field has error",
+                      "type": "text",
+                      "name": "field-error",
+                      "conditional": "fieldState == 'error'",
+                      "dynamic": [
+                        {
+                          "property": "content",
+                          "expr": [
+                            "var",
+                            "errorMessage"
+                          ]
+                        }
+                      ],
+                      "style": {
+                        "fontSize": 11,
+                        "color": "#ee5555"
+                      }
+                    },
+                    {
+                      "$description": "Async validation spinner — shown while checking server",
+                      "type": "icon",
+                      "icon": "Loader2",
+                      "name": "async-spinner",
+                      "conditional": "fieldState == 'validating'",
+                      "size": {
+                        "value": 12,
+                        "unit": "px"
+                      },
+                      "color": "#666666",
+                      "animation": "spinner"
+                    }
+                  ],
                   "name": "fullName",
                   "label": "form.name",
                   "placeholder": "form.namePlaceholder",
@@ -708,7 +2998,141 @@
                   "required": true
                 },
                 {
-                  "$ref": "field",
+                  "$description": "Form field with label, input, helper text, error message, and character counter. Tracks pristine/dirty/touched states via context.",
+                  "type": "group",
+                  "layout": "stack-v",
+                  "gap": 4,
+                  "children": [
+                    {
+                      "type": "group",
+                      "layout": "stack-h",
+                      "justify": "space-between",
+                      "align": "center",
+                      "children": [
+                        {
+                          "type": "text",
+                          "bind": "label",
+                          "style": {
+                            "fontSize": 13,
+                            "fontWeight": 500,
+                            "color": "#ededed"
+                          }
+                        },
+                        {
+                          "$description": "Character counter — only shown when maxLength is set",
+                          "type": "text",
+                          "name": "char-counter",
+                          "conditional": "params.maxLength != null",
+                          "dynamic": [
+                            {
+                              "property": "content",
+                              "expr": [
+                                "var",
+                                "charCountDisplay"
+                              ]
+                            },
+                            {
+                              "property": "color",
+                              "expr": [
+                                "if",
+                                [
+                                  "var",
+                                  "overLimit"
+                                ],
+                                "#ee5555",
+                                "#666666"
+                              ]
+                            }
+                          ],
+                          "style": {
+                            "fontSize": 11,
+                            "fontVariantNumeric": "tabular-nums"
+                          }
+                        }
+                      ]
+                    },
+                    {
+                      "type": "input",
+                      "bind": "name",
+                      "inputType": "email",
+                      "placeholder": "form.emailPlaceholder",
+                      "style": {
+                        "height": {
+                          "value": 40,
+                          "unit": "px"
+                        },
+                        "padding": {
+                          "horizontal": 12
+                        },
+                        "fontSize": 14,
+                        "color": "#ededed",
+                        "background": "#0a0a0a",
+                        "borderWidth": {
+                          "value": 1,
+                          "unit": "px"
+                        },
+                        "borderColor": "rgba(255, 255, 255, 0.1)",
+                        "cornerRadius": 6
+                      },
+                      "interactions": {
+                        "focus": {
+                          "borderColor": "#0070f3"
+                        }
+                      },
+                      "stateStyles": {
+                        "error": {
+                          "borderColor": "#ee5555",
+                          "background": "rgba(238, 85, 85, 0.08)"
+                        },
+                        "success": {
+                          "borderColor": "#52c41a",
+                          "background": "rgba(82, 196, 26, 0.08)"
+                        }
+                      }
+                    },
+                    {
+                      "$description": "Helper text — shown when field has no error",
+                      "type": "text",
+                      "bind": "helperText",
+                      "conditional": "fieldState == 'pristine' || fieldState == 'valid'",
+                      "style": {
+                        "fontSize": 11,
+                        "color": "#666666"
+                      }
+                    },
+                    {
+                      "$description": "Error text — shown when field has error",
+                      "type": "text",
+                      "name": "field-error",
+                      "conditional": "fieldState == 'error'",
+                      "dynamic": [
+                        {
+                          "property": "content",
+                          "expr": [
+                            "var",
+                            "errorMessage"
+                          ]
+                        }
+                      ],
+                      "style": {
+                        "fontSize": 11,
+                        "color": "#ee5555"
+                      }
+                    },
+                    {
+                      "$description": "Async validation spinner — shown while checking server",
+                      "type": "icon",
+                      "icon": "Loader2",
+                      "name": "async-spinner",
+                      "conditional": "fieldState == 'validating'",
+                      "size": {
+                        "value": 12,
+                        "unit": "px"
+                      },
+                      "color": "#666666",
+                      "animation": "spinner"
+                    }
+                  ],
                   "name": "email",
                   "label": "form.email",
                   "placeholder": "form.emailPlaceholder",
@@ -717,7 +3141,141 @@
                   "helperText": "form.emailHelper"
                 },
                 {
-                  "$ref": "field",
+                  "$description": "Form field with label, input, helper text, error message, and character counter. Tracks pristine/dirty/touched states via context.",
+                  "type": "group",
+                  "layout": "stack-v",
+                  "gap": 4,
+                  "children": [
+                    {
+                      "type": "group",
+                      "layout": "stack-h",
+                      "justify": "space-between",
+                      "align": "center",
+                      "children": [
+                        {
+                          "type": "text",
+                          "bind": "label",
+                          "style": {
+                            "fontSize": 13,
+                            "fontWeight": 500,
+                            "color": "#ededed"
+                          }
+                        },
+                        {
+                          "$description": "Character counter — only shown when maxLength is set",
+                          "type": "text",
+                          "name": "char-counter",
+                          "conditional": "params.maxLength != null",
+                          "dynamic": [
+                            {
+                              "property": "content",
+                              "expr": [
+                                "var",
+                                "charCountDisplay"
+                              ]
+                            },
+                            {
+                              "property": "color",
+                              "expr": [
+                                "if",
+                                [
+                                  "var",
+                                  "overLimit"
+                                ],
+                                "#ee5555",
+                                "#666666"
+                              ]
+                            }
+                          ],
+                          "style": {
+                            "fontSize": 11,
+                            "fontVariantNumeric": "tabular-nums"
+                          }
+                        }
+                      ]
+                    },
+                    {
+                      "type": "input",
+                      "bind": "name",
+                      "inputType": "text",
+                      "placeholder": "form.subjectPlaceholder",
+                      "style": {
+                        "height": {
+                          "value": 40,
+                          "unit": "px"
+                        },
+                        "padding": {
+                          "horizontal": 12
+                        },
+                        "fontSize": 14,
+                        "color": "#ededed",
+                        "background": "#0a0a0a",
+                        "borderWidth": {
+                          "value": 1,
+                          "unit": "px"
+                        },
+                        "borderColor": "rgba(255, 255, 255, 0.1)",
+                        "cornerRadius": 6
+                      },
+                      "interactions": {
+                        "focus": {
+                          "borderColor": "#0070f3"
+                        }
+                      },
+                      "stateStyles": {
+                        "error": {
+                          "borderColor": "#ee5555",
+                          "background": "rgba(238, 85, 85, 0.08)"
+                        },
+                        "success": {
+                          "borderColor": "#52c41a",
+                          "background": "rgba(82, 196, 26, 0.08)"
+                        }
+                      }
+                    },
+                    {
+                      "$description": "Helper text — shown when field has no error",
+                      "type": "text",
+                      "bind": "helperText",
+                      "conditional": "fieldState == 'pristine' || fieldState == 'valid'",
+                      "style": {
+                        "fontSize": 11,
+                        "color": "#666666"
+                      }
+                    },
+                    {
+                      "$description": "Error text — shown when field has error",
+                      "type": "text",
+                      "name": "field-error",
+                      "conditional": "fieldState == 'error'",
+                      "dynamic": [
+                        {
+                          "property": "content",
+                          "expr": [
+                            "var",
+                            "errorMessage"
+                          ]
+                        }
+                      ],
+                      "style": {
+                        "fontSize": 11,
+                        "color": "#ee5555"
+                      }
+                    },
+                    {
+                      "$description": "Async validation spinner — shown while checking server",
+                      "type": "icon",
+                      "icon": "Loader2",
+                      "name": "async-spinner",
+                      "conditional": "fieldState == 'validating'",
+                      "size": {
+                        "value": 12,
+                        "unit": "px"
+                      },
+                      "color": "#666666",
+                      "animation": "spinner"
+                    }
+                  ],
                   "name": "subject",
                   "label": "form.subject",
                   "placeholder": "form.subjectPlaceholder",
@@ -726,10 +3284,144 @@
                 {
                   "type": "group",
                   "layout": "stack-v",
-                  "gap": "{spacing.xs}",
+                  "gap": 4,
                   "children": [
                     {
-                      "$ref": "field",
+                      "$description": "Form field with label, input, helper text, error message, and character counter. Tracks pristine/dirty/touched states via context.",
+                      "type": "group",
+                      "layout": "stack-v",
+                      "gap": 4,
+                      "children": [
+                        {
+                          "type": "group",
+                          "layout": "stack-h",
+                          "justify": "space-between",
+                          "align": "center",
+                          "children": [
+                            {
+                              "type": "text",
+                              "bind": "label",
+                              "style": {
+                                "fontSize": 13,
+                                "fontWeight": 500,
+                                "color": "#ededed"
+                              }
+                            },
+                            {
+                              "$description": "Character counter — only shown when maxLength is set",
+                              "type": "text",
+                              "name": "char-counter",
+                              "conditional": "params.maxLength != null",
+                              "dynamic": [
+                                {
+                                  "property": "content",
+                                  "expr": [
+                                    "var",
+                                    "charCountDisplay"
+                                  ]
+                                },
+                                {
+                                  "property": "color",
+                                  "expr": [
+                                    "if",
+                                    [
+                                      "var",
+                                      "overLimit"
+                                    ],
+                                    "#ee5555",
+                                    "#666666"
+                                  ]
+                                }
+                              ],
+                              "style": {
+                                "fontSize": 11,
+                                "fontVariantNumeric": "tabular-nums"
+                              }
+                            }
+                          ]
+                        },
+                        {
+                          "type": "input",
+                          "bind": "name",
+                          "inputType": "textarea",
+                          "placeholder": "form.messagePlaceholder",
+                          "style": {
+                            "height": {
+                              "value": 40,
+                              "unit": "px"
+                            },
+                            "padding": {
+                              "horizontal": 12
+                            },
+                            "fontSize": 14,
+                            "color": "#ededed",
+                            "background": "#0a0a0a",
+                            "borderWidth": {
+                              "value": 1,
+                              "unit": "px"
+                            },
+                            "borderColor": "rgba(255, 255, 255, 0.1)",
+                            "cornerRadius": 6
+                          },
+                          "interactions": {
+                            "focus": {
+                              "borderColor": "#0070f3"
+                            }
+                          },
+                          "stateStyles": {
+                            "error": {
+                              "borderColor": "#ee5555",
+                              "background": "rgba(238, 85, 85, 0.08)"
+                            },
+                            "success": {
+                              "borderColor": "#52c41a",
+                              "background": "rgba(82, 196, 26, 0.08)"
+                            }
+                          }
+                        },
+                        {
+                          "$description": "Helper text — shown when field has no error",
+                          "type": "text",
+                          "bind": "helperText",
+                          "conditional": "fieldState == 'pristine' || fieldState == 'valid'",
+                          "style": {
+                            "fontSize": 11,
+                            "color": "#666666"
+                          }
+                        },
+                        {
+                          "$description": "Error text — shown when field has error",
+                          "type": "text",
+                          "name": "field-error",
+                          "conditional": "fieldState == 'error'",
+                          "dynamic": [
+                            {
+                              "property": "content",
+                              "expr": [
+                                "var",
+                                "errorMessage"
+                              ]
+                            }
+                          ],
+                          "style": {
+                            "fontSize": 11,
+                            "color": "#ee5555"
+                          }
+                        },
+                        {
+                          "$description": "Async validation spinner — shown while checking server",
+                          "type": "icon",
+                          "icon": "Loader2",
+                          "name": "async-spinner",
+                          "conditional": "fieldState == 'validating'",
+                          "size": {
+                            "value": 12,
+                            "unit": "px"
+                          },
+                          "color": "#666666",
+                          "animation": "spinner"
+                        }
+                      ],
                       "name": "message",
                       "label": "form.message",
                       "placeholder": "form.messagePlaceholder",
@@ -750,16 +3442,16 @@
                       "unit": "px"
                     }
                   },
-                  "cornerRadius": "{radius.sm}",
+                  "cornerRadius": 6,
                   "style": {
-                    "background": "{color.accent}",
-                    "fontSize": "{font.size.base}",
-                    "fontWeight": "{font.weight.medium}",
-                    "color": "{color.text.primary}"
+                    "background": "#0070f3",
+                    "fontSize": 14,
+                    "fontWeight": 500,
+                    "color": "#ededed"
                   },
                   "interactions": {
                     "hover": {
-                      "background": "{color.accentHover}"
+                      "background": "#0060df"
                     },
                     "disabled": {
                       "opacity": 0.5
@@ -785,14 +3477,20 @@
       },
       "transitions": [
         {
+          "event": "SUBMIT",
+          "target": "submitting",
+          "guard": null,
+          "actions": []
+        },
+        {
           "event": "TYPE",
-          "target": "dirty",
+          "target": "editing.dirty",
           "guard": null,
           "actions": []
         },
         {
           "event": "FOCUS_FIELD",
-          "target": "dirty",
+          "target": "editing.dirty",
           "guard": null,
           "actions": []
         }
@@ -813,7 +3511,7 @@
             "width": "fill",
             "height": "fill"
           },
-          "background": "{color.bg}"
+          "background": "#000000"
         }
       },
       "transitions": [
@@ -852,7 +3550,7 @@
             "width": "fill",
             "height": "fill"
           },
-          "background": "{color.bg}"
+          "background": "#000000"
         },
         "slots": {
           "content": [
@@ -861,7 +3559,7 @@
               "name": "success-card",
               "layout": "stack-v",
               "align": "center",
-              "gap": "{spacing.lg}",
+              "gap": 16,
               "size": {
                 "width": {
                   "value": 480,
@@ -869,10 +3567,10 @@
                 }
               },
               "padding": {
-                "value": "{spacing.xxl}"
+                "value": 32
               },
-              "background": "{color.card}",
-              "cornerRadius": "{radius.lg}",
+              "background": "#111111",
+              "cornerRadius": 12,
               "children": [
                 {
                   "type": "icon",
@@ -881,15 +3579,15 @@
                     "value": 48,
                     "unit": "px"
                   },
-                  "color": "{color.success}"
+                  "color": "#52c41a"
                 },
                 {
                   "type": "text",
                   "content": "form.success.title",
                   "style": {
-                    "fontSize": "{font.size.lg}",
-                    "fontWeight": "{font.weight.medium}",
-                    "color": "{color.text.primary}",
+                    "fontSize": 16,
+                    "fontWeight": 500,
+                    "color": "#ededed",
                     "textAlign": "center"
                   }
                 },
@@ -897,8 +3595,8 @@
                   "type": "text",
                   "content": "form.success.body",
                   "style": {
-                    "fontSize": "{font.size.base}",
-                    "color": "{color.text.secondary}",
+                    "fontSize": 14,
+                    "color": "#888888",
                     "textAlign": "center"
                   }
                 },
@@ -906,8 +3604,8 @@
                   "type": "text",
                   "content": "form.success.sendAnother",
                   "style": {
-                    "fontSize": "{font.size.sm}",
-                    "color": "{color.accent}"
+                    "fontSize": 13,
+                    "color": "#0070f3"
                   },
                   "command": "resetForm"
                 }
@@ -919,7 +3617,7 @@
       "transitions": [
         {
           "event": "RESET",
-          "target": "editing",
+          "target": "editing.pristine",
           "guard": null,
           "actions": []
         }
@@ -940,7 +3638,7 @@
             "width": "fill",
             "height": "fill"
           },
-          "background": "{color.bg}"
+          "background": "#000000"
         }
       },
       "transitions": [
@@ -973,7 +3671,7 @@
             "width": "fill",
             "height": "fill"
           },
-          "background": "{color.bg}"
+          "background": "#000000"
         }
       },
       "transitions": [
@@ -1002,5 +3700,5 @@
     }
   },
   "assertions": [],
-  "$source": "examples/04-form-validation.uispec.json"
+  "$source": "examples/04-form-validation.uxspec.json"
 }

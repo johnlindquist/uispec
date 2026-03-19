@@ -96,7 +96,7 @@ export interface StateNode {
   $visual?: VisualSpec;
 }
 
-export interface UISpecDocument {
+export interface UXSpecDocument {
   $schema: string;
   $description: string;
   $tokens?: Record<string, Json>;
@@ -136,8 +136,8 @@ export interface Assertion {
   testId: string;
 }
 
-export interface CompiledUISpec {
-  $format: "uispec-compiled";
+export interface CompiledUXSpec {
+  $format: "uxspec-compiled";
   $version: "0.2";
   $source?: string;
   initial: string;
@@ -197,7 +197,7 @@ export interface CompilerTraceEntry {
 
 export interface CompileResult {
   ok: boolean;
-  compiled: CompiledUISpec | null;
+  compiled: CompiledUXSpec | null;
   issues: CompilerIssue[];
   trace: CompilerTraceEntry[];
 }

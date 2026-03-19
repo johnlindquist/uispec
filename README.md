@@ -1,10 +1,10 @@
-# UISpec
+# UXSpec
 
 **A JSON format that is readable and writable by both humans and AI agents — and directly executable by machines.**
 
 Most UI specifications are either human-friendly (Figma, prose docs) or machine-friendly (code, ASTs). You write a design spec for humans, then translate it to code for machines. The spec and the code drift apart. Nobody trusts either one.
 
-UISpec is both at once. A human reads the `$description` fields and understands intent. An agent reads the structured JSON and generates pixel-accurate implementations. A compiler validates it, flattens it, and produces a runtime artifact that any renderer can execute — React, SwiftUI, Compose, Flutter, or a custom engine.
+UXSpec is both at once. A human reads the `$description` fields and understands intent. An agent reads the structured JSON and generates pixel-accurate implementations. A compiler validates it, flattens it, and produces a runtime artifact that any renderer can execute — React, SwiftUI, Compose, Flutter, or a custom engine.
 
 **One artifact. Readable by humans. Writable by agents. Executable by machines.**
 
@@ -21,7 +21,7 @@ Today, when an AI agent needs to understand or generate a UI component, it must 
 
 To answer "what does the error state look like?", the agent has to read three files and mentally reconstruct the picture. To generate a new state, it has to modify three files in sync.
 
-UISpec collapses all of this into one artifact. One file. One source of truth. The state machine says what happens. The visual spec on each state says what it looks like. The tokens say what colors and spacing are available. An agent reads one file and knows everything.
+UXSpec collapses all of this into one artifact. One file. One source of truth. The state machine says what happens. The visual spec on each state says what it looks like. The tokens say what colors and spacing are available. An agent reads one file and knows everything.
 
 ### Concrete Example: A Login Form
 
@@ -33,7 +33,7 @@ In a typical React codebase, a login form with loading and error states spans 3+
 // login.module.css — 60 lines of styles
 ```
 
-In UISpec, the same component is **one file** where every state is explicit:
+In UXSpec, the same component is **one file** where every state is explicit:
 
 ```json
 {
@@ -104,7 +104,7 @@ An agent reads this and immediately knows: there are 4 states, the submit button
 
 ## Format Overview
 
-A `.uispec.json` file has up to eight sections:
+A `.uxspec.json` file has up to eight sections:
 
 ```
 ┌──────────────────────────────────────┐
@@ -159,7 +159,7 @@ Other approaches separate behavior from appearance:
 | Zag.js | State machine | Your JSX + CSS (via `data-state`) | No |
 | React Aria | State hooks | Your styled components | No |
 | CVA/Panda | — | Variant-to-style map | No behavior |
-| **UISpec** | **State machine** | **`$visual` on each state** | **Yes** |
+| **UXSpec** | **State machine** | **`$visual` on each state** | **Yes** |
 
 ## Built on Standards
 
@@ -171,7 +171,7 @@ Other approaches separate behavior from appearance:
 
 JSON is parseable by every language. The format has no TypeScript, no CSS, no framework-specific concepts.
 
-A **compiled** version of any `.uispec.json` resolves all token references and element refs into concrete values and preserves the full runtime model — context schema, event schema, guarded transitions, entry/exit actions, and verification assertions. Consuming the compiled format requires a small amount of code in any language:
+A **compiled** version of any `.uxspec.json` resolves all token references and element refs into concrete values and preserves the full runtime model — context schema, event schema, guarded transitions, entry/exit actions, and verification assertions. Consuming the compiled format requires a small amount of code in any language:
 
 - Transition lookup with guards: `table[state][event]` + guard evaluation
 - Expression evaluator: recursive match on ~20 ops (25-35 lines)
@@ -185,25 +185,25 @@ Each example targets different edge cases:
 
 | Example | What it tests |
 |---------|---------------|
-| [01-recording-overlay](examples/01-recording-overlay.uispec.json) | Compound states, dynamic expressions (waveform bars), auto-dismiss, keyboard bindings, focus management |
-| [02-auth-flow](examples/02-auth-flow.uispec.json) | Multi-page routing, OAuth redirect, email verification, rate limiting, form-level vs field-level errors |
-| [03-toast-notifications](examples/03-toast-notifications.uispec.json) | Ephemeral lifecycle (enter → visible → exit), hover-to-pause countdown, swipe-to-dismiss, action buttons (undo), stacking |
-| [04-form-validation](examples/04-form-validation.uispec.json) | Per-field validation states (pristine/dirty/touched/error/valid), async validation with debounce, character counters, password strength, cross-field validation, network errors |
-| [05-media-player](examples/05-media-player.uispec.json) | Parallel states (playback + volume + display mode), continuous values (seek position, volume), buffering stalls, picture-in-picture, error recovery |
-| [06-data-resource-page](examples/06-data-resource-page.uispec.json) | Route-level loading, data fetch on entry, success/empty/error branches, retry, form edit, optimistic save, rollback on failure, toast on success, focus management, test IDs, aria metadata |
+| [01-recording-overlay](examples/01-recording-overlay.uxspec.json) | Compound states, dynamic expressions (waveform bars), auto-dismiss, keyboard bindings, focus management |
+| [02-auth-flow](examples/02-auth-flow.uxspec.json) | Multi-page routing, OAuth redirect, email verification, rate limiting, form-level vs field-level errors |
+| [03-toast-notifications](examples/03-toast-notifications.uxspec.json) | Ephemeral lifecycle (enter → visible → exit), hover-to-pause countdown, swipe-to-dismiss, action buttons (undo), stacking |
+| [04-form-validation](examples/04-form-validation.uxspec.json) | Per-field validation states (pristine/dirty/touched/error/valid), async validation with debounce, character counters, password strength, cross-field validation, network errors |
+| [05-media-player](examples/05-media-player.uxspec.json) | Parallel states (playback + volume + display mode), continuous values (seek position, volume), buffering stalls, picture-in-picture, error recovery |
+| [06-data-resource-page](examples/06-data-resource-page.uxspec.json) | Route-level loading, data fetch on entry, success/empty/error branches, retry, form edit, optimistic save, rollback on failure, toast on success, focus management, test IDs, aria metadata |
 
 ## Quick Start
 
 ```bash
 # Validate a spec (checks for structural and semantic errors)
-bun run src/compiler/cli.ts validate examples/02-auth-flow.uispec.json
+bun run src/compiler/cli.ts validate examples/02-auth-flow.uxspec.json
 
 # Compile to flat, fully-resolved runtime format
-bun run src/compiler/cli.ts compile examples/02-auth-flow.uispec.json
+bun run src/compiler/cli.ts compile examples/02-auth-flow.uxspec.json
 # → writes dist/compiled/02-auth-flow.compiled.json
 
 # Inspect the compiled state graph without writing files
-bun run src/compiler/cli.ts inspect examples/02-auth-flow.uispec.json
+bun run src/compiler/cli.ts inspect examples/02-auth-flow.uxspec.json
 
 # Run all tests
 bun test
@@ -212,7 +212,7 @@ bun test
 The compiler outputs structured JSON so agents can parse results programmatically:
 
 ```json
-{"file":"examples/02-auth-flow.uispec.json","ok":true,"states":17,"assertions":21,"leafInitial":true}
+{"file":"examples/02-auth-flow.uxspec.json","ok":true,"states":17,"assertions":21,"leafInitial":true}
 ```
 
 When validation fails, you get actionable issue codes:
@@ -223,11 +223,11 @@ When validation fails, you get actionable issue codes:
 
 ## For AI Agents
 
-An agent working with UISpec can:
+An agent working with UXSpec can:
 
-**Read** a `.uispec.json` to understand a component's full behavior and appearance — every state, every transition, every pixel value, every interaction state — from a single file.
+**Read** a `.uxspec.json` to understand a component's full behavior and appearance — every state, every transition, every pixel value, every interaction state — from a single file.
 
-**Write** a `.uispec.json` to define a new component. The format is constrained enough that the output is unambiguous: another agent (or a code generator) can produce a pixel-accurate implementation from the spec alone.
+**Write** a `.uxspec.json` to define a new component. The format is constrained enough that the output is unambiguous: another agent (or a code generator) can produce a pixel-accurate implementation from the spec alone.
 
 **Verify** a rendered component against its spec. Compare a screenshot to the `$visual` — check that colors match token values, elements are in the right slots, and interaction states apply the right style overrides.
 
@@ -238,13 +238,13 @@ The `$description` on every state and element is natural language documentation 
 ## Project Structure
 
 ```
-uispec/
+uxspec/
 ├── README.md
 ├── spec/
 │   ├── SPEC.md           Format specification
 │   └── COMPILER.md       Compiler reference + per-language runtimes
 ├── schema/
-│   └── uispec.schema.json   JSON Schema for validation
+│   └── uxspec.schema.json   JSON Schema for validation
 ├── src/compiler/
 │   ├── cli.ts            CLI entry point (validate, compile, inspect)
 │   ├── compile.ts        Five-phase compiler orchestration
@@ -256,12 +256,12 @@ uispec/
 ├── skills/
 │   └── SKILL.md          Agent skill for guided spec authoring
 ├── examples/
-│   ├── 01-recording-overlay.uispec.json
-│   ├── 02-auth-flow.uispec.json
-│   ├── 03-toast-notifications.uispec.json
-│   ├── 04-form-validation.uispec.json
-│   ├── 05-media-player.uispec.json
-│   └── 06-data-resource-page.uispec.json
+│   ├── 01-recording-overlay.uxspec.json
+│   ├── 02-auth-flow.uxspec.json
+│   ├── 03-toast-notifications.uxspec.json
+│   ├── 04-form-validation.uxspec.json
+│   ├── 05-media-player.uxspec.json
+│   └── 06-data-resource-page.uxspec.json
 └── tests/
     ├── compile.test.ts             Core compilation tests
     ├── validate.test.ts            Validation tests
@@ -272,7 +272,7 @@ uispec/
 
 ## Runtime Semantics (v0.2)
 
-UISpec v0.2 adds a normative execution model. The spec now defines:
+UXSpec v0.2 adds a normative execution model. The spec now defines:
 
 - **Typed context** (`$context`) — declare every runtime variable with a type and default.
 - **Typed events** (`$events`) — declare every event with source and payload schema.

@@ -1,11 +1,11 @@
-# UISpec — Development Guide
+# UXSpec — Development Guide
 
 ## Quick Start
 
 ```bash
 bun test                                                    # Run all tests
-bun run src/compiler/cli.ts validate examples/*.uispec.json # Validate specs
-bun run src/compiler/cli.ts compile examples/*.uispec.json  # Compile specs
+bun run src/compiler/cli.ts validate examples/*.uxspec.json # Validate specs
+bun run src/compiler/cli.ts compile examples/*.uxspec.json  # Compile specs
 ```
 
 ## Architecture
@@ -48,13 +48,13 @@ Source files: `resolve.ts` → `state-paths.ts` → `compile.ts` → `validate.t
 ### CLI Success Example
 
 ```json
-{"file":"examples/02-auth-flow.uispec.json","ok":true,"output":"dist/compiled/02-auth-flow.compiled.json","states":17,"assertions":21,"unresolvedRefs":0,"unresolvedTokenAliases":0,"leafInitial":true,"trace":[]}
+{"file":"examples/02-auth-flow.uxspec.json","ok":true,"output":"dist/compiled/02-auth-flow.compiled.json","states":17,"assertions":21,"unresolvedRefs":0,"unresolvedTokenAliases":0,"leafInitial":true,"trace":[]}
 ```
 
 ### CLI Failure Example
 
 ```json
-{"file":"tests/fixtures/bad-initial.uispec.json","ok":false,"issues":[{"code":"INVALID_MACHINE_INITIAL","message":"Machine initial \"missing\" does not resolve to a state","path":"$machine.initial","phase":"state-paths"}],"trace":[]}
+{"file":"tests/fixtures/bad-initial.uxspec.json","ok":false,"issues":[{"code":"INVALID_MACHINE_INITIAL","message":"Machine initial \"missing\" does not resolve to a state","path":"$machine.initial","phase":"state-paths"}],"trace":[]}
 ```
 
 ### Issue Codes

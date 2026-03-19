@@ -8,7 +8,7 @@ describe("compiler CLI", () => {
       "run",
       "src/compiler/cli.ts",
       "compile",
-      "tests/fixtures/bad-initial.uispec.json",
+      "tests/fixtures/bad-initial.uxspec.json",
     ]);
 
     const line = proc.stdout.toString().trim().split("\n").at(-1)!;
@@ -25,7 +25,7 @@ describe("compiler CLI", () => {
       "run",
       "src/compiler/cli.ts",
       "compile",
-      "examples/02-auth-flow.uispec.json",
+      "examples/02-auth-flow.uxspec.json",
     ]);
 
     const line = proc.stdout.toString().trim().split("\n").at(-1)!;
@@ -45,7 +45,7 @@ describe("compiler CLI", () => {
       "run",
       "src/compiler/cli.ts",
       "validate",
-      "examples/02-auth-flow.uispec.json",
+      "examples/02-auth-flow.uxspec.json",
     ]);
 
     const line = proc.stdout.toString().trim().split("\n").at(-1)!;
@@ -64,7 +64,7 @@ describe("compiler CLI", () => {
       "src/compiler/cli.ts",
       "validate",
       "--trace",
-      "examples/02-auth-flow.uispec.json",
+      "examples/02-auth-flow.uxspec.json",
     ]);
 
     const line = proc.stdout.toString().trim().split("\n").at(-1)!;
@@ -82,7 +82,7 @@ describe("compiler CLI", () => {
       "run",
       "src/compiler/cli.ts",
       "validate",
-      "tests/fixtures/nonexistent.uispec.json",
+      "tests/fixtures/nonexistent.uxspec.json",
     ]);
 
     const line = proc.stdout.toString().trim().split("\n").at(-1)!;
@@ -99,7 +99,7 @@ describe("compiler CLI", () => {
       "run",
       "src/compiler/cli.ts",
       "compile",
-      "tests/fixtures/nonexistent.uispec.json",
+      "tests/fixtures/nonexistent.uxspec.json",
     ]);
 
     const line = proc.stdout.toString().trim().split("\n").at(-1)!;
@@ -117,7 +117,7 @@ describe("compiler CLI", () => {
       "src/compiler/cli.ts",
       "compile",
       "--trace",
-      "examples/02-auth-flow.uispec.json",
+      "examples/02-auth-flow.uxspec.json",
     ]);
 
     const line = proc.stdout.toString().trim().split("\n").at(-1)!;
@@ -136,7 +136,7 @@ describe("compiler CLI", () => {
       "src/compiler/cli.ts",
       "inspect",
       "--trace",
-      "examples/02-auth-flow.uispec.json",
+      "examples/02-auth-flow.uxspec.json",
     ]);
 
     const line = proc.stdout.toString().trim().split("\n").at(-1)!;
@@ -165,7 +165,7 @@ describe("compiler CLI", () => {
       "run",
       "src/compiler/cli.ts",
       "inspect",
-      "tests/fixtures/bad-initial.uispec.json",
+      "tests/fixtures/bad-initial.uxspec.json",
     ]);
 
     const line = proc.stdout.toString().trim().split("\n").at(-1)!;
@@ -183,7 +183,7 @@ describe("compiler CLI", () => {
       "run",
       "src/compiler/cli.ts",
       "inspect",
-      "tests/fixtures/nonexistent.uispec.json",
+      "tests/fixtures/nonexistent.uxspec.json",
     ]);
 
     const line = proc.stdout.toString().trim().split("\n").at(-1)!;

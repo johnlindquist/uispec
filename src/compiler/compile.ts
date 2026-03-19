@@ -3,13 +3,13 @@ import type {
   Assertion,
   CompiledState,
   CompiledTransition,
-  CompiledUISpec,
+  CompiledUXSpec,
   CompileResult,
   CompilerIssue,
   CompilerTraceEntry,
   EffectSpec,
   StateNode,
-  UISpecDocument,
+  UXSpecDocument,
   VisualSpec,
 } from "./types";
 import { resolveDocument } from "./resolve";
@@ -193,7 +193,7 @@ function compileNode(
 }
 
 export function compile(
-  document: UISpecDocument,
+  document: UXSpecDocument,
   options: { trace?: boolean } = {}
 ): CompileResult {
   const issues: CompilerIssue[] = [];
@@ -263,8 +263,8 @@ export function compile(
     collectTestIds(state.visual, assertions, seen);
   }
 
-  const compiled: CompiledUISpec = {
-    $format: "uispec-compiled",
+  const compiled: CompiledUXSpec = {
+    $format: "uxspec-compiled",
     $version: "0.2",
     initial,
     contextSchema: resolved.$context ?? {},

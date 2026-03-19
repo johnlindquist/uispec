@@ -1,5 +1,5 @@
 {
-  "$format": "uispec-compiled",
+  "$format": "uxspec-compiled",
   "$version": "0.2",
   "initial": "hidden",
   "contextSchema": {},
@@ -29,16 +29,16 @@
               "value": 0,
               "unit": "px"
             },
-            "horizontal": "{spacing.xl}"
+            "horizontal": 14
           },
-          "gap": "{spacing.lg}",
-          "cornerRadius": "{radius.pill}",
-          "background": "{color.surface.glass}",
+          "gap": 10,
+          "cornerRadius": 18,
+          "background": "rgba(18, 18, 22, 0.72)",
           "borderWidth": {
             "value": 1,
             "unit": "px"
           },
-          "borderColor": "{color.stroke}",
+          "borderColor": "rgba(255, 255, 255, 0.18)",
           "backdropBlur": {
             "value": 6,
             "unit": "px"
@@ -49,7 +49,7 @@
       "transitions": [
         {
           "event": "SHOW",
-          "target": "recording",
+          "target": "recording.active",
           "guard": null,
           "actions": []
         }
@@ -82,16 +82,16 @@
               "value": 0,
               "unit": "px"
             },
-            "horizontal": "{spacing.xl}"
+            "horizontal": 14
           },
-          "gap": "{spacing.lg}",
-          "cornerRadius": "{radius.pill}",
-          "background": "{color.surface.glass}",
+          "gap": 10,
+          "cornerRadius": 18,
+          "background": "rgba(18, 18, 22, 0.72)",
           "borderWidth": {
             "value": 1,
             "unit": "px"
           },
-          "borderColor": "{color.stroke}",
+          "borderColor": "rgba(255, 255, 255, 0.18)",
           "backdropBlur": {
             "value": 6,
             "unit": "px"
@@ -101,10 +101,26 @@
         "slots": {
           "left": [
             {
-              "$ref": "logo"
+              "$description": "Vercel Voice triangle logo, always white",
+              "type": "icon",
+              "icon": "VercelVoiceLogo",
+              "size": {
+                "value": 16,
+                "unit": "px"
+              },
+              "color": "#ffffff"
             },
             {
-              "$ref": "timer"
+              "$description": "Elapsed recording time in MM:SS, monospace numerals",
+              "type": "text",
+              "role": "timer",
+              "style": {
+                "fontSize": 11,
+                "fontWeight": 500,
+                "color": "rgba(255, 255, 255, 0.5)",
+                "fontVariantNumeric": "tabular-nums",
+                "whiteSpace": "nowrap"
+              }
             }
           ],
           "middle": [
@@ -114,7 +130,7 @@
               "layout": "stack-h",
               "align": "end",
               "justify": "center",
-              "gap": "{spacing.sm}",
+              "gap": 4,
               "size": {
                 "height": {
                   "value": 20,
@@ -139,7 +155,7 @@
                     "unit": "px"
                   }
                 },
-                "cornerRadius": "{radius.xs}",
+                "cornerRadius": 1.5,
                 "dynamic": [
                   {
                     "property": "height",
@@ -183,8 +199,8 @@
                         "var",
                         "hasSound"
                       ],
-                      "{color.active}",
-                      "{color.inactive}"
+                      "#52c41a",
+                      "#ff4d4f"
                     ]
                   }
                 ]
@@ -193,37 +209,325 @@
           ],
           "right": [
             {
-              "$ref": "action-button",
+              "$description": "24×24 icon button with hover/press/focus states",
+              "type": "button",
+              "size": {
+                "width": {
+                  "value": 24,
+                  "unit": "px"
+                },
+                "height": {
+                  "value": 24,
+                  "unit": "px"
+                }
+              },
+              "cornerRadius": 4,
+              "style": {
+                "background": "rgba(255, 255, 255, 0.05)",
+                "borderWidth": {
+                  "value": 1,
+                  "unit": "px"
+                },
+                "borderColor": "rgba(255, 255, 255, 0.1)",
+                "iconSize": {
+                  "value": 16,
+                  "unit": "px"
+                },
+                "iconStrokeWidth": 2.5,
+                "color": "rgba(255, 255, 255, 0.6)"
+              },
+              "interactions": {
+                "hover": {
+                  "color": "#ffffff",
+                  "background": "rgba(255, 255, 255, 0.15)",
+                  "borderColor": "rgba(255, 255, 255, 0.25)"
+                },
+                "press": {
+                  "scale": 0.95,
+                  "background": "rgba(255, 255, 255, 0.2)"
+                },
+                "focus": {
+                  "outlineWidth": {
+                    "value": 2,
+                    "unit": "px"
+                  },
+                  "outlineColor": "rgba(255, 255, 255, 0.5)",
+                  "outlineOffset": {
+                    "value": 1,
+                    "unit": "px"
+                  }
+                }
+              },
               "id": "crop",
               "icon": "Crop",
               "tooltip": "overlay.captureRegionShortcut"
             },
             {
-              "$ref": "action-button",
+              "$description": "24×24 icon button with hover/press/focus states",
+              "type": "button",
+              "size": {
+                "width": {
+                  "value": 24,
+                  "unit": "px"
+                },
+                "height": {
+                  "value": 24,
+                  "unit": "px"
+                }
+              },
+              "cornerRadius": 4,
+              "style": {
+                "background": "rgba(255, 255, 255, 0.05)",
+                "borderWidth": {
+                  "value": 1,
+                  "unit": "px"
+                },
+                "borderColor": "rgba(255, 255, 255, 0.1)",
+                "iconSize": {
+                  "value": 16,
+                  "unit": "px"
+                },
+                "iconStrokeWidth": 2.5,
+                "color": "rgba(255, 255, 255, 0.6)"
+              },
+              "interactions": {
+                "hover": {
+                  "color": "#ffffff",
+                  "background": "rgba(255, 255, 255, 0.15)",
+                  "borderColor": "rgba(255, 255, 255, 0.25)"
+                },
+                "press": {
+                  "scale": 0.95,
+                  "background": "rgba(255, 255, 255, 0.2)"
+                },
+                "focus": {
+                  "outlineWidth": {
+                    "value": 2,
+                    "unit": "px"
+                  },
+                  "outlineColor": "rgba(255, 255, 255, 0.5)",
+                  "outlineOffset": {
+                    "value": 1,
+                    "unit": "px"
+                  }
+                }
+              },
               "id": "monitor",
               "icon": "Monitor",
               "tooltip": "overlay.captureFullscreenShortcut"
             },
             {
-              "$ref": "action-button",
+              "$description": "24×24 icon button with hover/press/focus states",
+              "type": "button",
+              "size": {
+                "width": {
+                  "value": 24,
+                  "unit": "px"
+                },
+                "height": {
+                  "value": 24,
+                  "unit": "px"
+                }
+              },
+              "cornerRadius": 4,
+              "style": {
+                "background": "rgba(255, 255, 255, 0.05)",
+                "borderWidth": {
+                  "value": 1,
+                  "unit": "px"
+                },
+                "borderColor": "rgba(255, 255, 255, 0.1)",
+                "iconSize": {
+                  "value": 16,
+                  "unit": "px"
+                },
+                "iconStrokeWidth": 2.5,
+                "color": "rgba(255, 255, 255, 0.6)"
+              },
+              "interactions": {
+                "hover": {
+                  "color": "#ffffff",
+                  "background": "rgba(255, 255, 255, 0.15)",
+                  "borderColor": "rgba(255, 255, 255, 0.25)"
+                },
+                "press": {
+                  "scale": 0.95,
+                  "background": "rgba(255, 255, 255, 0.2)"
+                },
+                "focus": {
+                  "outlineWidth": {
+                    "value": 2,
+                    "unit": "px"
+                  },
+                  "outlineColor": "rgba(255, 255, 255, 0.5)",
+                  "outlineOffset": {
+                    "value": 1,
+                    "unit": "px"
+                  }
+                }
+              },
               "id": "window",
               "icon": "AppWindow",
               "tooltip": "overlay.captureWindowShortcut"
             },
             {
-              "$ref": "action-button",
+              "$description": "24×24 icon button with hover/press/focus states",
+              "type": "button",
+              "size": {
+                "width": {
+                  "value": 24,
+                  "unit": "px"
+                },
+                "height": {
+                  "value": 24,
+                  "unit": "px"
+                }
+              },
+              "cornerRadius": 4,
+              "style": {
+                "background": "rgba(255, 255, 255, 0.05)",
+                "borderWidth": {
+                  "value": 1,
+                  "unit": "px"
+                },
+                "borderColor": "rgba(255, 255, 255, 0.1)",
+                "iconSize": {
+                  "value": 16,
+                  "unit": "px"
+                },
+                "iconStrokeWidth": 2.5,
+                "color": "rgba(255, 255, 255, 0.6)"
+              },
+              "interactions": {
+                "hover": {
+                  "color": "#ffffff",
+                  "background": "rgba(255, 255, 255, 0.15)",
+                  "borderColor": "rgba(255, 255, 255, 0.25)"
+                },
+                "press": {
+                  "scale": 0.95,
+                  "background": "rgba(255, 255, 255, 0.2)"
+                },
+                "focus": {
+                  "outlineWidth": {
+                    "value": 2,
+                    "unit": "px"
+                  },
+                  "outlineColor": "rgba(255, 255, 255, 0.5)",
+                  "outlineOffset": {
+                    "value": 1,
+                    "unit": "px"
+                  }
+                }
+              },
               "id": "variations",
               "icon": "LayoutGrid",
               "tooltip": "overlay.variationsTooltip"
             },
             {
-              "$ref": "action-button",
+              "$description": "24×24 icon button with hover/press/focus states",
+              "type": "button",
+              "size": {
+                "width": {
+                  "value": 24,
+                  "unit": "px"
+                },
+                "height": {
+                  "value": 24,
+                  "unit": "px"
+                }
+              },
+              "cornerRadius": 4,
+              "style": {
+                "background": "rgba(255, 255, 255, 0.05)",
+                "borderWidth": {
+                  "value": 1,
+                  "unit": "px"
+                },
+                "borderColor": "rgba(255, 255, 255, 0.1)",
+                "iconSize": {
+                  "value": 16,
+                  "unit": "px"
+                },
+                "iconStrokeWidth": 2.5,
+                "color": "rgba(255, 255, 255, 0.6)"
+              },
+              "interactions": {
+                "hover": {
+                  "color": "#ffffff",
+                  "background": "rgba(255, 255, 255, 0.15)",
+                  "borderColor": "rgba(255, 255, 255, 0.25)"
+                },
+                "press": {
+                  "scale": 0.95,
+                  "background": "rgba(255, 255, 255, 0.2)"
+                },
+                "focus": {
+                  "outlineWidth": {
+                    "value": 2,
+                    "unit": "px"
+                  },
+                  "outlineColor": "rgba(255, 255, 255, 0.5)",
+                  "outlineOffset": {
+                    "value": 1,
+                    "unit": "px"
+                  }
+                }
+              },
               "id": "chat",
               "icon": "MessageSquare",
               "tooltip": "overlay.followUpChatTooltip"
             },
             {
-              "$ref": "action-button",
+              "$description": "24×24 icon button with hover/press/focus states",
+              "type": "button",
+              "size": {
+                "width": {
+                  "value": 24,
+                  "unit": "px"
+                },
+                "height": {
+                  "value": 24,
+                  "unit": "px"
+                }
+              },
+              "cornerRadius": 4,
+              "style": {
+                "background": "rgba(255, 255, 255, 0.05)",
+                "borderWidth": {
+                  "value": 1,
+                  "unit": "px"
+                },
+                "borderColor": "rgba(255, 255, 255, 0.1)",
+                "iconSize": {
+                  "value": 16,
+                  "unit": "px"
+                },
+                "iconStrokeWidth": 2.5,
+                "color": "rgba(255, 255, 255, 0.6)"
+              },
+              "interactions": {
+                "hover": {
+                  "color": "#ffffff",
+                  "background": "rgba(255, 255, 255, 0.15)",
+                  "borderColor": "rgba(255, 255, 255, 0.25)"
+                },
+                "press": {
+                  "scale": 0.95,
+                  "background": "rgba(255, 255, 255, 0.2)"
+                },
+                "focus": {
+                  "outlineWidth": {
+                    "value": 2,
+                    "unit": "px"
+                  },
+                  "outlineColor": "rgba(255, 255, 255, 0.5)",
+                  "outlineOffset": {
+                    "value": 1,
+                    "unit": "px"
+                  }
+                }
+              },
               "id": "cancel",
               "icon": "EscapeKey",
               "tooltip": "overlay.cancelShortcut"
@@ -233,8 +537,32 @@
       },
       "transitions": [
         {
+          "event": "STOP",
+          "target": "transcribing.processing",
+          "guard": null,
+          "actions": []
+        },
+        {
+          "event": "CANCEL",
+          "target": "hidden",
+          "guard": null,
+          "actions": []
+        },
+        {
+          "event": "HIDE",
+          "target": "hidden",
+          "guard": null,
+          "actions": []
+        },
+        {
+          "event": "LONG_RECORDING",
+          "target": "confirming",
+          "guard": null,
+          "actions": []
+        },
+        {
           "event": "PAUSE",
-          "target": "paused",
+          "target": "recording.paused",
           "guard": null,
           "actions": []
         }
@@ -267,16 +595,16 @@
               "value": 0,
               "unit": "px"
             },
-            "horizontal": "{spacing.xl}"
+            "horizontal": 14
           },
-          "gap": "{spacing.lg}",
-          "cornerRadius": "{radius.pill}",
-          "background": "{color.surface.glass}",
+          "gap": 10,
+          "cornerRadius": 18,
+          "background": "rgba(18, 18, 22, 0.72)",
           "borderWidth": {
             "value": 1,
             "unit": "px"
           },
-          "borderColor": "{color.stroke}",
+          "borderColor": "rgba(255, 255, 255, 0.18)",
           "backdropBlur": {
             "value": 6,
             "unit": "px"
@@ -291,7 +619,7 @@
               "layout": "stack-h",
               "align": "center",
               "justify": "center",
-              "gap": "{spacing.sm}",
+              "gap": 4,
               "size": {
                 "height": {
                   "value": 20,
@@ -308,16 +636,16 @@
                     "unit": "px"
                   },
                   "strokeWidth": 2.5,
-                  "color": "{color.text.dimmed}"
+                  "color": "rgba(255, 255, 255, 0.6)"
                 },
                 {
                   "type": "text",
                   "content": "overlay.paused",
                   "style": {
-                    "fontSize": "{font.size.base}",
-                    "fontWeight": "{font.weight.medium}",
+                    "fontSize": 11,
+                    "fontWeight": 500,
                     "letterSpacing": "0.04em",
-                    "color": "{color.text.muted}"
+                    "color": "rgba(255, 255, 255, 0.5)"
                   }
                 }
               ]
@@ -327,8 +655,32 @@
       },
       "transitions": [
         {
+          "event": "STOP",
+          "target": "transcribing.processing",
+          "guard": null,
+          "actions": []
+        },
+        {
+          "event": "CANCEL",
+          "target": "hidden",
+          "guard": null,
+          "actions": []
+        },
+        {
+          "event": "HIDE",
+          "target": "hidden",
+          "guard": null,
+          "actions": []
+        },
+        {
+          "event": "LONG_RECORDING",
+          "target": "confirming",
+          "guard": null,
+          "actions": []
+        },
+        {
           "event": "RESUME",
-          "target": "active",
+          "target": "recording.active",
           "guard": null,
           "actions": []
         }
@@ -361,16 +713,16 @@
               "value": 0,
               "unit": "px"
             },
-            "horizontal": "{spacing.xl}"
+            "horizontal": 14
           },
-          "gap": "{spacing.lg}",
-          "cornerRadius": "{radius.pill}",
-          "background": "{color.surface.glass}",
+          "gap": 10,
+          "cornerRadius": 18,
+          "background": "rgba(18, 18, 22, 0.72)",
           "borderWidth": {
             "value": 1,
             "unit": "px"
           },
-          "borderColor": "{color.stroke}",
+          "borderColor": "rgba(255, 255, 255, 0.18)",
           "backdropBlur": {
             "value": 6,
             "unit": "px"
@@ -380,7 +732,14 @@
         "slots": {
           "left": [
             {
-              "$ref": "logo"
+              "$description": "Vercel Voice triangle logo, always white",
+              "type": "icon",
+              "icon": "VercelVoiceLogo",
+              "size": {
+                "value": 16,
+                "unit": "px"
+              },
+              "color": "#ffffff"
             }
           ],
           "middle": [
@@ -388,7 +747,7 @@
               "type": "group",
               "name": "dots",
               "layout": "stack-h",
-              "gap": "{spacing.sm}",
+              "gap": 4,
               "align": "center",
               "children": {
                 "type": "shape",
@@ -398,7 +757,7 @@
                   "value": 4,
                   "unit": "px"
                 },
-                "fill": "{color.active}",
+                "fill": "#52c41a",
                 "animation": "dot-pulse",
                 "animationStagger": {
                   "value": 200,
@@ -412,14 +771,20 @@
       },
       "transitions": [
         {
+          "event": "DONE",
+          "target": "hidden",
+          "guard": null,
+          "actions": []
+        },
+        {
           "event": "NO_SPEECH",
-          "target": "noSpeech",
+          "target": "transcribing.noSpeech",
           "guard": null,
           "actions": []
         },
         {
           "event": "ERROR",
-          "target": "error",
+          "target": "transcribing.error",
           "guard": null,
           "actions": []
         }
@@ -452,16 +817,16 @@
               "value": 0,
               "unit": "px"
             },
-            "horizontal": "{spacing.xl}"
+            "horizontal": 14
           },
-          "gap": "{spacing.lg}",
-          "cornerRadius": "{radius.pill}",
-          "background": "{color.surface.glass}",
+          "gap": 10,
+          "cornerRadius": 18,
+          "background": "rgba(18, 18, 22, 0.72)",
           "borderWidth": {
             "value": 1,
             "unit": "px"
           },
-          "borderColor": "{color.stroke}",
+          "borderColor": "rgba(255, 255, 255, 0.18)",
           "backdropBlur": {
             "value": 6,
             "unit": "px"
@@ -471,12 +836,31 @@
         "slots": {
           "left": [
             {
-              "$ref": "logo"
+              "$description": "Vercel Voice triangle logo, always white",
+              "type": "icon",
+              "icon": "VercelVoiceLogo",
+              "size": {
+                "value": 16,
+                "unit": "px"
+              },
+              "color": "#ffffff"
             }
           ],
           "middle": [
             {
-              "$ref": "error-badge",
+              "$description": "Small red status badge with icon and label",
+              "type": "badge",
+              "layout": "stack-h",
+              "align": "center",
+              "gap": 4,
+              "cornerRadius": 3,
+              "style": {
+                "background": "rgba(239, 68, 68, 0.3)",
+                "fontSize": 9,
+                "fontWeight": 600,
+                "color": "#f87171",
+                "letterSpacing": "0.05em"
+              },
               "icon": "MicOff",
               "label": "overlay.noSpeechDetected"
             }
@@ -488,7 +872,14 @@
           "unit": "ms"
         }
       },
-      "transitions": [],
+      "transitions": [
+        {
+          "event": "DONE",
+          "target": "hidden",
+          "guard": null,
+          "actions": []
+        }
+      ],
       "entry": [],
       "exit": [],
       "invoke": []
@@ -517,16 +908,16 @@
               "value": 0,
               "unit": "px"
             },
-            "horizontal": "{spacing.xl}"
+            "horizontal": 14
           },
-          "gap": "{spacing.lg}",
-          "cornerRadius": "{radius.pill}",
-          "background": "{color.surface.glass}",
+          "gap": 10,
+          "cornerRadius": 18,
+          "background": "rgba(18, 18, 22, 0.72)",
           "borderWidth": {
             "value": 1,
             "unit": "px"
           },
-          "borderColor": "{color.stroke}",
+          "borderColor": "rgba(255, 255, 255, 0.18)",
           "backdropBlur": {
             "value": 6,
             "unit": "px"
@@ -536,12 +927,31 @@
         "slots": {
           "left": [
             {
-              "$ref": "logo"
+              "$description": "Vercel Voice triangle logo, always white",
+              "type": "icon",
+              "icon": "VercelVoiceLogo",
+              "size": {
+                "value": 16,
+                "unit": "px"
+              },
+              "color": "#ffffff"
             }
           ],
           "middle": [
             {
-              "$ref": "error-badge",
+              "$description": "Small red status badge with icon and label",
+              "type": "badge",
+              "layout": "stack-h",
+              "align": "center",
+              "gap": 4,
+              "cornerRadius": 3,
+              "style": {
+                "background": "rgba(239, 68, 68, 0.3)",
+                "fontSize": 9,
+                "fontWeight": 600,
+                "color": "#f87171",
+                "letterSpacing": "0.05em"
+              },
               "icon": "XCircle",
               "label": "overlay.transcriptionFailed"
             }
@@ -553,7 +963,14 @@
           "unit": "ms"
         }
       },
-      "transitions": [],
+      "transitions": [
+        {
+          "event": "DONE",
+          "target": "hidden",
+          "guard": null,
+          "actions": []
+        }
+      ],
       "entry": [],
       "exit": [],
       "invoke": []
@@ -582,16 +999,16 @@
               "value": 0,
               "unit": "px"
             },
-            "horizontal": "{spacing.xl}"
+            "horizontal": 14
           },
-          "gap": "{spacing.lg}",
-          "cornerRadius": "{radius.pill}",
-          "background": "{color.surface.glass}",
+          "gap": 10,
+          "cornerRadius": 18,
+          "background": "rgba(18, 18, 22, 0.72)",
           "borderWidth": {
             "value": 1,
             "unit": "px"
           },
-          "borderColor": "{color.stroke}",
+          "borderColor": "rgba(255, 255, 255, 0.18)",
           "backdropBlur": {
             "value": 6,
             "unit": "px"
@@ -601,7 +1018,14 @@
         "slots": {
           "left": [
             {
-              "$ref": "logo"
+              "$description": "Vercel Voice triangle logo, always white",
+              "type": "icon",
+              "icon": "VercelVoiceLogo",
+              "size": {
+                "value": 16,
+                "unit": "px"
+              },
+              "color": "#ffffff"
             }
           ],
           "middle": [
@@ -612,7 +1036,7 @@
               "layout": "stack-h",
               "align": "center",
               "justify": "center",
-              "gap": "{spacing.xxl}",
+              "gap": 16,
               "children": [
                 {
                   "type": "button",
@@ -620,18 +1044,18 @@
                   "command": "confirmStop",
                   "layout": "stack-h",
                   "align": "center",
-                  "gap": "{spacing.md}",
-                  "cornerRadius": "{radius.md}",
+                  "gap": 6,
+                  "cornerRadius": 4,
                   "interactions": {
                     "hover": {
-                      "background": "{color.fill.hover}"
+                      "background": "rgba(255, 255, 255, 0.08)"
                     },
                     "focus": {
                       "outlineWidth": {
                         "value": 2,
                         "unit": "px"
                       },
-                      "outlineColor": "{color.focusRing}"
+                      "outlineColor": "rgba(255, 255, 255, 0.62)"
                     }
                   },
                   "children": [
@@ -639,25 +1063,25 @@
                       "type": "text",
                       "content": "overlay.abortKey",
                       "style": {
-                        "fontSize": "{font.size.lg}",
-                        "fontWeight": "{font.weight.regular}",
-                        "color": "{color.text.muted}",
-                        "background": "{color.fill.hover}",
+                        "fontSize": 12,
+                        "fontWeight": 400,
+                        "color": "rgba(255, 255, 255, 0.5)",
+                        "background": "rgba(255, 255, 255, 0.08)",
                         "borderWidth": {
                           "value": 1,
                           "unit": "px"
                         },
-                        "borderColor": "{color.border.medium}",
-                        "cornerRadius": "{radius.md}"
+                        "borderColor": "rgba(255, 255, 255, 0.12)",
+                        "cornerRadius": 4
                       }
                     },
                     {
                       "type": "text",
                       "content": "overlay.abort",
                       "style": {
-                        "fontSize": "{font.size.lg}",
-                        "fontWeight": "{font.weight.medium}",
-                        "color": "{color.inactive}"
+                        "fontSize": 12,
+                        "fontWeight": 500,
+                        "color": "#ff4d4f"
                       }
                     }
                   ]
@@ -668,18 +1092,18 @@
                   "command": "dismissConfirmation",
                   "layout": "stack-h",
                   "align": "center",
-                  "gap": "{spacing.md}",
-                  "cornerRadius": "{radius.md}",
+                  "gap": 6,
+                  "cornerRadius": 4,
                   "interactions": {
                     "hover": {
-                      "background": "{color.fill.hover}"
+                      "background": "rgba(255, 255, 255, 0.08)"
                     },
                     "focus": {
                       "outlineWidth": {
                         "value": 2,
                         "unit": "px"
                       },
-                      "outlineColor": "{color.focusRing}"
+                      "outlineColor": "rgba(255, 255, 255, 0.62)"
                     }
                   },
                   "children": [
@@ -687,25 +1111,25 @@
                       "type": "text",
                       "content": "overlay.resumeKey",
                       "style": {
-                        "fontSize": "{font.size.lg}",
-                        "fontWeight": "{font.weight.regular}",
-                        "color": "{color.text.muted}",
-                        "background": "{color.fill.hover}",
+                        "fontSize": 12,
+                        "fontWeight": 400,
+                        "color": "rgba(255, 255, 255, 0.5)",
+                        "background": "rgba(255, 255, 255, 0.08)",
                         "borderWidth": {
                           "value": 1,
                           "unit": "px"
                         },
-                        "borderColor": "{color.border.medium}",
-                        "cornerRadius": "{radius.md}"
+                        "borderColor": "rgba(255, 255, 255, 0.12)",
+                        "cornerRadius": 4
                       }
                     },
                     {
                       "type": "text",
                       "content": "overlay.resume",
                       "style": {
-                        "fontSize": "{font.size.lg}",
-                        "fontWeight": "{font.weight.medium}",
-                        "color": "{color.active}"
+                        "fontSize": 12,
+                        "fontWeight": 500,
+                        "color": "#52c41a"
                       }
                     }
                   ]
@@ -731,7 +1155,7 @@
         },
         {
           "event": "DISMISS",
-          "target": "recording",
+          "target": "recording.active",
           "guard": null,
           "actions": []
         }
@@ -742,5 +1166,5 @@
     }
   },
   "assertions": [],
-  "$source": "examples/01-recording-overlay.uispec.json"
+  "$source": "examples/01-recording-overlay.uxspec.json"
 }

@@ -1,5 +1,5 @@
 {
-  "$format": "uispec-compiled",
+  "$format": "uxspec-compiled",
   "$version": "0.2",
   "initial": "idle",
   "contextSchema": {},
@@ -17,13 +17,13 @@
               "unit": "px"
             }
           },
-          "cornerRadius": "{radius.md}",
-          "background": "{color.surface}",
+          "cornerRadius": 8,
+          "background": "#1a1a1a",
           "borderWidth": {
             "value": 1,
             "unit": "px"
           },
-          "borderColor": "{color.stroke}",
+          "borderColor": "rgba(255, 255, 255, 0.1)",
           "shadow": [
             {
               "x": 0,
@@ -60,13 +60,13 @@
               "unit": "px"
             }
           },
-          "cornerRadius": "{radius.md}",
-          "background": "{color.surface}",
+          "cornerRadius": 8,
+          "background": "#1a1a1a",
           "borderWidth": {
             "value": 1,
             "unit": "px"
           },
-          "borderColor": "{color.stroke}",
+          "borderColor": "rgba(255, 255, 255, 0.1)",
           "shadow": [
             {
               "x": 0,
@@ -83,7 +83,7 @@
       "transitions": [
         {
           "event": "ANIMATION_END",
-          "target": "visible",
+          "target": "visible.countdown",
           "guard": null,
           "actions": []
         }
@@ -104,13 +104,13 @@
               "unit": "px"
             }
           },
-          "cornerRadius": "{radius.md}",
-          "background": "{color.surface}",
+          "cornerRadius": 8,
+          "background": "#1a1a1a",
           "borderWidth": {
             "value": 1,
             "unit": "px"
           },
-          "borderColor": "{color.stroke}",
+          "borderColor": "rgba(255, 255, 255, 0.1)",
           "shadow": [
             {
               "x": 0,
@@ -129,19 +129,107 @@
               "name": "toast-content",
               "layout": "stack-h",
               "align": "start",
-              "gap": "{spacing.md}",
+              "gap": 12,
               "padding": {
-                "value": "{spacing.lg}"
+                "value": 16
               },
               "children": [
                 {
-                  "$ref": "severity-icon"
+                  "$description": "Colored icon matching toast severity",
+                  "type": "icon",
+                  "size": {
+                    "value": 16,
+                    "unit": "px"
+                  },
+                  "strokeWidth": 2,
+                  "dynamic": [
+                    {
+                      "property": "icon",
+                      "expr": [
+                        "if",
+                        [
+                          "==",
+                          [
+                            "var",
+                            "severity"
+                          ],
+                          "success"
+                        ],
+                        "CheckCircle",
+                        [
+                          "if",
+                          [
+                            "==",
+                            [
+                              "var",
+                              "severity"
+                            ],
+                            "error"
+                          ],
+                          "XCircle",
+                          [
+                            "if",
+                            [
+                              "==",
+                              [
+                                "var",
+                                "severity"
+                              ],
+                              "warning"
+                            ],
+                            "AlertTriangle",
+                            "Info"
+                          ]
+                        ]
+                      ]
+                    },
+                    {
+                      "property": "color",
+                      "expr": [
+                        "if",
+                        [
+                          "==",
+                          [
+                            "var",
+                            "severity"
+                          ],
+                          "success"
+                        ],
+                        "#52c41a",
+                        [
+                          "if",
+                          [
+                            "==",
+                            [
+                              "var",
+                              "severity"
+                            ],
+                            "error"
+                          ],
+                          "#ee5555",
+                          [
+                            "if",
+                            [
+                              "==",
+                              [
+                                "var",
+                                "severity"
+                              ],
+                              "warning"
+                            ],
+                            "#f5a623",
+                            "#0070f3"
+                          ]
+                        ]
+                      ]
+                    }
+                  ]
                 },
                 {
                   "type": "group",
                   "name": "text-content",
                   "layout": "stack-v",
-                  "gap": "{spacing.xs}",
+                  "gap": 4,
                   "size": {
                     "width": "fill"
                   },
@@ -150,17 +238,17 @@
                       "type": "text",
                       "bind": "title",
                       "style": {
-                        "fontSize": "{font.size.base}",
-                        "fontWeight": "{font.weight.medium}",
-                        "color": "{color.text.primary}"
+                        "fontSize": 14,
+                        "fontWeight": 500,
+                        "color": "#ffffff"
                       }
                     },
                     {
                       "type": "text",
                       "bind": "message",
                       "style": {
-                        "fontSize": "{font.size.sm}",
-                        "color": "{color.text.secondary}"
+                        "fontSize": 12,
+                        "color": "rgba(255, 255, 255, 0.6)"
                       }
                     }
                   ]
@@ -184,12 +272,12 @@
                     }
                   },
                   "style": {
-                    "color": "{color.text.secondary}",
+                    "color": "rgba(255, 255, 255, 0.6)",
                     "background": "transparent"
                   },
                   "interactions": {
                     "hover": {
-                      "color": "{color.text.primary}"
+                      "color": "#ffffff"
                     }
                   },
                   "command": "dismiss"
@@ -211,10 +299,10 @@
                 }
               },
               "style": {
-                "fontSize": "{font.size.sm}",
-                "fontWeight": "{font.weight.medium}",
-                "color": "{color.info}",
-                "background": "{color.infoBg}",
+                "fontSize": 12,
+                "fontWeight": 500,
+                "color": "#0070f3",
+                "background": "rgba(0, 112, 243, 0.1)",
                 "borderTop": "1px solid {color.stroke}"
               },
               "command": "executeAction",
@@ -248,7 +336,7 @@
                       ],
                       "success"
                     ],
-                    "{color.success}",
+                    "#52c41a",
                     [
                       "if",
                       [
@@ -259,7 +347,7 @@
                         ],
                         "error"
                       ],
-                      "{color.error}",
+                      "#ee5555",
                       [
                         "if",
                         [
@@ -270,8 +358,8 @@
                           ],
                           "warning"
                         ],
-                        "{color.warning}",
-                        "{color.info}"
+                        "#f5a623",
+                        "#0070f3"
                       ]
                     ]
                   ]
@@ -285,6 +373,24 @@
       },
       "transitions": [
         {
+          "event": "DISMISS",
+          "target": "exiting",
+          "guard": null,
+          "actions": []
+        },
+        {
+          "event": "ACTION",
+          "target": "exiting",
+          "guard": null,
+          "actions": []
+        },
+        {
+          "event": "SWIPE_RIGHT",
+          "target": "exiting",
+          "guard": null,
+          "actions": []
+        },
+        {
           "event": "TIMER_EXPIRED",
           "target": "exiting",
           "guard": null,
@@ -292,7 +398,7 @@
         },
         {
           "event": "HOVER_START",
-          "target": "paused",
+          "target": "visible.paused",
           "guard": null,
           "actions": []
         }
@@ -313,13 +419,13 @@
               "unit": "px"
             }
           },
-          "cornerRadius": "{radius.md}",
-          "background": "{color.surface}",
+          "cornerRadius": 8,
+          "background": "#1a1a1a",
           "borderWidth": {
             "value": 1,
             "unit": "px"
           },
-          "borderColor": "{color.stroke}",
+          "borderColor": "rgba(255, 255, 255, 0.1)",
           "shadow": [
             {
               "x": 0,
@@ -338,19 +444,107 @@
               "name": "toast-content",
               "layout": "stack-h",
               "align": "start",
-              "gap": "{spacing.md}",
+              "gap": 12,
               "padding": {
-                "value": "{spacing.lg}"
+                "value": 16
               },
               "children": [
                 {
-                  "$ref": "severity-icon"
+                  "$description": "Colored icon matching toast severity",
+                  "type": "icon",
+                  "size": {
+                    "value": 16,
+                    "unit": "px"
+                  },
+                  "strokeWidth": 2,
+                  "dynamic": [
+                    {
+                      "property": "icon",
+                      "expr": [
+                        "if",
+                        [
+                          "==",
+                          [
+                            "var",
+                            "severity"
+                          ],
+                          "success"
+                        ],
+                        "CheckCircle",
+                        [
+                          "if",
+                          [
+                            "==",
+                            [
+                              "var",
+                              "severity"
+                            ],
+                            "error"
+                          ],
+                          "XCircle",
+                          [
+                            "if",
+                            [
+                              "==",
+                              [
+                                "var",
+                                "severity"
+                              ],
+                              "warning"
+                            ],
+                            "AlertTriangle",
+                            "Info"
+                          ]
+                        ]
+                      ]
+                    },
+                    {
+                      "property": "color",
+                      "expr": [
+                        "if",
+                        [
+                          "==",
+                          [
+                            "var",
+                            "severity"
+                          ],
+                          "success"
+                        ],
+                        "#52c41a",
+                        [
+                          "if",
+                          [
+                            "==",
+                            [
+                              "var",
+                              "severity"
+                            ],
+                            "error"
+                          ],
+                          "#ee5555",
+                          [
+                            "if",
+                            [
+                              "==",
+                              [
+                                "var",
+                                "severity"
+                              ],
+                              "warning"
+                            ],
+                            "#f5a623",
+                            "#0070f3"
+                          ]
+                        ]
+                      ]
+                    }
+                  ]
                 },
                 {
                   "type": "group",
                   "name": "text-content",
                   "layout": "stack-v",
-                  "gap": "{spacing.xs}",
+                  "gap": 4,
                   "size": {
                     "width": "fill"
                   },
@@ -359,17 +553,17 @@
                       "type": "text",
                       "bind": "title",
                       "style": {
-                        "fontSize": "{font.size.base}",
-                        "fontWeight": "{font.weight.medium}",
-                        "color": "{color.text.primary}"
+                        "fontSize": 14,
+                        "fontWeight": 500,
+                        "color": "#ffffff"
                       }
                     },
                     {
                       "type": "text",
                       "bind": "message",
                       "style": {
-                        "fontSize": "{font.size.sm}",
-                        "color": "{color.text.secondary}"
+                        "fontSize": 12,
+                        "color": "rgba(255, 255, 255, 0.6)"
                       }
                     }
                   ]
@@ -393,12 +587,12 @@
                     }
                   },
                   "style": {
-                    "color": "{color.text.secondary}",
+                    "color": "rgba(255, 255, 255, 0.6)",
                     "background": "transparent"
                   },
                   "interactions": {
                     "hover": {
-                      "color": "{color.text.primary}"
+                      "color": "#ffffff"
                     }
                   },
                   "command": "dismiss"
@@ -420,10 +614,10 @@
                 }
               },
               "style": {
-                "fontSize": "{font.size.sm}",
-                "fontWeight": "{font.weight.medium}",
-                "color": "{color.info}",
-                "background": "{color.infoBg}",
+                "fontSize": 12,
+                "fontWeight": 500,
+                "color": "#0070f3",
+                "background": "rgba(0, 112, 243, 0.1)",
                 "borderTop": "1px solid {color.stroke}"
               },
               "command": "executeAction",
@@ -457,7 +651,7 @@
                       ],
                       "success"
                     ],
-                    "{color.success}",
+                    "#52c41a",
                     [
                       "if",
                       [
@@ -468,7 +662,7 @@
                         ],
                         "error"
                       ],
-                      "{color.error}",
+                      "#ee5555",
                       [
                         "if",
                         [
@@ -479,8 +673,8 @@
                           ],
                           "warning"
                         ],
-                        "{color.warning}",
-                        "{color.info}"
+                        "#f5a623",
+                        "#0070f3"
                       ]
                     ]
                   ]
@@ -494,8 +688,26 @@
       },
       "transitions": [
         {
+          "event": "DISMISS",
+          "target": "exiting",
+          "guard": null,
+          "actions": []
+        },
+        {
+          "event": "ACTION",
+          "target": "exiting",
+          "guard": null,
+          "actions": []
+        },
+        {
+          "event": "SWIPE_RIGHT",
+          "target": "exiting",
+          "guard": null,
+          "actions": []
+        },
+        {
           "event": "HOVER_END",
-          "target": "countdown",
+          "target": "visible.countdown",
           "guard": null,
           "actions": []
         }
@@ -516,13 +728,13 @@
               "unit": "px"
             }
           },
-          "cornerRadius": "{radius.md}",
-          "background": "{color.surface}",
+          "cornerRadius": 8,
+          "background": "#1a1a1a",
           "borderWidth": {
             "value": 1,
             "unit": "px"
           },
-          "borderColor": "{color.stroke}",
+          "borderColor": "rgba(255, 255, 255, 0.1)",
           "shadow": [
             {
               "x": 0,
@@ -550,5 +762,5 @@
     }
   },
   "assertions": [],
-  "$source": "examples/03-toast-notifications.uispec.json"
+  "$source": "examples/03-toast-notifications.uxspec.json"
 }

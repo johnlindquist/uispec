@@ -1,4 +1,4 @@
-import type { CompilerIssue, CompilerTraceEntry, Json, UISpecDocument } from "./types";
+import type { CompilerIssue, CompilerTraceEntry, Json, UXSpecDocument } from "./types";
 
 type JsonRecord = Record<string, Json>;
 const TOKEN_REF_RE = /^\{([A-Za-z0-9_.-]+)\}$/;
@@ -201,10 +201,10 @@ function expandRefs(
 }
 
 export function resolveDocument(
-  document: UISpecDocument,
+  document: UXSpecDocument,
   issues: CompilerIssue[] = [],
   trace: CompilerTraceEntry[] = []
-): UISpecDocument {
+): UXSpecDocument {
   const cloned = clone(document);
   const expanded = expandRefs(
     cloned,
@@ -219,5 +219,5 @@ export function resolveDocument(
     issues,
     trace,
     "$"
-  ) as UISpecDocument;
+  ) as UXSpecDocument;
 }

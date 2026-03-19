@@ -1,11 +1,11 @@
-# Minimal UISpec Example
+# Minimal UXSpec Example
 
 A complete, minimal spec for a simple counter component. Use as a starting template.
 
 ```json
 {
-  "$schema": "https://uispec.dev/0.2/schema.json",
-  "$description": "Simple counter — increment and decrement buttons with a display. Minimal example demonstrating core UISpec patterns.",
+  "$schema": "https://uxspec.dev/0.2/schema.json",
+  "$description": "Simple counter — increment and decrement buttons with a display. Minimal example demonstrating core UXSpec patterns.",
 
   "$tokens": {
     "color": {
@@ -122,9 +122,9 @@ A complete, minimal spec for a simple counter component. Use as a starting templ
 ## Compile and Verify
 
 ```bash
-bun run src/compiler/cli.ts validate examples/counter.uispec.json
-bun run src/compiler/cli.ts compile examples/counter.uispec.json
-bun run src/compiler/cli.ts inspect examples/counter.uispec.json
+bun run src/compiler/cli.ts validate examples/counter.uxspec.json
+bun run src/compiler/cli.ts compile examples/counter.uxspec.json
+bun run src/compiler/cli.ts inspect examples/counter.uxspec.json
 ```
 
 Expected output:

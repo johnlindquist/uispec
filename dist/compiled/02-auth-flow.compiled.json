@@ -1,5 +1,5 @@
 {
-  "$format": "uispec-compiled",
+  "$format": "uxspec-compiled",
   "$version": "0.2",
   "initial": "signIn.idle",
   "contextSchema": {
@@ -5601,5 +5601,5 @@
       "testId": "oauth-redirect"
     }
   ],
-  "$source": "examples/02-auth-flow.uispec.json"
+  "$source": "examples/02-auth-flow.uxspec.json"
 }

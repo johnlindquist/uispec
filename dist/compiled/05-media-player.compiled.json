@@ -1,5 +1,5 @@
 {
-  "$format": "uispec-compiled",
+  "$format": "uxspec-compiled",
   "$version": "0.2",
   "initial": "loading",
   "contextSchema": {},
@@ -15,7 +15,7 @@
             "width": "fill",
             "height": "fill"
           },
-          "background": "{color.bg}"
+          "background": "#000000"
         },
         "slots": {
           "center": [
@@ -26,7 +26,7 @@
                 "value": 48,
                 "unit": "px"
               },
-              "color": "{color.text.secondary}",
+              "color": "rgba(255, 255, 255, 0.7)",
               "animation": "spinner"
             }
           ]
@@ -35,7 +35,7 @@
       "transitions": [
         {
           "event": "LOADED",
-          "target": "ready",
+          "target": "ready.paused",
           "guard": null,
           "actions": []
         },
@@ -60,7 +60,7 @@
             "width": "fill",
             "height": "fill"
           },
-          "background": "{color.bg}"
+          "background": "#000000"
         },
         "slots": {
           "center": [
@@ -77,10 +77,10 @@
                   "unit": "px"
                 }
               },
-              "cornerRadius": "{radius.full}",
+              "cornerRadius": 9999,
               "style": {
                 "background": "rgba(0,0,0,0.6)",
-                "color": "{color.white}",
+                "color": "#ffffff",
                 "iconSize": {
                   "value": 28,
                   "unit": "px"
@@ -94,14 +94,32 @@
       },
       "transitions": [
         {
+          "event": "CONTROLS_IDLE",
+          "target": "ready.controlsHidden",
+          "guard": null,
+          "actions": []
+        },
+        {
+          "event": "MOUSE_MOVE",
+          "target": "ready.controlsVisible",
+          "guard": null,
+          "actions": []
+        },
+        {
+          "event": "ERROR",
+          "target": "error",
+          "guard": null,
+          "actions": []
+        },
+        {
           "event": "PLAY",
-          "target": "playing",
+          "target": "ready.playing",
           "guard": null,
           "actions": []
         },
         {
           "event": "SEEK",
-          "target": "paused",
+          "target": "ready.paused",
           "guard": null,
           "actions": []
         }
@@ -120,7 +138,7 @@
             "width": "fill",
             "height": "fill"
           },
-          "background": "{color.bg}"
+          "background": "#000000"
         },
         "slots": {
           "center": []
@@ -128,26 +146,44 @@
       },
       "transitions": [
         {
+          "event": "CONTROLS_IDLE",
+          "target": "ready.controlsHidden",
+          "guard": null,
+          "actions": []
+        },
+        {
+          "event": "MOUSE_MOVE",
+          "target": "ready.controlsVisible",
+          "guard": null,
+          "actions": []
+        },
+        {
+          "event": "ERROR",
+          "target": "error",
+          "guard": null,
+          "actions": []
+        },
+        {
           "event": "PAUSE",
-          "target": "paused",
+          "target": "ready.paused",
           "guard": null,
           "actions": []
         },
         {
           "event": "ENDED",
-          "target": "ended",
+          "target": "ready.ended",
           "guard": null,
           "actions": []
         },
         {
           "event": "BUFFERING",
-          "target": "buffering",
+          "target": "ready.buffering",
           "guard": null,
           "actions": []
         },
         {
           "event": "SEEK",
-          "target": "playing",
+          "target": "ready.playing",
           "guard": null,
           "actions": []
         }
@@ -166,7 +202,7 @@
             "width": "fill",
             "height": "fill"
           },
-          "background": "{color.bg}"
+          "background": "#000000"
         },
         "slots": {
           "center": [
@@ -177,7 +213,7 @@
                 "value": 48,
                 "unit": "px"
               },
-              "color": "{color.text.primary}",
+              "color": "#ffffff",
               "animation": "spinner"
             }
           ]
@@ -185,14 +221,32 @@
       },
       "transitions": [
         {
+          "event": "CONTROLS_IDLE",
+          "target": "ready.controlsHidden",
+          "guard": null,
+          "actions": []
+        },
+        {
+          "event": "MOUSE_MOVE",
+          "target": "ready.controlsVisible",
+          "guard": null,
+          "actions": []
+        },
+        {
+          "event": "ERROR",
+          "target": "error",
+          "guard": null,
+          "actions": []
+        },
+        {
           "event": "BUFFER_FULL",
-          "target": "playing",
+          "target": "ready.playing",
           "guard": null,
           "actions": []
         },
         {
           "event": "PAUSE",
-          "target": "paused",
+          "target": "ready.paused",
           "guard": null,
           "actions": []
         }
@@ -211,7 +265,7 @@
             "width": "fill",
             "height": "fill"
           },
-          "background": "{color.bg}"
+          "background": "#000000"
         },
         "slots": {
           "center": [
@@ -228,10 +282,10 @@
                   "unit": "px"
                 }
               },
-              "cornerRadius": "{radius.full}",
+              "cornerRadius": 9999,
               "style": {
                 "background": "rgba(0,0,0,0.6)",
-                "color": "{color.white}",
+                "color": "#ffffff",
                 "iconSize": {
                   "value": 28,
                   "unit": "px"
@@ -245,14 +299,32 @@
       },
       "transitions": [
         {
+          "event": "CONTROLS_IDLE",
+          "target": "ready.controlsHidden",
+          "guard": null,
+          "actions": []
+        },
+        {
+          "event": "MOUSE_MOVE",
+          "target": "ready.controlsVisible",
+          "guard": null,
+          "actions": []
+        },
+        {
+          "event": "ERROR",
+          "target": "error",
+          "guard": null,
+          "actions": []
+        },
+        {
           "event": "REPLAY",
-          "target": "playing",
+          "target": "ready.playing",
           "guard": null,
           "actions": []
         },
         {
           "event": "SEEK",
-          "target": "paused",
+          "target": "ready.paused",
           "guard": null,
           "actions": []
         }
@@ -271,7 +343,7 @@
             "width": "fill",
             "height": "fill"
           },
-          "background": "{color.bg}"
+          "background": "#000000"
         },
         "slots": {
           "video": [
@@ -290,18 +362,123 @@
               "type": "group",
               "name": "controls-bar",
               "layout": "stack-v",
-              "gap": "{spacing.sm}",
+              "gap": 8,
               "size": {
                 "width": "fill"
               },
               "padding": {
-                "horizontal": "{spacing.lg}",
-                "vertical": "{spacing.sm}"
+                "horizontal": 16,
+                "vertical": 8
               },
               "background": "linear-gradient(transparent, rgba(0,0,0,0.8))",
               "children": [
                 {
-                  "$ref": "seek-bar"
+                  "$description": "Horizontal seek/progress bar with buffered range, played range, and draggable thumb",
+                  "type": "group",
+                  "name": "seek-bar",
+                  "layout": "layer",
+                  "size": {
+                    "width": "fill",
+                    "height": {
+                      "value": 4,
+                      "unit": "px"
+                    }
+                  },
+                  "cornerRadius": 9999,
+                  "interactions": {
+                    "hover": {
+                      "height": {
+                        "value": 6,
+                        "unit": "px"
+                      }
+                    }
+                  },
+                  "children": [
+                    {
+                      "type": "shape",
+                      "name": "track",
+                      "shape": "rectangle",
+                      "size": {
+                        "width": "fill",
+                        "height": "fill"
+                      },
+                      "fill": "rgba(255, 255, 255, 0.2)",
+                      "cornerRadius": 9999
+                    },
+                    {
+                      "type": "shape",
+                      "name": "buffered",
+                      "shape": "rectangle",
+                      "size": {
+                        "height": "fill"
+                      },
+                      "fill": "rgba(255, 255, 255, 0.4)",
+                      "cornerRadius": 9999,
+                      "dynamic": [
+                        {
+                          "property": "width",
+                          "expr": [
+                            "*",
+                            [
+                              "var",
+                              "bufferedFraction"
+                            ],
+                            100
+                          ],
+                          "unit": "%"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "shape",
+                      "name": "played",
+                      "shape": "rectangle",
+                      "size": {
+                        "height": "fill"
+                      },
+                      "fill": "#ff4d4f",
+                      "cornerRadius": 9999,
+                      "dynamic": [
+                        {
+                          "property": "width",
+                          "expr": [
+                            "*",
+                            [
+                              "var",
+                              "playedFraction"
+                            ],
+                            100
+                          ],
+                          "unit": "%"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "shape",
+                      "name": "thumb",
+                      "shape": "circle",
+                      "size": {
+                        "value": 12,
+                        "unit": "px"
+                      },
+                      "fill": "#ff4d4f",
+                      "conditional": "hovering || dragging",
+                      "dynamic": [
+                        {
+                          "property": "left",
+                          "expr": [
+                            "*",
+                            [
+                              "var",
+                              "playedFraction"
+                            ],
+                            100
+                          ],
+                          "unit": "%"
+                        }
+                      ]
+                    }
+                  ]
                 },
                 {
                   "type": "group",
@@ -315,28 +492,224 @@
                       "name": "left-controls",
                       "layout": "stack-h",
                       "align": "center",
-                      "gap": "{spacing.xs}",
+                      "gap": 4,
                       "children": [
                         {
-                          "$ref": "transport-button",
+                          "$description": "Control bar icon button",
+                          "type": "button",
+                          "size": {
+                            "width": {
+                              "value": 36,
+                              "unit": "px"
+                            },
+                            "height": {
+                              "value": 36,
+                              "unit": "px"
+                            }
+                          },
+                          "cornerRadius": 4,
+                          "style": {
+                            "color": "#ffffff",
+                            "background": "transparent",
+                            "iconSize": {
+                              "value": 20,
+                              "unit": "px"
+                            }
+                          },
+                          "interactions": {
+                            "hover": {
+                              "background": "rgba(255,255,255,0.1)"
+                            },
+                            "press": {
+                              "scale": 0.92
+                            }
+                          },
                           "name": "play-pause",
                           "icon": "Play",
                           "shortcutKey": "Space"
                         },
                         {
-                          "$ref": "transport-button",
+                          "$description": "Control bar icon button",
+                          "type": "button",
+                          "size": {
+                            "width": {
+                              "value": 36,
+                              "unit": "px"
+                            },
+                            "height": {
+                              "value": 36,
+                              "unit": "px"
+                            }
+                          },
+                          "cornerRadius": 4,
+                          "style": {
+                            "color": "#ffffff",
+                            "background": "transparent",
+                            "iconSize": {
+                              "value": 20,
+                              "unit": "px"
+                            }
+                          },
+                          "interactions": {
+                            "hover": {
+                              "background": "rgba(255,255,255,0.1)"
+                            },
+                            "press": {
+                              "scale": 0.92
+                            }
+                          },
                           "name": "skip-back",
                           "icon": "SkipBack",
                           "shortcutKey": "ArrowLeft"
                         },
                         {
-                          "$ref": "transport-button",
+                          "$description": "Control bar icon button",
+                          "type": "button",
+                          "size": {
+                            "width": {
+                              "value": 36,
+                              "unit": "px"
+                            },
+                            "height": {
+                              "value": 36,
+                              "unit": "px"
+                            }
+                          },
+                          "cornerRadius": 4,
+                          "style": {
+                            "color": "#ffffff",
+                            "background": "transparent",
+                            "iconSize": {
+                              "value": 20,
+                              "unit": "px"
+                            }
+                          },
+                          "interactions": {
+                            "hover": {
+                              "background": "rgba(255,255,255,0.1)"
+                            },
+                            "press": {
+                              "scale": 0.92
+                            }
+                          },
                           "name": "skip-forward",
                           "icon": "SkipForward",
                           "shortcutKey": "ArrowRight"
                         },
                         {
-                          "$ref": "volume-slider"
+                          "$description": "Vertical or horizontal volume slider with mute toggle",
+                          "type": "group",
+                          "layout": "stack-h",
+                          "align": "center",
+                          "gap": 4,
+                          "children": [
+                            {
+                              "type": "button",
+                              "name": "mute-toggle",
+                              "size": {
+                                "width": {
+                                  "value": 36,
+                                  "unit": "px"
+                                },
+                                "height": {
+                                  "value": 36,
+                                  "unit": "px"
+                                }
+                              },
+                              "style": {
+                                "color": "#ffffff",
+                                "background": "transparent"
+                              },
+                              "dynamic": [
+                                {
+                                  "property": "icon",
+                                  "expr": [
+                                    "if",
+                                    [
+                                      "var",
+                                      "muted"
+                                    ],
+                                    "VolumeX",
+                                    [
+                                      "if",
+                                      [
+                                        "<",
+                                        [
+                                          "var",
+                                          "volume"
+                                        ],
+                                        0.5
+                                      ],
+                                      "Volume1",
+                                      "Volume2"
+                                    ]
+                                  ]
+                                }
+                              ],
+                              "command": "toggleMute"
+                            },
+                            {
+                              "type": "group",
+                              "name": "volume-track",
+                              "layout": "layer",
+                              "size": {
+                                "width": {
+                                  "value": 60,
+                                  "unit": "px"
+                                },
+                                "height": {
+                                  "value": 4,
+                                  "unit": "px"
+                                }
+                              },
+                              "cornerRadius": 9999,
+                              "children": [
+                                {
+                                  "type": "shape",
+                                  "name": "track-bg",
+                                  "shape": "rectangle",
+                                  "size": {
+                                    "width": "fill",
+                                    "height": "fill"
+                                  },
+                                  "fill": "rgba(255, 255, 255, 0.2)",
+                                  "cornerRadius": 9999
+                                },
+                                {
+                                  "type": "shape",
+                                  "name": "volume-fill",
+                                  "shape": "rectangle",
+                                  "size": {
+                                    "height": "fill"
+                                  },
+                                  "fill": "#ffffff",
+                                  "cornerRadius": 9999,
+                                  "dynamic": [
+                                    {
+                                      "property": "width",
+                                      "expr": [
+                                        "*",
+                                        [
+                                          "if",
+                                          [
+                                            "var",
+                                            "muted"
+                                          ],
+                                          0,
+                                          [
+                                            "var",
+                                            "volume"
+                                          ]
+                                        ],
+                                        100
+                                      ],
+                                      "unit": "%"
+                                    }
+                                  ]
+                                }
+                              ]
+                            }
+                          ]
                         },
                         {
                           "type": "text",
@@ -351,9 +724,9 @@
                             }
                           ],
                           "style": {
-                            "fontSize": "{font.size.xs}",
-                            "fontWeight": "{font.weight.regular}",
-                            "color": "{color.text.secondary}",
+                            "fontSize": 11,
+                            "fontWeight": 400,
+                            "color": "rgba(255, 255, 255, 0.7)",
                             "fontVariantNumeric": "tabular-nums"
                           }
                         }
@@ -364,16 +737,72 @@
                       "name": "right-controls",
                       "layout": "stack-h",
                       "align": "center",
-                      "gap": "{spacing.xs}",
+                      "gap": 4,
                       "children": [
                         {
-                          "$ref": "transport-button",
+                          "$description": "Control bar icon button",
+                          "type": "button",
+                          "size": {
+                            "width": {
+                              "value": 36,
+                              "unit": "px"
+                            },
+                            "height": {
+                              "value": 36,
+                              "unit": "px"
+                            }
+                          },
+                          "cornerRadius": 4,
+                          "style": {
+                            "color": "#ffffff",
+                            "background": "transparent",
+                            "iconSize": {
+                              "value": 20,
+                              "unit": "px"
+                            }
+                          },
+                          "interactions": {
+                            "hover": {
+                              "background": "rgba(255,255,255,0.1)"
+                            },
+                            "press": {
+                              "scale": 0.92
+                            }
+                          },
                           "name": "pip",
                           "icon": "PictureInPicture2",
                           "shortcutKey": "p"
                         },
                         {
-                          "$ref": "transport-button",
+                          "$description": "Control bar icon button",
+                          "type": "button",
+                          "size": {
+                            "width": {
+                              "value": 36,
+                              "unit": "px"
+                            },
+                            "height": {
+                              "value": 36,
+                              "unit": "px"
+                            }
+                          },
+                          "cornerRadius": 4,
+                          "style": {
+                            "color": "#ffffff",
+                            "background": "transparent",
+                            "iconSize": {
+                              "value": 20,
+                              "unit": "px"
+                            }
+                          },
+                          "interactions": {
+                            "hover": {
+                              "background": "rgba(255,255,255,0.1)"
+                            },
+                            "press": {
+                              "scale": 0.92
+                            }
+                          },
                           "name": "fullscreen",
                           "icon": "Maximize",
                           "shortcutKey": "f"
@@ -390,8 +819,26 @@
       },
       "transitions": [
         {
+          "event": "CONTROLS_IDLE",
+          "target": "ready.controlsHidden",
+          "guard": null,
+          "actions": []
+        },
+        {
+          "event": "MOUSE_MOVE",
+          "target": "ready.controlsVisible",
+          "guard": null,
+          "actions": []
+        },
+        {
+          "event": "ERROR",
+          "target": "error",
+          "guard": null,
+          "actions": []
+        },
+        {
           "event": "IDLE_TIMEOUT",
-          "target": "controlsHidden",
+          "target": "ready.controlsHidden",
           "guard": null,
           "actions": []
         }
@@ -410,7 +857,7 @@
             "width": "fill",
             "height": "fill"
           },
-          "background": "{color.bg}"
+          "background": "#000000"
         },
         "slots": {
           "video": [
@@ -429,18 +876,123 @@
               "type": "group",
               "name": "controls-bar",
               "layout": "stack-v",
-              "gap": "{spacing.sm}",
+              "gap": 8,
               "size": {
                 "width": "fill"
               },
               "padding": {
-                "horizontal": "{spacing.lg}",
-                "vertical": "{spacing.sm}"
+                "horizontal": 16,
+                "vertical": 8
               },
               "background": "linear-gradient(transparent, rgba(0,0,0,0.8))",
               "children": [
                 {
-                  "$ref": "seek-bar"
+                  "$description": "Horizontal seek/progress bar with buffered range, played range, and draggable thumb",
+                  "type": "group",
+                  "name": "seek-bar",
+                  "layout": "layer",
+                  "size": {
+                    "width": "fill",
+                    "height": {
+                      "value": 4,
+                      "unit": "px"
+                    }
+                  },
+                  "cornerRadius": 9999,
+                  "interactions": {
+                    "hover": {
+                      "height": {
+                        "value": 6,
+                        "unit": "px"
+                      }
+                    }
+                  },
+                  "children": [
+                    {
+                      "type": "shape",
+                      "name": "track",
+                      "shape": "rectangle",
+                      "size": {
+                        "width": "fill",
+                        "height": "fill"
+                      },
+                      "fill": "rgba(255, 255, 255, 0.2)",
+                      "cornerRadius": 9999
+                    },
+                    {
+                      "type": "shape",
+                      "name": "buffered",
+                      "shape": "rectangle",
+                      "size": {
+                        "height": "fill"
+                      },
+                      "fill": "rgba(255, 255, 255, 0.4)",
+                      "cornerRadius": 9999,
+                      "dynamic": [
+                        {
+                          "property": "width",
+                          "expr": [
+                            "*",
+                            [
+                              "var",
+                              "bufferedFraction"
+                            ],
+                            100
+                          ],
+                          "unit": "%"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "shape",
+                      "name": "played",
+                      "shape": "rectangle",
+                      "size": {
+                        "height": "fill"
+                      },
+                      "fill": "#ff4d4f",
+                      "cornerRadius": 9999,
+                      "dynamic": [
+                        {
+                          "property": "width",
+                          "expr": [
+                            "*",
+                            [
+                              "var",
+                              "playedFraction"
+                            ],
+                            100
+                          ],
+                          "unit": "%"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "shape",
+                      "name": "thumb",
+                      "shape": "circle",
+                      "size": {
+                        "value": 12,
+                        "unit": "px"
+                      },
+                      "fill": "#ff4d4f",
+                      "conditional": "hovering || dragging",
+                      "dynamic": [
+                        {
+                          "property": "left",
+                          "expr": [
+                            "*",
+                            [
+                              "var",
+                              "playedFraction"
+                            ],
+                            100
+                          ],
+                          "unit": "%"
+                        }
+                      ]
+                    }
+                  ]
                 },
                 {
                   "type": "group",
@@ -454,28 +1006,224 @@
                       "name": "left-controls",
                       "layout": "stack-h",
                       "align": "center",
-                      "gap": "{spacing.xs}",
+                      "gap": 4,
                       "children": [
                         {
-                          "$ref": "transport-button",
+                          "$description": "Control bar icon button",
+                          "type": "button",
+                          "size": {
+                            "width": {
+                              "value": 36,
+                              "unit": "px"
+                            },
+                            "height": {
+                              "value": 36,
+                              "unit": "px"
+                            }
+                          },
+                          "cornerRadius": 4,
+                          "style": {
+                            "color": "#ffffff",
+                            "background": "transparent",
+                            "iconSize": {
+                              "value": 20,
+                              "unit": "px"
+                            }
+                          },
+                          "interactions": {
+                            "hover": {
+                              "background": "rgba(255,255,255,0.1)"
+                            },
+                            "press": {
+                              "scale": 0.92
+                            }
+                          },
                           "name": "play-pause",
                           "icon": "Play",
                           "shortcutKey": "Space"
                         },
                         {
-                          "$ref": "transport-button",
+                          "$description": "Control bar icon button",
+                          "type": "button",
+                          "size": {
+                            "width": {
+                              "value": 36,
+                              "unit": "px"
+                            },
+                            "height": {
+                              "value": 36,
+                              "unit": "px"
+                            }
+                          },
+                          "cornerRadius": 4,
+                          "style": {
+                            "color": "#ffffff",
+                            "background": "transparent",
+                            "iconSize": {
+                              "value": 20,
+                              "unit": "px"
+                            }
+                          },
+                          "interactions": {
+                            "hover": {
+                              "background": "rgba(255,255,255,0.1)"
+                            },
+                            "press": {
+                              "scale": 0.92
+                            }
+                          },
                           "name": "skip-back",
                           "icon": "SkipBack",
                           "shortcutKey": "ArrowLeft"
                         },
                         {
-                          "$ref": "transport-button",
+                          "$description": "Control bar icon button",
+                          "type": "button",
+                          "size": {
+                            "width": {
+                              "value": 36,
+                              "unit": "px"
+                            },
+                            "height": {
+                              "value": 36,
+                              "unit": "px"
+                            }
+                          },
+                          "cornerRadius": 4,
+                          "style": {
+                            "color": "#ffffff",
+                            "background": "transparent",
+                            "iconSize": {
+                              "value": 20,
+                              "unit": "px"
+                            }
+                          },
+                          "interactions": {
+                            "hover": {
+                              "background": "rgba(255,255,255,0.1)"
+                            },
+                            "press": {
+                              "scale": 0.92
+                            }
+                          },
                           "name": "skip-forward",
                           "icon": "SkipForward",
                           "shortcutKey": "ArrowRight"
                         },
                         {
-                          "$ref": "volume-slider"
+                          "$description": "Vertical or horizontal volume slider with mute toggle",
+                          "type": "group",
+                          "layout": "stack-h",
+                          "align": "center",
+                          "gap": 4,
+                          "children": [
+                            {
+                              "type": "button",
+                              "name": "mute-toggle",
+                              "size": {
+                                "width": {
+                                  "value": 36,
+                                  "unit": "px"
+                                },
+                                "height": {
+                                  "value": 36,
+                                  "unit": "px"
+                                }
+                              },
+                              "style": {
+                                "color": "#ffffff",
+                                "background": "transparent"
+                              },
+                              "dynamic": [
+                                {
+                                  "property": "icon",
+                                  "expr": [
+                                    "if",
+                                    [
+                                      "var",
+                                      "muted"
+                                    ],
+                                    "VolumeX",
+                                    [
+                                      "if",
+                                      [
+                                        "<",
+                                        [
+                                          "var",
+                                          "volume"
+                                        ],
+                                        0.5
+                                      ],
+                                      "Volume1",
+                                      "Volume2"
+                                    ]
+                                  ]
+                                }
+                              ],
+                              "command": "toggleMute"
+                            },
+                            {
+                              "type": "group",
+                              "name": "volume-track",
+                              "layout": "layer",
+                              "size": {
+                                "width": {
+                                  "value": 60,
+                                  "unit": "px"
+                                },
+                                "height": {
+                                  "value": 4,
+                                  "unit": "px"
+                                }
+                              },
+                              "cornerRadius": 9999,
+                              "children": [
+                                {
+                                  "type": "shape",
+                                  "name": "track-bg",
+                                  "shape": "rectangle",
+                                  "size": {
+                                    "width": "fill",
+                                    "height": "fill"
+                                  },
+                                  "fill": "rgba(255, 255, 255, 0.2)",
+                                  "cornerRadius": 9999
+                                },
+                                {
+                                  "type": "shape",
+                                  "name": "volume-fill",
+                                  "shape": "rectangle",
+                                  "size": {
+                                    "height": "fill"
+                                  },
+                                  "fill": "#ffffff",
+                                  "cornerRadius": 9999,
+                                  "dynamic": [
+                                    {
+                                      "property": "width",
+                                      "expr": [
+                                        "*",
+                                        [
+                                          "if",
+                                          [
+                                            "var",
+                                            "muted"
+                                          ],
+                                          0,
+                                          [
+                                            "var",
+                                            "volume"
+                                          ]
+                                        ],
+                                        100
+                                      ],
+                                      "unit": "%"
+                                    }
+                                  ]
+                                }
+                              ]
+                            }
+                          ]
                         },
                         {
                           "type": "text",
@@ -490,9 +1238,9 @@
                             }
                           ],
                           "style": {
-                            "fontSize": "{font.size.xs}",
-                            "fontWeight": "{font.weight.regular}",
-                            "color": "{color.text.secondary}",
+                            "fontSize": 11,
+                            "fontWeight": 400,
+                            "color": "rgba(255, 255, 255, 0.7)",
                             "fontVariantNumeric": "tabular-nums"
                           }
                         }
@@ -503,16 +1251,72 @@
                       "name": "right-controls",
                       "layout": "stack-h",
                       "align": "center",
-                      "gap": "{spacing.xs}",
+                      "gap": 4,
                       "children": [
                         {
-                          "$ref": "transport-button",
+                          "$description": "Control bar icon button",
+                          "type": "button",
+                          "size": {
+                            "width": {
+                              "value": 36,
+                              "unit": "px"
+                            },
+                            "height": {
+                              "value": 36,
+                              "unit": "px"
+                            }
+                          },
+                          "cornerRadius": 4,
+                          "style": {
+                            "color": "#ffffff",
+                            "background": "transparent",
+                            "iconSize": {
+                              "value": 20,
+                              "unit": "px"
+                            }
+                          },
+                          "interactions": {
+                            "hover": {
+                              "background": "rgba(255,255,255,0.1)"
+                            },
+                            "press": {
+                              "scale": 0.92
+                            }
+                          },
                           "name": "pip",
                           "icon": "PictureInPicture2",
                           "shortcutKey": "p"
                         },
                         {
-                          "$ref": "transport-button",
+                          "$description": "Control bar icon button",
+                          "type": "button",
+                          "size": {
+                            "width": {
+                              "value": 36,
+                              "unit": "px"
+                            },
+                            "height": {
+                              "value": 36,
+                              "unit": "px"
+                            }
+                          },
+                          "cornerRadius": 4,
+                          "style": {
+                            "color": "#ffffff",
+                            "background": "transparent",
+                            "iconSize": {
+                              "value": 20,
+                              "unit": "px"
+                            }
+                          },
+                          "interactions": {
+                            "hover": {
+                              "background": "rgba(255,255,255,0.1)"
+                            },
+                            "press": {
+                              "scale": 0.92
+                            }
+                          },
                           "name": "fullscreen",
                           "icon": "Maximize",
                           "shortcutKey": "f"
@@ -529,14 +1333,26 @@
       },
       "transitions": [
         {
+          "event": "CONTROLS_IDLE",
+          "target": "ready.controlsHidden",
+          "guard": null,
+          "actions": []
+        },
+        {
           "event": "MOUSE_MOVE",
-          "target": "controlsVisible",
+          "target": "ready.controlsVisible",
+          "guard": null,
+          "actions": []
+        },
+        {
+          "event": "ERROR",
+          "target": "error",
           "guard": null,
           "actions": []
         },
         {
           "event": "TAP",
-          "target": "controlsVisible",
+          "target": "ready.controlsVisible",
           "guard": null,
           "actions": []
         }
@@ -555,7 +1371,7 @@
             "width": "fill",
             "height": "fill"
           },
-          "background": "{color.bg}"
+          "background": "#000000"
         },
         "slots": {
           "center": [
@@ -563,7 +1379,7 @@
               "type": "group",
               "layout": "stack-v",
               "align": "center",
-              "gap": "{spacing.md}",
+              "gap": 12,
               "children": [
                 {
                   "type": "icon",
@@ -572,23 +1388,23 @@
                     "value": 48,
                     "unit": "px"
                   },
-                  "color": "{color.error}"
+                  "color": "#ee5555"
                 },
                 {
                   "type": "text",
                   "content": "player.error.title",
                   "style": {
-                    "fontSize": "{font.size.sm}",
-                    "fontWeight": "{font.weight.medium}",
-                    "color": "{color.text.primary}"
+                    "fontSize": 12,
+                    "fontWeight": 500,
+                    "color": "#ffffff"
                   }
                 },
                 {
                   "type": "text",
                   "content": "player.error.description",
                   "style": {
-                    "fontSize": "{font.size.xs}",
-                    "color": "{color.text.secondary}"
+                    "fontSize": 11,
+                    "color": "rgba(255, 255, 255, 0.7)"
                   }
                 },
                 {
@@ -596,7 +1412,7 @@
                   "name": "retry",
                   "layout": "stack-h",
                   "align": "center",
-                  "gap": "{spacing.xs}",
+                  "gap": 4,
                   "icon": "RotateCcw",
                   "size": {
                     "height": {
@@ -605,13 +1421,13 @@
                     }
                   },
                   "padding": {
-                    "horizontal": "{spacing.lg}"
+                    "horizontal": 16
                   },
-                  "cornerRadius": "{radius.sm}",
+                  "cornerRadius": 4,
                   "style": {
                     "background": "rgba(255,255,255,0.1)",
-                    "fontSize": "{font.size.sm}",
-                    "color": "{color.text.primary}"
+                    "fontSize": 12,
+                    "color": "#ffffff"
                   },
                   "command": "retry"
                 }
@@ -634,5 +1450,5 @@
     }
   },
   "assertions": [],
-  "$source": "examples/05-media-player.uispec.json"
+  "$source": "examples/05-media-player.uxspec.json"
 }

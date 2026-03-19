@@ -1,4 +1,4 @@
-# UISpec — Agent Guide
+# UXSpec — Agent Guide
 
 This file describes the machine-readable interfaces that AI agents and automated tooling can rely on.
 
@@ -6,7 +6,7 @@ This file describes the machine-readable interfaces that AI agents and automated
 
 ```
 src/compiler/          # Compiler source (TypeScript, runs on Bun)
-  types.ts             # All shared types: UISpecDocument, CompileResult, CompilerIssue, etc.
+  types.ts             # All shared types: UXSpecDocument, CompileResult, CompilerIssue, etc.
   compile.ts           # compile() entry point
   validate.ts          # validateSpec() — standalone validation without compilation
   resolve.ts           # Token and $ref resolution
@@ -14,7 +14,7 @@ src/compiler/          # Compiler source (TypeScript, runs on Bun)
   cli.ts               # CLI entry: validate and compile commands
 
 spec/COMPILER.md       # Normative compiler reference
-examples/              # Authoring-format .uispec.json files
+examples/              # Authoring-format .uxspec.json files
 dist/compiled/         # Compiled .compiled.json output
 tests/                 # Bun test suites
 ```
@@ -56,13 +56,13 @@ tests/                 # Bun test suites
 ### CLI Success Example
 
 ```json
-{"file":"examples/02-auth-flow.uispec.json","ok":true,"output":"dist/compiled/02-auth-flow.compiled.json","states":17,"assertions":21,"unresolvedRefs":0,"unresolvedTokenAliases":0,"leafInitial":true,"trace":[]}
+{"file":"examples/02-auth-flow.uxspec.json","ok":true,"output":"dist/compiled/02-auth-flow.compiled.json","states":17,"assertions":21,"unresolvedRefs":0,"unresolvedTokenAliases":0,"leafInitial":true,"trace":[]}
 ```
 
 ### CLI Failure Example
 
 ```json
-{"file":"tests/fixtures/bad-initial.uispec.json","ok":false,"issues":[{"code":"INVALID_MACHINE_INITIAL","message":"Machine initial \"missing\" does not resolve to a state","path":"$machine.initial","phase":"state-paths"}],"trace":[]}
+{"file":"tests/fixtures/bad-initial.uxspec.json","ok":false,"issues":[{"code":"INVALID_MACHINE_INITIAL","message":"Machine initial \"missing\" does not resolve to a state","path":"$machine.initial","phase":"state-paths"}],"trace":[]}
 ```
 
 ### Issue Codes

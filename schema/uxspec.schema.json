@@ -1,7 +1,7 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://uispec.dev/0.2/schema.json",
-  "title": "UISpec",
+  "$id": "https://uxspec.dev/0.2/schema.json",
+  "title": "UXSpec",
   "type": "object",
   "required": ["$schema", "$description", "$machine"],
   "properties": {
