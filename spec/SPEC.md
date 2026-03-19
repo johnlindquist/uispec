@@ -29,7 +29,7 @@ State machines are excellent at describing application behavior in a way that is
 
 ```json
 {
-  "$schema": "https://uxspec.dev/0.2/schema.json",
+  "$schema": "https://raw.githubusercontent.com/johnlindquist/uxspec/main/schema/uxspec.schema.json",
   "$description": "Human-readable description of this component",
 
   "$tokens": { },

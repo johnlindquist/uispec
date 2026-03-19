@@ -4,7 +4,7 @@ import type { UXSpecDocument } from "../src/compiler/types";
 
 function minimalDoc(overrides: Partial<UXSpecDocument> = {}): UXSpecDocument {
   return {
-    $schema: "https://uxspec.dev/0.2/schema.json",
+    $schema: "https://raw.githubusercontent.com/johnlindquist/uxspec/main/schema/uxspec.schema.json",
     $description: "test",
     $context: {},
     $events: {},
@@ -353,7 +353,7 @@ describe("validateSpec", () => {
   describe("combined failure case", () => {
     it("reports multiple issues for a malformed spec", () => {
       const result = validateSpec({
-        $schema: "https://uxspec.dev/0.2/schema.json",
+        $schema: "https://raw.githubusercontent.com/johnlindquist/uxspec/main/schema/uxspec.schema.json",
         $description: "bad example",
         $context: {},
         $events: {},

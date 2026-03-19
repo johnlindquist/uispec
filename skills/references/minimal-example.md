@@ -4,7 +4,7 @@ A complete, minimal spec for a simple counter component. Use as a starting templ
 
 ```json
 {
-  "$schema": "https://uxspec.dev/0.2/schema.json",
+  "$schema": "https://raw.githubusercontent.com/johnlindquist/uxspec/main/schema/uxspec.schema.json",
   "$description": "Simple counter — increment and decrement buttons with a display. Minimal example demonstrating core UXSpec patterns.",
 
   "$tokens": {

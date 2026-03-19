@@ -1,6 +1,6 @@
 {
   "name": "uxspec",
-  "version": "0.2.1",
+  "version": "0.2.2",
   "description": "UXSpec — unified state machine + visual specification for AI agents",
   "type": "module",
   "main": "./dist/compile.js",
@@ -17,7 +17,8 @@
   "files": [
     "dist/*.js",
     "dist/*.d.ts",
-    "bin"
+    "bin",
+    "logo.png"
   ],
   "scripts": {
     "build": "tsup src/compiler/cli.ts src/compiler/compile.ts --format esm --dts --clean --tsconfig tsconfig.build.json",

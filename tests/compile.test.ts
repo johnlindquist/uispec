@@ -4,7 +4,7 @@ import type { UXSpecDocument, CompiledUXSpec } from "../src/compiler/types";
 
 function minimalDoc(overrides: Partial<UXSpecDocument> = {}): UXSpecDocument {
   return {
-    $schema: "https://uxspec.dev/0.2/schema.json",
+    $schema: "https://raw.githubusercontent.com/johnlindquist/uxspec/main/schema/uxspec.schema.json",
     $description: "test",
     $context: {},
     $events: {},
@@ -433,7 +433,7 @@ describe("compile", () => {
   describe("full integration", () => {
     it("compiles the submit flow example from the research context", () => {
       const doc: UXSpecDocument = {
-        $schema: "https://uxspec.dev/0.2/schema.json",
+        $schema: "https://raw.githubusercontent.com/johnlindquist/uxspec/main/schema/uxspec.schema.json",
         $description: "submit flow",
         $context: {
           submitting: { type: "boolean", default: false },

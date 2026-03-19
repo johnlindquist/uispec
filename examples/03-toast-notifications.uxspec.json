@@ -1,5 +1,5 @@
 {
-  "$schema": "https://uxspec.dev/0.1/schema.json",
+  "$schema": "https://raw.githubusercontent.com/johnlindquist/uxspec/main/schema/uxspec.schema.json",
   "$description": "Toast notification system — ephemeral messages with auto-dismiss, stacking, swipe-to-dismiss, and action buttons. Edge cases: multiple concurrent toasts, different severity levels, progress bar for timed actions, undo pattern.",
 
   "$tokens": {

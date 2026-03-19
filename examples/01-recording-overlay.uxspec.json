@@ -1,5 +1,5 @@
 {
-  "$schema": "https://uxspec.dev/0.1/schema.json",
+  "$schema": "https://raw.githubusercontent.com/johnlindquist/uxspec/main/schema/uxspec.schema.json",
   "$description": "Recording overlay — a floating pill-shaped HUD shown during voice dictation. Demonstrates compound states, dynamic expressions (waveform), auto-dismiss substates, keyboard bindings, and focus management.",
 
   "$tokens": {

@@ -1,5 +1,5 @@
 {
-  "$schema": "https://uxspec.dev/0.1/schema.json",
+  "$schema": "https://raw.githubusercontent.com/johnlindquist/uxspec/main/schema/uxspec.schema.json",
   "$description": "Media player with transport controls. Demonstrates parallel states (playback + volume + fullscreen are independent), continuous values (seek position, volume level), keyboard shortcuts across states, and responsive layout. Edge cases: buffering stalls, seek while paused, volume mute toggle, picture-in-picture, error recovery.",
 
   "$tokens": {

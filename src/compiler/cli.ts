@@ -33,7 +33,7 @@ async function listV02ExampleSpecs(): Promise<string[]> {
   for (const file of files) {
     try {
       const document = await readDocument(file);
-      if (document.$schema === "https://uxspec.dev/0.2/schema.json") {
+      if (document.$schema === "https://raw.githubusercontent.com/johnlindquist/uxspec/main/schema/uxspec.schema.json") {
         matching.push(file);
       }
     } catch {

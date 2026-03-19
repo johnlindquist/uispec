@@ -1,3 +1,7 @@
+<p align="center">
+  <img src="https://raw.githubusercontent.com/johnlindquist/uxspec/main/logo.png" alt="UXSpec logo" width="400">
+</p>
+
 # UXSpec
 
 **One file. Human-readable. Agent-writable. Machine-executable.**
@@ -5,12 +9,10 @@
 UXSpec is a JSON format that describes what your UI looks like *and* how it behaves — in a single artifact that compiles to any language or framework.
 
 ```
-                         ┌──→  React
-  .uxspec.json           ├──→  SwiftUI
-  ├── state machine      ├──→  Flutter
-  ├── visuals        ────┤
-  ├── tokens             ├──→  Compose
-  └── tests              └──→  anything
+  state ─────┐
+  visuals ───┤
+  tokens ────┼──→ .uxspec.json ──→ React, SwiftUI,
+  tests ─────┘                     Flutter, Compose, ...
 ```
 
 ---
@@ -147,6 +149,10 @@ bun test
 Active specification. The visual layer is stable, runtime semantics (v0.2) are newly normative. Looking for feedback on the runtime model, layout primitives, and expression language.
 
 See [spec/SPEC.md](spec/SPEC.md) for the full specification and [spec/COMPILER.md](spec/COMPILER.md) for compiler reference with Python, Rust, and Swift examples.
+
+## Acknowledgments
+
+Design decision prompts in the agent skill are informed by [Impeccable](https://github.com/pbakaus/impeccable) by [Paul Bakaus](https://github.com/pbakaus) — a design quality framework for AI-generated interfaces.
 
 ## License
 
