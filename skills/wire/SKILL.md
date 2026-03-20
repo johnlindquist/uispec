@@ -1,3 +1,8 @@
+---
+name: wire
+description: Connect the spec to behavior — wire up $context, $events, actions, effects, guards, and element bindings
+---
+
 # Wire: Runtime Semantics
 
 Connect the spec to behavior — context, events, actions, effects, bindings, guards. This is where the state machine comes alive.

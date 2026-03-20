@@ -1,3 +1,8 @@
+---
+name: harden
+description: Strengthen a UXSpec against real-world conditions — overflow, missing data, network failures, and accessibility
+---
+
 # Harden: Edge Cases and Resilience
 
 Strengthen a UXSpec against real-world conditions — long text, missing data, network failures, diverse devices, keyboard navigation. Specs that only work with perfect data aren't specs.

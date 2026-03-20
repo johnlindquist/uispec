@@ -1,3 +1,8 @@
+---
+name: tokens
+description: Define $tokens for color, typography, spacing, and timing that give a spec its visual identity
+---
+
 # Tokens: Design Token System
 
 Define the `$tokens` that give a spec its visual identity — color, typography, spacing, timing. Tokens are the vocabulary every `$visual` speaks.

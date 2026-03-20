@@ -1,3 +1,8 @@
+---
+name: animate
+description: Add purposeful motion to a UXSpec — $animations, onEnter choreography, and timing tokens
+---
+
 # Animate: Motion and Transitions
 
 Add purposeful motion to a UXSpec — `$animations`, `onEnter` choreography, and timing tokens. Motion should communicate, not decorate.

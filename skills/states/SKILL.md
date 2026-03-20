@@ -1,3 +1,8 @@
+---
+name: states
+description: Design the $machine section — map happy paths, error paths, and all state types into a complete behavioral skeleton
+---
+
 # States: State Machine Design
 
 Design the `$machine` — the behavioral skeleton of a UXSpec. Every state is a promise to the user about what they can do and what they'll see.

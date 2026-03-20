@@ -1,3 +1,8 @@
+---
+name: extract
+description: Identify repeated patterns and consolidate them into $elements and shared tokens for systematic reuse
+---
+
 # Extract: Reusable Elements and Patterns
 
 Identify repeated patterns in a spec and consolidate them into `$elements` and shared tokens. Systematic reuse, not premature abstraction.

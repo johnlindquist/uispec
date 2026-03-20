@@ -1,3 +1,8 @@
+---
+name: clarify
+description: Improve every piece of text in a UXSpec — descriptions, labels, error messages, empty states, and loading copy
+---
+
 # Clarify: Copy and Descriptions
 
 Improve every piece of text in a UXSpec — `$description` fields, button labels, error messages, empty state copy, loading text. Words are design.

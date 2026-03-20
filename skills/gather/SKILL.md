@@ -1,3 +1,8 @@
+---
+name: gather
+description: Collect design context, audience, intent, and requirements before writing any UXSpec JSON
+---
+
 # Gather: Design Context and Requirements
 
 Establish who this spec is for, what it needs to do, and how it should feel — before writing any JSON.

@@ -1,3 +1,8 @@
+---
+name: review
+description: Run a systematic quality audit on a completed UXSpec — design intent, consistency, accessibility, and state coverage
+---
+
 # Review: Spec Quality Audit
 
 Systematic quality pass on a completed UXSpec before shipping. Checks design intent, consistency, accessibility, state coverage, and copy quality.

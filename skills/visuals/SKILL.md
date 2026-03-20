@@ -1,3 +1,8 @@
+---
+name: visuals
+description: Write $visual blocks that define layout, elements, descriptions, and test hooks for each state
+---
+
 # Visuals: State Visual Specifications
 
 Write the `$visual` blocks that define what each state looks like — layout, elements, descriptions, and test hooks.
